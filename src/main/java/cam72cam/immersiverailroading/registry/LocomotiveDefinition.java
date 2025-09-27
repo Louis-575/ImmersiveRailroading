@@ -219,4 +219,8 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     public boolean hasIndependentBrake() {
         return hasIndependentBrake;
     }
+    
+    public String getWorks() {
+        return works;
+    }
 }
