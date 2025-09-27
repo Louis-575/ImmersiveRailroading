@@ -3,7 +3,6 @@ package cam72cam.immersiverailroading.registry;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.library.unit.ForceDisplayType;
@@ -128,7 +127,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     public int getScriptedHorsePower(Gauge gauge, Locomotive stock) {
         return stock.localHorsepower != -1
                 ? (int) Math.ceil(gauge.scale() * stock.localHorsepower)
-                : (int) Math.ceil(gauge.scale() * this.power);
+                : (int) Math.ceil(gauge.scale() * this.power_kW * PowerDisplayType.kwToHp);
     }
 
     /**
@@ -140,8 +139,8 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
 
     public int getScriptedStartingTractionNewtons(Gauge gauge, Locomotive stock) {
         return stock.localTraction != -1
-                ? (int) Math.ceil(gauge.scale() * stock.localTraction * 4.44822)
-                : (int) Math.ceil(gauge.scale() * this.traction * 4.44822);
+                ? (int) Math.ceil(gauge.scale() * stock.localTraction * ForceDisplayType.lbfToNewton)
+                : (int) Math.ceil(gauge.scale() * this.traction_N * ForceDisplayType.lbfToNewton);
     }
 
     public Speed getMaxSpeed(Gauge gauge){
@@ -181,12 +180,12 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
 
     @Override
     public void setTraction(double val) {
-        this.traction = val;
+        this.traction_N = val;
     }
 
     @Override
     public void setHorsepower(double val) {
-        this.power = val;
+        this.power_kW = val;
     }
 
     @Override
@@ -201,12 +200,12 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
 
     @Override
     public double getTraction() {
-        return traction;
+        return traction_N;
     }
 
     @Override
     public double getHorsepower() {
-        return this.power;
+        return this.power_kW * PowerDisplayType.kwToHp;
     }
     
     public boolean isSpeedLimiter() {

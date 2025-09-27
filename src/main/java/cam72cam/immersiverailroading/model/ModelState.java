@@ -240,15 +240,6 @@ public class ModelState {
         }
     }
 
-        // Filter out text fields
-        groups = groups.stream().filter(group -> !group.contains("TEXTFIELD_")).collect(Collectors.toList());
-
-        // Filter out groups that aren't currently visible
-        if (groupVisibility != null) {
-            groups = groups.stream().filter(group -> {
-                Boolean visible = groupVisibility.visible(stock, group);
-                return visible == null || visible;
-            }).collect(Collectors.toList());
     private static final BlendMode ALPHA_BLEND = new BlendMode(BlendMode.GL_SRC_ALPHA, BlendMode.GL_ONE_MINUS_SRC_ALPHA);
 
     private static class GroupState {
