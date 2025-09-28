@@ -1,8 +1,6 @@
 package cam72cam.immersiverailroading;
 
-import cam72cam.immersiverailroading.library.PressureDisplayType;
-import cam72cam.immersiverailroading.library.SpeedDisplayType;
-import cam72cam.immersiverailroading.library.TemperatureDisplayType;
+import cam72cam.immersiverailroading.library.unit.*;
 import cam72cam.mod.config.ConfigFile.Comment;
 import cam72cam.mod.config.ConfigFile.Name;
 import cam72cam.mod.render.OptiFine;
@@ -22,14 +20,20 @@ public class ConfigGraphics {
 	@Comment( "Self explanatory" )
 	public static boolean trainsOnTheBrain = true;
 	
-	@Comment( "What unit to use for speedometer. (kmh, mph or ms)" )
+	@Comment("What unit to use for speedometer. (kmh, mph or ms)" )
 	public static SpeedDisplayType speedUnit = SpeedDisplayType.kmh;
 
-	@Comment("What units to display pressure in (psi, bar)")
+	@Comment("What unit to display pressure in (psi, bar, kpa)")
 	public static PressureDisplayType pressureUnit = PressureDisplayType.psi;
 
-	@Comment("What units to display pressure in (psi, bar)")
+	@Comment("What unit to display pressure in (psi, bar)")
 	public static TemperatureDisplayType temperatureUnit = TemperatureDisplayType.celcius;
+
+	@Comment("What unit to display locomotive power in (W, kW, horsepower)")
+	public static PowerDisplayType powerUnit = PowerDisplayType.w;
+
+	@Comment("What unit to display locomotive traction force in (N, kN, lbf)")
+	public static ForceDisplayType forceUnit = ForceDisplayType.n;
 
 	@Comment( "How long to keep textures in memory after they have left the screen (higher numbers = smoother game play, lower numbers = less GPU memory used)")
 	@Range(min = 0, max = 100)
@@ -68,7 +72,13 @@ public class ConfigGraphics {
 	@Comment("Try to fake interior lighting for locomotives/passenger cars that are being ridden")
 	public static boolean FakeInteriorLighting = true;
 
+	@Comment("Disable headlights' texture render")
+	public static boolean DisableLightTextureRender = false;
+
 	@Comment("The track's maximum visibility range")
 	@Range(min = 256, max = 4096)
 	public static double TrackRenderDistance = 256;
+
+	@Comment("Should semi-transparent parts render? Disable this if you are experiencing problems with semi-transparent parts when using a Shader")
+	public static boolean RenderSemiTransparentParts = true;
 }

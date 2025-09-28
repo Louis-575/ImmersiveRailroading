@@ -321,6 +321,23 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			if (!nbt.hasKey("railHeight")) {
 				railHeight = bedHeight;
 			}
+		case 4:
+			if (this instanceof TileRail) {
+				TileRail tr = ((TileRail) this);
+				if (tr.info.settings.type == TrackItems.SLOPE && tr.info.customInfo != null && tr.info.customInfo.placementPosition != null) {
+					// Force to 1 block offset
+					tr.info = tr.info.with(mod -> {
+						Vec3d placement = mod.customInfo.placementPosition;
+						Vec3d control = mod.customInfo.control;
+						mod.customInfo = new PlacementInfo(
+								new Vec3d(placement.x, mod.placementInfo.placementPosition.y+1, placement.z),
+								mod.customInfo.direction,
+								mod.customInfo.yaw,
+								control == null ? null : new Vec3d(control.x, mod.placementInfo.placementPosition.y+1, control.z)
+						);
+					});
+				}
+			}
 		}
 		if (augment == Augment.LUA_SCRIPTER && selectedScript != null && getWorld().isServer) {
 			this.loadScript(selectedScript.script, selectedScript.additional);
@@ -328,7 +345,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 	@Override
 	public void save(TagCompound nbt) {
-		nbt.setInteger("version", 4);
+		nbt.setInteger("version", 5);
 	}
 
 	public TileRail getParentTile() {
@@ -373,10 +390,10 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		return this.willBeReplaced;
 	}
 
-	public void cleanSnow() {
+	public void cleanSnow(int snowLevel) {
 		int snow = this.getSnowLayers();
-		if (snow > 1) {
-			this.setSnowLayers(1);
+		if (snow > snowLevel) {
+			this.setSnowLayers(snowLevel);
 			int snowDown = snow -1;
 			for (int i = 1; i <= 3; i ++) {
 				Facing[] horiz = Facing.values().clone();
@@ -1035,7 +1052,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 		if (stack.isValidTool(ToolType.SHOVEL)) {
 			if (this.getWorld().isServer) {
-				this.cleanSnow();
+				this.cleanSnow(1);
 				this.setSnowLayers(0);
 				stack.damageItem(1, player);
 			}

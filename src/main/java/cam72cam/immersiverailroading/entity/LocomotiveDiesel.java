@@ -18,8 +18,7 @@ import cam72cam.mod.fluid.FluidStack;
 import cam72cam.mod.serialization.TagField;
 import org.luaj.vm2.LuaValue;
 
-import java.util.List;
-import java.util.OptionalDouble;
+import java.util.*;
 
 public class LocomotiveDiesel extends Locomotive {
 
@@ -121,7 +120,24 @@ public class LocomotiveDiesel extends Locomotive {
 	 */
 	@Override
 	public void handleKeyPress(Player source, KeyTypes key, boolean disableIndependentThrottle) {
-		switch (key) {
+        if (source.hasPermission(Permissions.BRAKE_CONTROL)) {
+            float dynamicBrakeNotch = 0.04f;
+            switch (key) {
+                case DYNAMIC_BRAKE_UP:
+                    setDynamicBrake(getDynamicBrake() + dynamicBrakeNotch);
+                    break;
+                case DYNAMIC_BRAKE_ZERO:
+                    setDynamicBrake(0f);
+                    break;
+                case DYNAMIC_BRAKE_DOWN:
+                    setDynamicBrake(getDynamicBrake() - dynamicBrakeNotch);
+                    break;
+                default:
+                    break;
+            }
+        }
+        
+	    switch (key) {
 		case START_STOP_ENGINE:
 			if (turnOnOffDelay == 0) {
 				turnOnOffDelay = 10;
@@ -141,7 +157,7 @@ public class LocomotiveDiesel extends Locomotive {
 		case THROTTLE_ZERO:
 		case THROTTLE_DOWN:
 			if (this.throttleCooldown > 0) {
-				return;
+				break;
 			}
 			throttleCooldown = 2;
 			super.handleKeyPress(source, key, disableIndependentThrottle);
@@ -149,29 +165,12 @@ public class LocomotiveDiesel extends Locomotive {
 		default:
 			super.handleKeyPress(source, key, disableIndependentThrottle);
 		}
-		
-		if (source.hasPermission(Permissions.BRAKE_CONTROL)) {
-            float dynamicBrakeNotch = 0.04f;
-            switch (key) {
-                case DYNAMIC_BRAKE_UP:
-                    setDynamicBrake(getDynamicBrake() + dynamicBrakeNotch);
-                    break;
-                case DYNAMIC_BRAKE_ZERO:
-                    setDynamicBrake(0f);
-                    break;
-                case DYNAMIC_BRAKE_DOWN:
-                    setDynamicBrake(getDynamicBrake() - dynamicBrakeNotch);
-                    break;
-                default:
-                    super.handleKeyPress(source, key, disableIndependentThrottle);
-            }
-        }
 	}
-
-	@Override
-	public float getThrottleDelta() {
-		return 1F / this.getDefinition().getThrottleNotches();
-	}
+	
+    @Override
+    public float getThrottleDelta() {
+        return 1F / this.getDefinition().getThrottleNotches();
+    }
 
 	@Override
 	public boolean providesElectricalPower() {
@@ -185,7 +184,7 @@ public class LocomotiveDiesel extends Locomotive {
 
 	@Override
 	public void setThrottle(float newThrottle) {
-		int targetNotch = Math.round(newThrottle / getThrottleDelta()); // *2
+	    int targetNotch = Math.round(newThrottle / getThrottleDelta()); // *2
 		//issue #1526: when dragging or control with augment throttle glitches
 		super.setThrottle(targetNotch * getThrottleDelta());
 	}
@@ -200,6 +199,7 @@ public class LocomotiveDiesel extends Locomotive {
 	public double getAppliedTractiveEffort(Speed speed) {
 		if (isRunning() && (getEngineTemperature() > 75 || !Config.isFuelRequired(gauge))) {
 			double maxPower_W = this.getDefinition().getScriptedHorsePower(gauge, this) * 745.7d;
+			//double maxPower_W = this.getDefinition().getWatt(gauge);
 			double efficiency = 0.82; // Similar to a *lot* of imperial references
 			double maxPowerAtSpeed = maxPower_W * efficiency / Math.max(1, Math.abs(speed.metersPerSecond()));
 			double applied = maxPowerAtSpeed * relativeRPM * getReverser();
@@ -257,9 +257,12 @@ public class LocomotiveDiesel extends Locomotive {
 
 		if (this.getLiquidAmount() > 0 && isRunning()) {
 			float consumption = Math.abs(getThrottle()) + 0.05f;
-			float burnTime = BurnUtil.getBurnTime(this.getLiquid());
+			float burnTime = getDefinition().getOverriddenFuels().getOrDefault(this.getLiquid(), 0);
 			if (burnTime == 0) {
-				burnTime = 200; // Default to 200 for unregistered liquids
+				burnTime = BurnUtil.getBurnTime(this.getLiquid());
+			}
+			if (burnTime == 0) {
+				burnTime = 200;
 			}
 			burnTime *= getDefinition().getFuelEfficiency() / 100f;
 			burnTime *= (Config.ConfigBalance.locoDieselFuelEfficiency / 100f);
@@ -293,7 +296,8 @@ public class LocomotiveDiesel extends Locomotive {
 
 	@Override
 	public List<Fluid> getFluidFilter() {
-		return BurnUtil.burnableFluids();
+		Set<Fluid> set = getDefinition().getOverriddenFuels().keySet();
+		return set.isEmpty() ? BurnUtil.burnableFluids() : new ArrayList<>(set);
 	}
 
 	@Override
