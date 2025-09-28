@@ -183,41 +183,12 @@ public class LocomotiveSteam extends Locomotive {
                 * reverser * speedPercent * Math.PI * getDefinition().getWheelDiameter(gauge)) + 0.001f);
         chestPressure -= factor < 0 ? 0 : (float) factor;
 
-        if ((speedPercent * getDefinition().getMaxSpeed(gauge).metric()) < getDefinition()
-                .getWheelDiameter(gauge) / (0.035 * getDefinition().getCylinderCount())) {
-            boolean isEndStroke = isEndStroke(0, 0.25);
-            if (!chuffOn && isEndStroke) {
-                chuffOn = true;
-                float factor2 = (float) (1 * reverser * (1 - 4 * speedPercent));
-                chestPressure -= factor2 < 0 ? 0 : factor2;
-            } else {
-                if (!isEndStroke) {
-                    chuffOn = false;
-                }
-            }
-        }
-
         if (slipping) {
             chestPressure -= Math.abs(simulateWheelSlip());
         }
         if (getChestPressure() < 0) {
             chestPressure = 0;
         }
-    }
-
-    private boolean isEndStroke(final double offset, final double pos) {
-        double percent = angle(distanceTraveled / gauge.scale(), offset);
-        double pistonPos = pos;
-        float delta = 0.125f;
-        return Math.abs(percent - pistonPos) < delta || Math.abs(percent - pistonPos - 1) < delta
-                || Math.abs(percent - pistonPos + 1) < delta;
-    }
-
-    private float angle(final double distance, final double offset) {
-        double circumference = getDefinition().getWheelDiameter(gauge) * Math.PI
-                / (2 * getDefinition().getCylinderCount());
-        double relDist = distance % circumference;
-        return (float) (relDist / circumference + offset);
     }
 
 	@Override
