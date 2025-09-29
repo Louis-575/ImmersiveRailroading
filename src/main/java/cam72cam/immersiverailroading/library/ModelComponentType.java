@@ -145,6 +145,7 @@ public enum ModelComponentType {
 		return group.contains("CHIMNEY_") || group.contains("CHIMINEY_") || group.contains("PRESSURE_VALVE_") || group.contains("EXHAUST_") || group.contains("CARGO_ITEMS") || group.contains("TEXTFIELD_");
 	}
 
+	//TODO add new parts
 	public String getOverlayName() {
 		//Get name and remove _X
 		String primary = this.name().substring(0, this.name().length() - 2);
