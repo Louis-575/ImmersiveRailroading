@@ -137,7 +137,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     public int getScriptedHorsePower(Gauge gauge, Locomotive stock) {
         return stock.localHorsepower != -1
                 ? (int) Math.ceil(gauge.scale() * stock.localHorsepower)
-                : (int) Math.ceil(gauge.scale() * this.power_kW * PowerDisplayType.kwToHp);
+                : (int) Math.ceil(gauge.scale() * this.power_kW * PowerDisplayType.kWToHp);
     }
 
     /**
@@ -215,7 +215,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
 
     @Override
     public double getHorsepower() {
-        return this.power_kW * PowerDisplayType.kwToHp;
+        return this.power_kW * PowerDisplayType.kWToHp;
     }
     
     public boolean isSpeedLimiter() {
