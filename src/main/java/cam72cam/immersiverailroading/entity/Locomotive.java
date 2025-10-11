@@ -521,13 +521,8 @@ public abstract class Locomotive extends FreightTank{
 	public abstract double getAppliedTractiveEffort(Speed speed);
 
 	/** Maximum force that can be between the wheels and the rails before it slips */
-    protected final double getStaticTractiveEffort(Speed speed) {
-        //if (getRotationPitch() != 0) 
-            //System.out.println("Pitch: " + getRotationPitch());
-        
+    protected final double getStaticTractiveEffort(Speed speed) {        
         return getDefinition().getScriptedStartingTractionNewtons(gauge, this)
-                * (1 + Math.sin(-Math.copySign(Math.toRadians(getRotationPitch()),
-                        speed.metric())) * Config.ConfigBalance.slopeMultiplier)
                 * Config.ConfigBalance.tractionMultiplier * adhesionCoefficient();
     }
 
@@ -580,7 +575,7 @@ public abstract class Locomotive extends FreightTank{
     }
 
 	@Override
-	public double getBrakeSystemEfficiency() {
+	public float getBrakeSystemEfficiency() {
 		if (cogging) {
 			return 10;
 		}
