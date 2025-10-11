@@ -522,11 +522,30 @@ public abstract class Locomotive extends FreightTank{
 
 	/** Maximum force that can be between the wheels and the rails before it slips */
     protected final double getStaticTractiveEffort(Speed speed) {
+        //if (getRotationPitch() != 0) 
+            //System.out.println("Pitch: " + getRotationPitch());
+        
         return getDefinition().getScriptedStartingTractionNewtons(gauge, this)
                 * (1 + Math.sin(-Math.copySign(Math.toRadians(getRotationPitch()),
                         speed.metric())) * Config.ConfigBalance.slopeMultiplier)
-                * Config.ConfigBalance.tractionMultiplier
-                * (slipping ? 0.5 : 1) * (isSanding ? 1.5 : 1);
+                * Config.ConfigBalance.tractionMultiplier * adhesionCoefficient();
+    }
+
+    public float adhesionCoefficient() {
+        float adhMult = 1;
+        World world = getWorld();
+        Vec3i blockPos = getBlockPosition();
+        if (world.isPrecipitating() && world.canSeeSky(blockPos)) {
+            if (world.isRaining(blockPos))
+                adhMult *= 0.7f;
+            if (world.isSnowing(blockPos))
+                adhMult *= 0.35f;
+        }
+        if (isSanding)
+            adhMult *= 3;
+        if (slipping)
+            adhMult *= 0.5f;
+        return adhMult;
     }
 	
     protected double simulateWheelSlip() {
@@ -730,21 +749,6 @@ public abstract class Locomotive extends FreightTank{
 	public void setBell(int newBell) {
 		this.bellTime = newBell;
 	}
-
-    public double slipCoefficient() {
-        double slipMult = 0.5;
-        World world = getWorld();
-        Vec3i blockPos = getBlockPosition();
-        if (world.isPrecipitating() && world.canSeeSky(blockPos)) {
-            if (world.isRaining(blockPos)) {
-                slipMult *= 0.6;
-            }
-            if (world.isSnowing(blockPos)) {
-                slipMult *= 0.4;
-            }
-        }
-        return slipMult;
-    }
 
 	public abstract boolean providesElectricalPower();
 
