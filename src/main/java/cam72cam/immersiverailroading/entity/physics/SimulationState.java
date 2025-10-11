@@ -4,7 +4,6 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
-import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.library.BrakeMode;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -144,8 +143,6 @@ public class SimulationState {
             couplerSlackRear = stock.getDefinition().getCouplerSlack(EntityCoupleableRollingStock.CouplerType.BACK, gauge);
 
             this.massKg = stock.getWeight();
-            // When FuelRequired is false, most of the time the locos are empty.  Work around that here
-            double designMassKg = !Config.ConfigBalance.FuelRequired && (stock instanceof Locomotive || stock instanceof Tender) ? massKg : stock.getMaxWeight();
 
             if (stock instanceof Locomotive) {
                 Locomotive locomotive = (Locomotive) stock;
@@ -163,9 +160,9 @@ public class SimulationState {
             }
 
 
-            double staticFriction = PhysicalMaterials.STEEL.staticFriction(PhysicalMaterials.STEEL);
+            float staticFriction = PhysicalMaterials.STEEL.staticFriction(PhysicalMaterials.STEEL);
             this.maximumAdhesionNewtons = massKg * staticFriction * 9.8 * stock.getBrakeAdhesionEfficiency();
-            this.designAdhesionNewtons = designMassKg * staticFriction * 9.8 * stock.getBrakeSystemEfficiency();
+            this.designAdhesionNewtons = massKg * staticFriction * 9.8 * stock.getBrakeSystemEfficiency();
             if (stock instanceof Locomotive)
                 this.independentBrake = ((Locomotive) stock).getIndependentBrake();
             this.handBrakeNewtons = stock.getHandBrake() * 9.8 * 0.015 * stock.getDefinition().getWeight(gauge) * stock.getDefinition().getHandBrakeCoefficient();
@@ -450,9 +447,9 @@ public class SimulationState {
         // TODO This is kinda directional?
         double blockResistanceNewtons = interferingResistance * 1000 * Config.ConfigDamage.blockHardness;
 
-        config.brakeCylinderPressure = Math.max(Math.min(Config.ImmersionConfig.brakeMode.equals(BrakeMode.DEFAULT) ?
+        config.brakeCylinderPressure = Math.max(config.hasPressureBrake ? Math.min(Config.ImmersionConfig.brakeMode.equals(BrakeMode.DEFAULT) ?
                 1 - config.trainBrakePressure :
-                    (1 - config.trainBrakePressure) / 0.3f, 1), config.independentBrake);
+                    (1 - config.trainBrakePressure) / 0.3f, 1) : 0, config.independentBrake);
         double brakeAdhesionNewtons = config.designAdhesionNewtons * config.brakeCylinderPressure;
         double handBrakeNewtons = config.handBrakeNewtons;
         double dynamicBrakeNewtons = config.dynamicBrakeNewtons * Config.ConfigBalance.brakeMultiplier;
