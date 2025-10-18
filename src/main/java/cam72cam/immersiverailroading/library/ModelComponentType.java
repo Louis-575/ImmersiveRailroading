@@ -159,6 +159,7 @@ public enum ModelComponentType {
 				//Fallthrough
 			case TRAIN_BRAKE_X:
 			case INDEPENDENT_BRAKE_X:
+			case HAND_BRAKE_X:
 			case THROTTLE_X:
 			case REVERSER_X:
 			case THROTTLE_BRAKE_X:
