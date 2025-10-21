@@ -550,6 +550,10 @@ public abstract class Locomotive extends FreightTank{
         return appliedTractiveEffort;
     }
     
+    public float getCurrentTractiveEffort() {
+        return (float) (getAppliedTractiveEffort(getCurrentSpeed()) / getStaticTractiveEffort(getCurrentSpeed()));
+    }
+    
     public double speedPercent(Speed speed) {
         return Math.abs(speed.metric() / getDefinition().getMaxSpeed(gauge).metric());
     }
