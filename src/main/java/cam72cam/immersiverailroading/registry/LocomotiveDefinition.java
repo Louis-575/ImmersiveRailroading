@@ -32,6 +32,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     private double factorOfAdhesion;
     private boolean speedLimiter;
     protected double powerMultiplier;
+    private int brakeNotches;
 
     LocomotiveDefinition(Class<? extends EntityRollingStock> type, String defID, DataBlock data) throws Exception {
         super(type, defID, data);
@@ -89,6 +90,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
         toggleBell = properties.getValue("toggle_bell").asBoolean();
         isCog = properties.getValue("cog").asBoolean();
         speedLimiter = properties.getValue("speed_limiter").asBoolean(true);
+        brakeNotches = properties.getValue("brake_notches").asInteger(25);
     }
 
     protected boolean readCabCarFlag(DataBlock data) {
@@ -220,5 +222,9 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     
     public String getWorks() {
         return works;
+    }
+    
+    public int getBrakeNotches() {
+        return brakeNotches;
     }
 }
