@@ -16,8 +16,6 @@ import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidStack;
 import cam72cam.mod.serialization.TagField;
-import org.luaj.vm2.LuaValue;
-
 import java.util.*;
 
 public class LocomotiveDiesel extends Locomotive {
@@ -380,12 +378,6 @@ public class LocomotiveDiesel extends Locomotive {
         }
         super.copySettings(stock, direction);
     }
-	
-	@Override
-	public void setTrainBrake(float newTrainBrake) {
-	    super.setTrainBrake(newTrainBrake);
-	    setRealDynamicBrake(newTrainBrake);
-	}
 	
 	@Override
 	public void setRealTrainBrake(float newTrainBrake) {
