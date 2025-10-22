@@ -188,6 +188,14 @@ public class LocomotiveDiesel extends Locomotive {
 		//issue #1526: when dragging or control with augment throttle glitches
 		super.setThrottle(targetNotch * getThrottleDelta());
 	}
+	
+	@Override
+	public void setRealThrottle(float newThrottle) {
+	    super.setRealThrottle(newThrottle);
+	    if (this.getThrottle() != newThrottle) {
+	        setControlPositions(ModelComponentType.THROTTLE_DYN_BRAKE_X, getThrottle()/2 + (1- getDynamicBrake())/2);
+	    }
+	}
 
 	@Override
 	public void setReverser(float newReverser) {
@@ -324,6 +332,10 @@ public class LocomotiveDiesel extends Locomotive {
 	        case DYNAMIC_BRAKE_X:
 	            setDynamicBrake(getControlPosition(component));
 	            break;
+            case THROTTLE_DYN_BRAKE_X:
+                setDynamicBrake(1 - getControlPosition(component)*2);
+                setThrottle(getControlPosition(component)*2 - 1);
+                break;
 	    }
 	}
 
@@ -342,9 +354,20 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 	
 	@Override
+	protected float defaultControlPosition(Control<?> control) {
+	    switch (control.part.type) {
+            case THROTTLE_DYN_BRAKE_X:
+                return 0.5f;
+            default:
+                return super.defaultControlPosition(control);
+        }
+	}
+	
+	@Override
 	public boolean playerCanDrag(Player player, Control<?> control) {
 	    switch (control.part.type) {
 	        case DYNAMIC_BRAKE_X:
+	        case THROTTLE_DYN_BRAKE_X:
 	            return player.hasPermission(Permissions.LOCOMOTIVE_CONTROL);
 	    }
 	    return super.playerCanDrag(player, control);
@@ -362,6 +385,14 @@ public class LocomotiveDiesel extends Locomotive {
 	public void setTrainBrake(float newTrainBrake) {
 	    super.setTrainBrake(newTrainBrake);
 	    setRealDynamicBrake(newTrainBrake);
+	}
+	
+	@Override
+	public void setRealTrainBrake(float newTrainBrake) {
+	    super.setRealTrainBrake(newTrainBrake);
+	    if (this.getTrainBrake() != newTrainBrake) {
+	        setControlPositions(ModelComponentType.THROTTLE_DYN_BRAKE_X, getThrottle()/2 + (1- getDynamicBrake())/2);
+	    }
 	}
 	
 	public float getDynamicBrake() {

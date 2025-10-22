@@ -599,7 +599,7 @@ public abstract class Locomotive extends FreightTank{
 			this.mapTrain(this, true, false, this::copySettings);
 		}
 	}
-	private void setRealThrottle(float newThrottle) {
+	public void setRealThrottle(float newThrottle) {
 		newThrottle = Math.min(1, Math.max(0, newThrottle));
 //		ModCore.info("Set Throttle to: " + newThrottle);
 		if (this.getThrottle() != newThrottle) {
@@ -693,7 +693,7 @@ public abstract class Locomotive extends FreightTank{
 		setRealTrainBrake(newTrainBrake);
 		this.mapTrain(this, true, false, this::copySettings);
 	}
-	private void setRealTrainBrake(float newTrainBrake) {
+	public void setRealTrainBrake(float newTrainBrake) {
 		newTrainBrake = Math.min(1, Math.max(0, newTrainBrake));
 		if (this.getTrainBrake() != newTrainBrake) {
 			if (getDefinition().isLinearBrakeControl()) {
