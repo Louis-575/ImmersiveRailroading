@@ -38,6 +38,7 @@ public enum Readouts {
     BRAKE_CYLINDER_PRESSURE,
     DYNAMIC_BRAKE,
     ROLLING_STOCK_PITCH,
+    TRACTIVE_EFFORT,
     ;
 
     public float getValue(EntityRollingStock stock) {
@@ -74,7 +75,7 @@ public enum Readouts {
             case TRAIN_BRAKE_LEVER:
                 return stock.getDefinition().isLinearBrakeControl() ? TRAIN_BRAKE.getValue(stock) : lever;
             case INDEPENDENT_BRAKE:
-                return stock instanceof Locomotive ? ((Locomotive) stock).getIndependentBrake() : 0;
+                return stock instanceof EntityMoveableRollingStock ? ((EntityMoveableRollingStock) stock).getIndependentBrake() : 0;
             case BRAKE_PRESSURE:
                 return stock instanceof EntityMoveableRollingStock ? ((EntityMoveableRollingStock) stock).getBrakePressure() : 0;
             case BRAKE_CYLINDER_PRESSURE:
@@ -128,6 +129,9 @@ public enum Readouts {
                         ((LocomotiveDiesel) stock).getDynamicBrakeNewtons() : 0);
             case ROLLING_STOCK_PITCH:
                 return stock.getRotationPitch();
+            case TRACTIVE_EFFORT:
+                return stock instanceof Locomotive ?
+                        ((Locomotive) stock).getCurrentTractiveEffort() : 0;
         }
         return 0;
     }

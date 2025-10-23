@@ -91,6 +91,7 @@ public abstract class EntityRollingStockDefinition {
     private int maxPassengers;
     private int snowLayers;
     private float interiorLightLevel;
+    private boolean hasIndependentBrake;
     private boolean hasHandBrake;
     private boolean hasPressureBrake;
     private final EnumMap<ModelComponentType, List<ModelComponent>> renderComponents;
@@ -106,6 +107,7 @@ public abstract class EntityRollingStockDefinition {
     private double swayMultiplier;
     private double tiltMultiplier;
     private float brakeCoefficient;
+    private PhysicalMaterials brakeMaterials;
     private float handBrakeCoefficient;
     public double rollingResistanceCoefficient;
     public double directFrictionCoefficient;
@@ -521,6 +523,7 @@ public abstract class EntityRollingStockDefinition {
         DataBlock properties = data.getBlock("properties");
         weight = properties.getValue("weight_kg").asInteger() * internal_inv_scale;
         valveGear = ValveGearConfig.get(properties, "valve_gear");
+        hasIndependentBrake = properties.getValue("independent_brake").asBoolean();
         hasHandBrake = properties.getValue("hand_brake").asBoolean(true);
         hasPressureBrake = properties.getValue("pressure_brake").asBoolean();
         // Locomotives default to linear brake control
@@ -540,12 +543,12 @@ public abstract class EntityRollingStockDefinition {
         }
         textFieldData = data.getBlocks("textfield");
 
-        brakeCoefficient = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.CAST_IRON);
         try {
-            brakeCoefficient = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.valueOf(properties.getValue("brake_shoe_material").asString()));
+            brakeMaterials = PhysicalMaterials.valueOf(properties.getValue("brake_shoe_material").asString(PhysicalMaterials.CAST_IRON.toString()));
         } catch (Exception ex) {
             ImmersiveRailroading.warn("Invalid brake_shoe_material, possible values are: %s", Arrays.toString(PhysicalMaterials.values()));
         }
+        brakeCoefficient = PhysicalMaterials.STEEL.kineticFriction(brakeMaterials);
         brakeCoefficient = properties.getValue("brake_friction_coefficient").asFloat(brakeCoefficient);
         // https://en.wikipedia.org/wiki/Rolling_resistance#Rolling_resistance_coefficient_examples
         rollingResistanceCoefficient = properties.getValue("rolling_resistance_coefficient").asDouble();
@@ -703,6 +706,9 @@ public abstract class EntityRollingStockDefinition {
         }
     }
 
+    public boolean hasIndependentBrake() {
+        return hasIndependentBrake;
+    }
 
     public boolean hasHandBrake() {
         return hasHandBrake;
@@ -1024,7 +1030,7 @@ public abstract class EntityRollingStockDefinition {
     }
 
     protected GuiBuilder getDefaultOverlay(DataBlock data) throws IOException {
-        return hasHandBrake() ? GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/independent.caml")) : null;
+        return hasIndependentBrake() || hasHandBrake() ? GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/independent.caml")) : null;
     }
     
     public GuiBuilder getOverlay() {
@@ -1043,9 +1049,10 @@ public abstract class EntityRollingStockDefinition {
         return tiltMultiplier;
     }
 
-    public double getBrakeShoeFriction() {
+    public float getBrakeShoeFriction() {
         return brakeCoefficient;
     }
+    
     public int getSnowLayers() {
         return snowLayers;
     }
@@ -1084,5 +1091,9 @@ public abstract class EntityRollingStockDefinition {
 
     public String getName() {
         return name;
+    }
+    
+    public PhysicalMaterials getBrakeMaterials() {
+        return brakeMaterials;
     }
 }

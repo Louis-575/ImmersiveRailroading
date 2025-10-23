@@ -132,18 +132,12 @@ public class IRModule implements LuaModule {
 
     @LuaFunction(module = "IR")
     public void setIndependentBrake(LuaValue value) {
-        if (stock instanceof Locomotive) {
-            ((Locomotive) stock).setIndependentBrake(value.tofloat());
-        }
+        stock.setIndependentBrake(value.tofloat());
     }
 
     @LuaFunction(module = "IR")
     public LuaValue getIndependentBrake() {
-        if (stock instanceof Locomotive) {
-            float indBrake = ((Locomotive) stock).getIndependentBrake();
-            return LuaValue.valueOf(indBrake);
-        }
-        return (LuaValue.valueOf(0));
+        return LuaValue.valueOf(stock.getIndependentBrake());
     }
     
     @LuaFunction(module = "IR")
@@ -156,8 +150,7 @@ public class IRModule implements LuaModule {
     @LuaFunction(module = "IR")
     public LuaValue getDynamicBrake() {
         if (stock instanceof LocomotiveDiesel) {
-            float dynBrake = ((LocomotiveDiesel) stock).getDynamicBrake();
-            return LuaValue.valueOf(dynBrake);
+            return LuaValue.valueOf(((LocomotiveDiesel) stock).getDynamicBrake());
         }
         return LuaValue.valueOf(0);
     }
@@ -182,8 +175,7 @@ public class IRModule implements LuaModule {
     @LuaFunction(module = "IR")
     public LuaValue isSanding() {
         if (stock instanceof Locomotive) {
-            boolean sanding = ((Locomotive) stock).isSanding();
-            return LuaValue.valueOf(sanding);
+            return LuaValue.valueOf(((Locomotive) stock).isSanding());
         }
         return LuaValue.valueOf(false);
     }

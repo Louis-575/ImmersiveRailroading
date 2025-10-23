@@ -16,8 +16,6 @@ import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidStack;
 import cam72cam.mod.serialization.TagField;
-import org.luaj.vm2.LuaValue;
-
 import java.util.*;
 
 public class LocomotiveDiesel extends Locomotive {
@@ -120,7 +118,24 @@ public class LocomotiveDiesel extends Locomotive {
 	 */
 	@Override
 	public void handleKeyPress(Player source, KeyTypes key, boolean disableIndependentThrottle) {
-        if (source.hasPermission(Permissions.BRAKE_CONTROL)) {
+        if (getDefinition().isLinkedDynBrakeThrottle()) {
+            switch (key) {
+                case THROTTLE_UP:
+                    if (getDynamicBrake() > 0) {
+                        key = KeyTypes.DYNAMIC_BRAKE_DOWN;
+                    }
+                    break;
+                case THROTTLE_ZERO:
+                    setDynamicBrake(0);
+                    break;
+                case THROTTLE_DOWN:
+                    if (getThrottle() == 0) {
+                        key = KeyTypes.DYNAMIC_BRAKE_UP;
+                    }
+                    break;
+            }
+        }
+	    if (source.hasPermission(Permissions.BRAKE_CONTROL)) {
             float dynamicBrakeNotch = 0.04f;
             switch (key) {
                 case DYNAMIC_BRAKE_UP:
@@ -187,6 +202,12 @@ public class LocomotiveDiesel extends Locomotive {
 	    int targetNotch = Math.round(newThrottle / getThrottleDelta()); // *2
 		//issue #1526: when dragging or control with augment throttle glitches
 		super.setThrottle(targetNotch * getThrottleDelta());
+	}
+	
+	@Override
+	public void setRealThrottle(float newThrottle) {
+	    super.setRealThrottle(newThrottle);
+	    setControlPositions(ModelComponentType.THROTTLE_DYN_BRAKE_X, getThrottle()/2 + (1- getDynamicBrake())/2);
 	}
 
 	@Override
@@ -324,6 +345,10 @@ public class LocomotiveDiesel extends Locomotive {
 	        case DYNAMIC_BRAKE_X:
 	            setDynamicBrake(getControlPosition(component));
 	            break;
+            case THROTTLE_DYN_BRAKE_X:
+                setDynamicBrake(1 - getControlPosition(component)*2);
+                setThrottle(getControlPosition(component)*2 - 1);
+                break;
 	    }
 	}
 
@@ -342,9 +367,20 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 	
 	@Override
+	protected float defaultControlPosition(Control<?> control) {
+	    switch (control.part.type) {
+            case THROTTLE_DYN_BRAKE_X:
+                return 0.5f;
+            default:
+                return super.defaultControlPosition(control);
+        }
+	}
+	
+	@Override
 	public boolean playerCanDrag(Player player, Control<?> control) {
 	    switch (control.part.type) {
 	        case DYNAMIC_BRAKE_X:
+	        case THROTTLE_DYN_BRAKE_X:
 	            return player.hasPermission(Permissions.LOCOMOTIVE_CONTROL);
 	    }
 	    return super.playerCanDrag(player, control);
@@ -357,12 +393,6 @@ public class LocomotiveDiesel extends Locomotive {
         }
         super.copySettings(stock, direction);
     }
-	
-	@Override
-	public void setTrainBrake(float newTrainBrake) {
-	    super.setTrainBrake(newTrainBrake);
-	    setRealDynamicBrake(newTrainBrake);
-	}
 	
 	public float getDynamicBrake() {
         return getDefinition().getDynamicBrake() != 0 ? dynamicBrakePosition : 0;
@@ -393,6 +423,7 @@ public class LocomotiveDiesel extends Locomotive {
                 setControlPositions(ModelComponentType.DYNAMIC_BRAKE_X, newDynamicBrakePos);
             }
             dynamicBrakePosition = newDynamicBrakePos;
+            setControlPositions(ModelComponentType.THROTTLE_DYN_BRAKE_X, getThrottle()/2 + (1- getDynamicBrake())/2);
         }
     }
 
