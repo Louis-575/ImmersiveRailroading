@@ -143,8 +143,8 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
 
     public int getScriptedStartingTractionNewtons(Gauge gauge, Locomotive stock) {
         return stock.localTraction != -1
-                ? (int) Math.ceil(gauge.scale() * stock.localTraction * ForceDisplayType.lbfToNewton)
-                : (int) Math.ceil(gauge.scale() * this.traction_N * ForceDisplayType.lbfToNewton);
+                ? (int) Math.ceil(gauge.scale() * stock.localTraction)
+                : (int) Math.ceil(gauge.scale() * this.traction_N);
     }
 
     public Speed getMaxSpeed(Gauge gauge){

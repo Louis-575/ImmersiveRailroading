@@ -522,10 +522,10 @@ public abstract class Locomotive extends FreightTank{
         double appliedTractiveEffort = Math.abs(getAppliedTractiveEffort(speed));
         double staticTractiveEffort = getStaticTractiveEffort(speed);
         slipping = appliedTractiveEffort > staticTractiveEffort;
-
+        
         if (cogging || !slipping)
             return 0;
-
+        
         double adhesionFactor = appliedTractiveEffort / staticTractiveEffort;
         return Math.copySign((adhesionFactor - 1) / 8, getReverser());
     }
@@ -545,7 +545,7 @@ public abstract class Locomotive extends FreightTank{
     }
     
     public float getCurrentTractiveEffort() {
-        return (float) Math.abs((getAppliedTractiveEffort(getCurrentSpeed()) / getStaticTractiveEffort(getCurrentSpeed())));
+        return (float) Math.min(1, Math.abs((getAppliedTractiveEffort(getCurrentSpeed()) / getDefinition().getScriptedStartingTractionNewtons(gauge, this))));
     }
     
     public double speedPercent(Speed speed) {
