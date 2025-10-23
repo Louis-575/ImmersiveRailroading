@@ -145,8 +145,11 @@ public class LocomotiveSteam extends Locomotive {
                 * getMaxChestPressure() / getDefinition().getWheelDiameter(gauge)
                 * getDefinition().getPowerMultiplier() * Config.ConfigBalance.powerMultiplier;
 
-        if (getWorld().isClient && appliedTraction > getStaticTractiveEffort(speed)) {
-            appliedTraction *= 2.5f;
+        if (getWorld().isClient) {
+            appliedTraction *= 1.03f;
+            if (slipping) {
+                appliedTraction *= 2.5f;
+            }
         }
         return appliedTraction * Math.copySign(1, reverser);
     }
@@ -184,7 +187,7 @@ public class LocomotiveSteam extends Locomotive {
         chestPressure -= factor < 0 ? 0 : (float) factor;
 
         if (slipping) {
-            chestPressure -= Math.abs(simulateWheelSlip());
+            chestPressure -= Math.abs(10 * simulateWheelSlip());
         }
         if (getChestPressure() < 0) {
             chestPressure = 0;
