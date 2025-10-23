@@ -107,6 +107,7 @@ public abstract class EntityRollingStockDefinition {
     private double swayMultiplier;
     private double tiltMultiplier;
     private float brakeCoefficient;
+    private PhysicalMaterials brakeMaterials;
     private float handBrakeCoefficient;
     public double rollingResistanceCoefficient;
     public double directFrictionCoefficient;
@@ -542,12 +543,12 @@ public abstract class EntityRollingStockDefinition {
         }
         textFieldData = data.getBlocks("textfield");
 
-        brakeCoefficient = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.CAST_IRON);
         try {
-            brakeCoefficient = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.valueOf(properties.getValue("brake_shoe_material").asString()));
+            brakeMaterials = PhysicalMaterials.valueOf(properties.getValue("brake_shoe_material").asString(PhysicalMaterials.CAST_IRON.toString()));
         } catch (Exception ex) {
             ImmersiveRailroading.warn("Invalid brake_shoe_material, possible values are: %s", Arrays.toString(PhysicalMaterials.values()));
         }
+        brakeCoefficient = PhysicalMaterials.STEEL.kineticFriction(brakeMaterials);
         brakeCoefficient = properties.getValue("brake_friction_coefficient").asFloat(brakeCoefficient);
         // https://en.wikipedia.org/wiki/Rolling_resistance#Rolling_resistance_coefficient_examples
         rollingResistanceCoefficient = properties.getValue("rolling_resistance_coefficient").asDouble();
@@ -1090,5 +1091,9 @@ public abstract class EntityRollingStockDefinition {
 
     public String getName() {
         return name;
+    }
+    
+    public PhysicalMaterials getBrakeMaterials() {
+        return brakeMaterials;
     }
 }
