@@ -59,7 +59,7 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
 
     @TagSync
     @TagField("BRAKE_PRESSURE")
-    private float trainBrakePressure = 1;
+    private float trainBrakePressure = 0;
 
     @TagSync
     @TagField("BRAKE_CYLINDER_PRESSURE")

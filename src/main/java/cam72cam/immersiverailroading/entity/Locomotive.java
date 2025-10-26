@@ -17,10 +17,8 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.StrictTagMapper;
 import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.world.World;
 import org.luaj.vm2.LuaValue;
 import java.util.List;
 import java.util.OptionalDouble;
@@ -46,6 +44,11 @@ public abstract class Locomotive extends FreightTank{
 	@TagSync
 	@TagField("AIR_BRAKE")
 	private float trainBrakePosition = 0;
+	
+    @TagSync
+    @TagField("MAIN_AIR_RESERVOIR")
+    private float mainAirReservoir = 0;
+    private boolean isLowAir = false;
 
 	@TagSync
 	@TagField("HORN")
@@ -483,6 +486,11 @@ public abstract class Locomotive extends FreightTank{
                 isSanding = true;
             }
         }
+        
+        // Compressor
+        if(providesElectricalPower()) {
+            raiseMainAirReservoir();
+        }
 	}
 	
 	@Override
@@ -667,22 +675,15 @@ public abstract class Locomotive extends FreightTank{
 		return Math.max((float)control, hornPull);
 	}
 
-	@Deprecated
-	public float getAirBrake() {
-		return getTrainBrake();
-	}
 	public float getTrainBrake() {
 		return trainBrakePosition;
 	}
 	
-	@Deprecated
-	public void setAirBrake(float value) {
-		setTrainBrake(value);
-	}
 	public void setTrainBrake(float newTrainBrake) {
 		setRealTrainBrake(newTrainBrake);
 		this.mapTrain(this, true, false, this::copySettings);
 	}
+	
 	private void setRealTrainBrake(float newTrainBrake) {
 		newTrainBrake = Math.min(1, Math.max(0, newTrainBrake));
 		if (this.getTrainBrake() != newTrainBrake) {
@@ -693,10 +694,39 @@ public abstract class Locomotive extends FreightTank{
 			setControlPositions(ModelComponentType.THROTTLE_BRAKE_X, getThrottle()/2 + (1- getTrainBrake())/2);
 		}
 	}
+	
+	public float getMainAirReservoir() {
+	    return mainAirReservoir;
+	}
+	
+	private boolean isLowAir() {
+	    return isLowAir;
+	}
+	
+	private void raiseMainAirReservoir() {
+	    if (!isLowAir() && getMainAirReservoir() < 0.8f) {
+	        isLowAir = true;
+	    } else if (isLowAir() && getMainAirReservoir() >= 1.0f) {
+	        isLowAir = false;
+	    }
+	    if (!isLowAir())
+	        return;
+
+	    float newMainReservoir = getMainAirReservoir() + 0.1f / consist.trainLength;
+	    newMainReservoir = Math.min(1, Math.max(0, newMainReservoir));
+	    mainAirReservoir = newMainReservoir;
+	}
+	
+	public void lowerMainAirReservoir() {
+	    float newMainReservoir = getMainAirReservoir() - 0.000001f * consist.trainLength;
+        newMainReservoir = Math.min(1, Math.max(0, newMainReservoir));
+        mainAirReservoir = newMainReservoir;
+	}
 
 	public int getBell() {
 		return bellTime;
 	}
+	
 	public void setBell(int newBell) {
 		this.bellTime = newBell;
 	}
