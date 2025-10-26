@@ -501,15 +501,7 @@ public abstract class Locomotive extends FreightTank{
     }
 
     public float adhesionCoefficient() {
-        float adhMult = 1;
-        World world = getWorld();
-        Vec3i blockPos = getBlockPosition();
-        if (world.isPrecipitating() && world.canSeeSky(blockPos)) {
-            if (world.isRaining(blockPos))
-                adhMult *= 0.7f;
-            if (world.isSnowing(blockPos))
-                adhMult *= 0.35f;
-        }
+        float adhMult = super.adhesionCoefficient();
         if (isSanding)
             adhMult *= 3;
         if (slipping)
@@ -561,7 +553,7 @@ public abstract class Locomotive extends FreightTank{
 	}
 
 	@Override
-	public double getBrakeAdhesionEfficiency() {
+	public float getBrakeAdhesionEfficiency() {
 		if (cogging) {
 			return 10;
 		}
