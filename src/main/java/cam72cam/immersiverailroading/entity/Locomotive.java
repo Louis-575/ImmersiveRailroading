@@ -48,6 +48,9 @@ public abstract class Locomotive extends FreightTank{
     @TagSync
     @TagField("MAIN_AIR_RESERVOIR")
     private float mainAirReservoir = 0;
+    
+    @TagSync
+    @TagField("COMPRESSOR")
     private boolean isLowAir = false;
 
 	@TagSync
@@ -72,6 +75,8 @@ public abstract class Locomotive extends FreightTank{
 	@TagField("cogging")
 	private boolean cogging = false;
 
+	@TagSync
+    @TagField("slipping")
 	protected boolean slipping = false;
 	
     protected int sandTime = 0;
@@ -699,7 +704,7 @@ public abstract class Locomotive extends FreightTank{
 	    return mainAirReservoir;
 	}
 	
-	private boolean isLowAir() {
+	public boolean isLowAir() {
 	    return isLowAir;
 	}
 	

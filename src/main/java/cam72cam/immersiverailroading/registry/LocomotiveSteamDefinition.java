@@ -76,7 +76,6 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
         idle = SoundDefinition.getOrDefault(sounds, "idle");
         chuff = sounds.getValue("chuff").asIdentifier();
         pressure = sounds.getValue("pressure").asIdentifier();
-        bell = SoundDefinition.getOrDefault(sounds, "bell");
         cylinder_drain = sounds.getValue("cylinder_drain").asIdentifier();
         pistonDiameter = properties.getValue("piston_diameter").asDouble(0.6);
         pistonStroke = properties.getValue("piston_stroke").asDouble(0.66);
