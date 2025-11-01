@@ -96,9 +96,9 @@ public abstract class Locomotive extends FreightTank{
 	@TagField("localHorsepower")
 	public double localHorsepower = -1;
 	
-	   @TagSync
-	    @TagField("localPowerMultiplier")
-	    public double localPowerMultiplier = -1;
+	@TagSync
+	@TagField("localPowerMultiplier")
+	public double localPowerMultiplier = -1;
 
 	/*
 	 * 

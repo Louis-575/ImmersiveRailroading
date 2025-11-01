@@ -490,6 +490,14 @@ public class IRModule implements LuaModule {
         }
         return LuaValue.valueOf(0);
     }
-
-
+    
+    @LuaFunction(module = "IR")
+    public LuaValue getBrakingWeight() {
+        return LuaValue.valueOf(stock.getBrakingWeight());
+    }
+    
+    @LuaFunction(module = "IR")
+    public void setBrakingWeight(LuaValue value) {
+        stock.setBrakingWeight(value.todouble());
+    }
 }

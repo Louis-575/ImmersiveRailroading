@@ -68,6 +68,10 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
     @TagSync
     @TagField("SLIDING")
     public boolean sliding = false;
+    
+    @TagSync
+    @TagField("luaBrakingWeight")
+    private double luaBrakingWeight = -1;
 
     public long lastCollision = 0;
 
@@ -547,6 +551,14 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
             }
         }
         return value;
+    }
+    
+    public double getBrakingWeight() {
+        return luaBrakingWeight == -1 ? getWeight() : luaBrakingWeight;
+    }
+    
+    public void setBrakingWeight(double weight) {
+        luaBrakingWeight = weight;
     }
 
     public boolean isSliding() {
