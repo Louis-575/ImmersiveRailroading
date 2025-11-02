@@ -111,6 +111,10 @@ public abstract class EntityRollingStockDefinition {
     private float handBrakeCoefficient;
     public double rollingResistanceCoefficient;
     public double directFrictionCoefficient;
+    
+    public SoundDefinition brakeHighSpeedSound;
+    public SoundDefinition brakeLowSpeedSound;
+    public SoundDefinition brakeShoeSound;
 
     public List<AnimationDefinition> animations;
     public Map<String, Float> cgDefaults;
@@ -581,6 +585,10 @@ public abstract class EntityRollingStockDefinition {
         flange_sound = sounds.getValue("flange").asIdentifier();
         flange_min_yaw = sounds.getValue("flange_min_yaw").asDouble();
         collision_sound = sounds.getValue("collision").asIdentifier();
+        brakeHighSpeedSound = SoundDefinition.getOrDefault(sounds, "brake_noise_fast");
+        brakeLowSpeedSound = SoundDefinition.getOrDefault(sounds, "brake_noise_slow");
+        brakeShoeSound = SoundDefinition.getOrDefault(sounds, "brake_apply");
+        
         DataBlock soundControls = sounds.getBlock("controls");
         if (soundControls != null) {
             soundControls.getBlockMap().forEach((key, block) -> controlSounds.put(key, new ControlSoundsDefinition(block)));
