@@ -115,6 +115,7 @@ public abstract class EntityRollingStockDefinition {
     public SoundDefinition brakeHighSpeedSound;
     public SoundDefinition brakeLowSpeedSound;
     public SoundDefinition brakeShoeSound;
+    public SoundDefinition brakePressureSound;
 
     public List<AnimationDefinition> animations;
     public Map<String, Float> cgDefaults;
@@ -588,6 +589,7 @@ public abstract class EntityRollingStockDefinition {
         brakeHighSpeedSound = SoundDefinition.getOrDefault(sounds, "brake_noise_fast");
         brakeLowSpeedSound = SoundDefinition.getOrDefault(sounds, "brake_noise_slow");
         brakeShoeSound = SoundDefinition.getOrDefault(sounds, "brake_apply");
+        brakePressureSound = SoundDefinition.getOrDefault(sounds, "brake_pressure");
         
         DataBlock soundControls = sounds.getBlock("controls");
         if (soundControls != null) {
