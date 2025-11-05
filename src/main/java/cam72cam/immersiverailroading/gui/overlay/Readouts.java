@@ -134,8 +134,8 @@ public enum Readouts {
                 return stock instanceof Locomotive ?
                         ((Locomotive) stock).getCurrentTractiveEffort() : 0;
             case MAIN_AIR_RESERVOIR:
-                return stock instanceof Locomotive ?
-                        ((Locomotive) stock).getMainAirReservoir() : 0;
+                return (float) (stock instanceof Locomotive ?
+                        ((Locomotive) stock).getMainAirReservoir() : 0);
         }
         return 0;
     }
