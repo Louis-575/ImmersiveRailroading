@@ -538,11 +538,6 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
         return getTickPos();
     }
 
-    /**
-     * This assumes that the brake system is designed to apply a percentage of the total adhesion
-     * That percentage was improved over time, with the materials used (friction coefficient) helping inform our guess
-     * Though, I'm going to limit it to 75% of the total possible adhesion
-     */
     public float getBrakeSystemEfficiency() {
         float value = getDefinition().getBrakeShoeFriction();
         if (ImmersionConfig.brakeMode.equals(BrakeMode.REALISTIC)) {
