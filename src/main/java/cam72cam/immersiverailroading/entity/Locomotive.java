@@ -101,6 +101,10 @@ public abstract class Locomotive extends FreightTank{
 	@TagSync
 	@TagField("localPowerMultiplier")
 	public double localPowerMultiplier = -1;
+	
+	@TagSync
+	@TagField("localTractiveEffort")
+	public double localTractiveEffort = -1;
 
 	/*
 	 * 
@@ -547,7 +551,7 @@ public abstract class Locomotive extends FreightTank{
             return 0;
 
         double appliedTractiveEffort = getAppliedTractiveEffort(speed);
-
+        
         if (slipping) {
             appliedTractiveEffort *= 0.5;
         }
@@ -556,6 +560,10 @@ public abstract class Locomotive extends FreightTank{
     
     public float getCurrentTractiveEffort() {
         return (float) Math.min(1, Math.abs((getAppliedTractiveEffort(getCurrentSpeed()) / getDefinition().getScriptedStartingTractionNewtons(gauge, this))));
+    }
+    
+    public void setCurrentTractiveEffort(double effort) {
+        localTractiveEffort = effort;
     }
     
     public double speedPercent(Speed speed) {

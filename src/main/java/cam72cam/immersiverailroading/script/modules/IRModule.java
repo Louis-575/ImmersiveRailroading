@@ -500,4 +500,19 @@ public class IRModule implements LuaModule {
     public void setBrakingWeight(LuaValue value) {
         stock.setBrakingWeight(value.todouble());
     }
+
+    @LuaFunction(module = "IR")
+    public LuaValue getTractiveEffort() {
+        if (stock instanceof Locomotive) {
+            return LuaValue.valueOf(((Locomotive) stock).getCurrentTractiveEffort());
+        }
+        return LuaValue.valueOf(0);
+    }
+
+    @LuaFunction(module = "IR")
+    public void setTractiveEffort(LuaValue value) {
+        if (stock instanceof Locomotive) {
+            ((Locomotive) stock).setCurrentTractiveEffort(value.tofloat());
+        }
+    }
 }
