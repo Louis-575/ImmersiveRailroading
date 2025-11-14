@@ -14,6 +14,7 @@ import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.entity.Entity;
@@ -267,7 +268,7 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
             if (getDefinition().hasIndependentBrake()) {
                 for (Control<?> control : getDefinition().getModel().getControls()) {
                     if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.INDEPENDENT_BRAKE_X) {
-                        setIndependentBrake(Math.max(0, Math.min(1, getIndependentBrake() + (getControlPosition(control) - 0.5f) / 8)));
+                        setIndependentBrake(MathUtil.clamp(getIndependentBrake() + (getControlPosition(control) - 0.5f) / 8, 0, 1));
                     }
                 }
             }
@@ -504,7 +505,7 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
     }
     
     private void setRealIndependentBrake(float newIndependentBrake) {
-        newIndependentBrake = Math.min(1, Math.max(0, newIndependentBrake));
+        newIndependentBrake = MathUtil.clamp(newIndependentBrake, 0, 1);
         if (this.getIndependentBrake() != newIndependentBrake && getDefinition().hasIndependentBrake()) {
             if (getDefinition().isLinearBrakeControl()) {
                 setControlPositions(ModelComponentType.INDEPENDENT_BRAKE_X, newIndependentBrake);

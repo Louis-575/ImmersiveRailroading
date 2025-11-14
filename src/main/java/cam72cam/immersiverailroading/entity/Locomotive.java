@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
@@ -415,7 +416,7 @@ public abstract class Locomotive extends FreightTank{
 			for (Control<?> control : getDefinition().getModel().getControls()) {
 				// Logic duplicated in Readouts#setValue
 				if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.TRAIN_BRAKE_X) {
-					setTrainBrake(Math.max(0, Math.min(1, getTrainBrake() + (getControlPosition(control) - 0.5f) / 8)));
+					setTrainBrake(MathUtil.clamp(getTrainBrake() + (getControlPosition(control) - 0.5f) / 8, 0, 1));
 				}
 			}
 
@@ -610,9 +611,8 @@ public abstract class Locomotive extends FreightTank{
 			this.mapTrain(this, true, false, this::copySettings);
 		}
 	}
-	public void setRealThrottle(float newThrottle) {
-		newThrottle = Math.min(1, Math.max(0, newThrottle));
-//		ModCore.info("Set Throttle to: " + newThrottle);
+	private void setRealThrottle(float newThrottle) {
+		newThrottle = MathUtil.clamp(newThrottle, 0, 1);
 		if (this.getThrottle() != newThrottle) {
 			setControlPositions(ModelComponentType.THROTTLE_X, newThrottle);
 			throttle = newThrottle;
@@ -640,7 +640,7 @@ public abstract class Locomotive extends FreightTank{
 		}
 	}
 	private void setRealReverser(float newReverser){
-		newReverser = Math.min(1, Math.max(-1, newReverser));
+		newReverser = MathUtil.clamp(newReverser, -1, 1);
 
 		if (this.getReverser() != newReverser) {
 			setControlPositions(ModelComponentType.REVERSER_X, newReverser/-2 + 0.5f);
@@ -702,7 +702,7 @@ public abstract class Locomotive extends FreightTank{
 	}
 	
 	private void setRealTrainBrake(float newTrainBrake) {
-		newTrainBrake = Math.min(1, Math.max(0, newTrainBrake));
+		newTrainBrake = MathUtil.clamp(newTrainBrake, 0, 1);
 		if (this.getTrainBrake() != newTrainBrake) {
 			if (getDefinition().isLinearBrakeControl()) {
 				setControlPositions(ModelComponentType.TRAIN_BRAKE_X, newTrainBrake);
