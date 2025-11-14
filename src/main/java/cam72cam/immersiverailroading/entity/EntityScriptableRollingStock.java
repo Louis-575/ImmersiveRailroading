@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.entity;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemTypewriter;
+import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.script.*;
 import cam72cam.immersiverailroading.script.library.ILuaEvent;
@@ -25,6 +26,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class EntityScriptableRollingStock extends EntityCoupleableRollingStock implements ILuaEvent {
+    /**
+     * The context is actually loaded for every stock, not regarding if the stock even has a script. I did this for compatibility with the LuaAugment. <br>
+     * It shouldn't cause any performance issues because it doesn't actually run anything.
+     * @see cam72cam.immersiverailroading.tile.TileRailBase
+     */
     private LuaContext context;
     /**
      * Used by {@link IRModule}
@@ -60,10 +66,6 @@ public abstract class EntityScriptableRollingStock extends EntityCoupleableRolli
         }
 
         if (Config.ConfigPerformance.disableLuaScript) {
-            return;
-        }
-
-        if (getDefinition().script == null) {
             return;
         }
 
@@ -108,13 +110,33 @@ public abstract class EntityScriptableRollingStock extends EntityCoupleableRolli
         return luaEventCallbacks;
     }
 
+    @Override
+    public void handleKeyPress(Player source, KeyTypes key, boolean disableIndependentThrottle) {
+        boolean hasPermission;
+        switch (key) {
+            case INDEPENDENT_BRAKE_UP:
+            case INDEPENDENT_BRAKE_DOWN:
+            case INDEPENDENT_BRAKE_ZERO:
+                hasPermission = source.hasPermission(Permissions.BRAKE_CONTROL);
+                break;
+            default:
+                hasPermission = source.hasPermission(Permissions.LOCOMOTIVE_CONTROL);
+                break;
+        }
+        if (getWorld().isServer) {
+            triggerEvent("onKeyPress", LuaValue.valueOf(key.toString()), LuaValue.valueOf(hasPermission));
+        }
+
+        super.handleKeyPress(source, key, disableIndependentThrottle);
+    }
+
     private void registerModules() {
         context.registerLibrary(new ScriptVectorUtil.VectorLibrary());
         context.registerLibrary(new MarkupModule());
 
         context.registerLibrary(new IRModule(this));
         context.registerLibrary(new WorldModule(getWorld()));
-        context.registerLibrary(new DebugModule(this));
+        context.registerLibrary(new StockDebugModule(this));
         context.registerLibrary(new EventModule(this));
     }
 
@@ -122,9 +144,11 @@ public abstract class EntityScriptableRollingStock extends EntityCoupleableRolli
         Identifier script = getDefinition().script;
 
         List<String> modules = getDefinition().addScripts;
-        context.loadModules(modules, script);
+        if (modules != null) {
+            context.loadModules(modules, script);
+        }
 
-        if (script.canLoad()) {
+        if (script != null && script.canLoad()) {
             context.loadScript(script);
         }
     }
@@ -141,15 +165,13 @@ public abstract class EntityScriptableRollingStock extends EntityCoupleableRolli
         if (config.isGlobal()) {
             mapTrain(this, false, stock -> {
                 EntityScriptableRollingStock next = (EntityScriptableRollingStock) stock;
-                if (next.getDefinition().getModel().groups().stream().anyMatch(g -> g.contains(config.getObject()))) {
-                    next.textFields.put(config.getObject(), config);
-                }
+                next.textFields.computeIfPresent(config.getObject(), (k, v) -> new TextFieldConfig(config));
             });
         }
 
         if (config.getLinked() != null && !config.getLinked().isEmpty()) {
             config.getLinked().forEach(l -> {
-                TextFieldConfig linked = textFields.get(String.format("TEXTFIELD_%s", l));
+                TextFieldConfig linked = textFields.get(l);
                 if (linked == null) {
                     return;
                 }

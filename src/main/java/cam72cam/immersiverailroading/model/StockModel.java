@@ -39,7 +39,10 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     protected Bogey bogeyRear;
     protected DrivingAssembly drivingWheels;
     private ModelComponent shell;
-    private final ModelComponent remaining;
+    private ModelComponent remaining;
+    public ModelComponent floor;
+    public ModelComponent collision;
+    protected final List<TextField<ENTITY>> textFields;
     protected final List<Door<ENTITY>> doors;
     protected final List<Control<ENTITY>> controls;
     protected final List<Readout<ENTITY>> gauges;
@@ -47,8 +50,6 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     protected final Map<String, ServerSideSound<ENTITY>> serverSideSounds = new HashMap<>();
 
     protected List<LightFlare<ENTITY>> headlights;
-
-    protected TextField<ENTITY> textField = new TextField<>();
 
     private final TrackFollowers frontTrackers;
     private final TrackFollowers rearTrackers;
@@ -86,6 +87,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         this.controls = new ArrayList<>();
         this.gauges = new ArrayList<>();
         this.headlights = new ArrayList<>();
+        this.textFields = new ArrayList<>();
 
         ModelState.LightState base = new ModelState.LightState(null, null, null, hasInterior);
 
@@ -138,10 +140,16 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         initStates();
         parseControllable(provider, def);
 
+        addTextFields(def, provider);
+
         // Shay Hack...
         // A proper dependency tree would be ideal...
         this.bogeyFront = Bogey.get(provider, front, unifiedBogies(), ModelPosition.FRONT);
         this.bogeyRear = Bogey.get(provider, rear, unifiedBogies(), ModelPosition.REAR);
+
+        // Parse Floor and Collision Meshes
+        this.floor = provider.parse(ModelComponentType.FLOOR);
+        this.collision = provider.parse(ModelComponentType.COLLISION);
 
         parseComponents(provider, def);
         provider.parse(ModelComponentType.IMMERSIVERAILROADING_BASE_COMPONENT);
@@ -202,6 +210,12 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         this.headlights.addAll(LightFlare.get(def, provider, frontRocking, type, ModelPosition.BOGEY_FRONT));
         this.headlights.addAll(LightFlare.get(def, provider, rearRocking, type, ModelPosition.BOGEY_REAR));
         this.headlights.addAll(LightFlare.get(def, provider, rocking, type));
+    }
+
+    protected void addTextFields(DEFINITION def, ComponentProvider provider) {
+        this.textFields.addAll(TextField.get(provider, frontRocking, ModelPosition.BOGEY_FRONT));
+        this.textFields.addAll(TextField.get(provider, rearRocking, ModelPosition.BOGEY_REAR));
+        this.textFields.addAll(TextField.get(provider, rocking));
     }
 
     protected void parseControllable(ComponentProvider provider, DEFINITION def) {
@@ -317,7 +331,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         sway.removed(stock);
 
         serverSideSounds.forEach((n, s) -> s.removed(stock));
-        textField.removed(stock);
+        textFields.forEach(c -> c.removed(stock));
     }
 
     private int lod_level = LOD_LARGE;
@@ -400,7 +414,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         doors.forEach(c -> c.postRender(stock, state, partialTicks));
         gauges.forEach(c -> c.postRender(stock, state, partialTicks));
         headlights.forEach(x -> x.postRender(stock, state));
-        textField.postRender(stock, state, this.animations, partialTicks);
+        textFields.forEach(c -> c.render(stock, state, animations, partialTicks));
     }
 
     public List<Control<ENTITY>> getControls() {

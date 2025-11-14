@@ -3,7 +3,6 @@ package cam72cam.immersiverailroading.script.modules;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
-import cam72cam.immersiverailroading.floor.Mesh;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.immersiverailroading.script.LuaFunction;
@@ -23,6 +22,7 @@ import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 public class IRModule implements LuaModule {
     private final EntityScriptableRollingStock stock;
@@ -267,14 +267,15 @@ public class IRModule implements LuaModule {
     @LuaFunction(module = "IR")
     public LuaValue initTextField(LuaValue group, LuaValue resX, LuaValue resY) {
         String groupName = String.format("TEXTFIELD_%s", group.tojstring());
-        List<Mesh.Group> groupList = stock.getDefinition().getMesh().getGroupContains(groupName);
 
-        if (groupList.isEmpty()) {
+        long objectCount = stock.getDefinition().getModel().groups().stream().filter(s -> s.contains(groupName)).count();
+
+        if (objectCount == 0L) {
             ModCore.error("[Lua] Found no TextField named %s in: %s", groupName, stock.getDefinitionID());
-            return new LuaTable();
+            return LuaValue.tableOf();
         }
 
-        if (groupList.size() > 1) {
+        if (objectCount > 1L) {
             ModCore.info("[Lua] Found more than one TextField defined as %s, using first!", groupName);
         }
 
@@ -514,5 +515,17 @@ public class IRModule implements LuaModule {
         if (stock instanceof Locomotive) {
             ((Locomotive) stock).setCurrentTractiveEffort(value.tofloat());
         }
+    public LuaValue isSliding() {
+        return LuaValue.valueOf(stock.isSliding());
+    }
+
+    @LuaFunction(module = "IR")
+    public LuaValue getBrakePressure() {
+        return LuaValue.valueOf(stock.getBrakePressure());
+    }
+
+    @LuaFunction(module = "IR")
+    public LuaValue getWeight() {
+        return LuaValue.valueOf(stock.getWeight());
     }
 }

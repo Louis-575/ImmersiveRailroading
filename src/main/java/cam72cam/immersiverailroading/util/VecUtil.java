@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.util.Axis;
 import cam72cam.mod.util.FastMath;
 import util.Matrix4;
 
@@ -68,6 +69,15 @@ public class VecUtil {
         return a.x * b.x + a.y * b.y + a.z * b.z;
     }
 
+	public static double getByAxis(Vec3d vec, Axis axis) {
+		switch (axis) {
+			case X: return vec.x;
+			case Y: return vec.y;
+			case Z: return vec.z;
+			default: throw new IllegalArgumentException("Invalid axis, did you provide a null?");
+		}
+	}
+	
 	@Deprecated
 	//TODO REMOVE
     public static Vec3d crossProduct(Vec3d a, Vec3d b) {
@@ -75,14 +85,5 @@ public class VecUtil {
         double cy = a.z * b.x - a.x * b.z;
         double cz = a.x * b.y - a.y * b.x;
         return new Vec3d(cx, cy, cz);
-    }
-	
-    public static double getAxis(Vec3d vec, int axis) {
-        switch (axis) {
-            case 0: return vec.x;
-            case 1: return vec.y;
-            case 2: return vec.z;
-            default: throw new IllegalArgumentException("Axis must be 0 (x), 1 (y), or 2 (z)");
-        }
     }
 }

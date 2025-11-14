@@ -1,9 +1,9 @@
 package cam72cam.immersiverailroading.textfield.library;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.floor.Mesh;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.model.obj.OBJFace;
 import cam72cam.mod.model.obj.Vec2f;
 import cam72cam.mod.serialization.*;
 import org.apache.commons.lang3.tuple.Pair;
@@ -53,11 +53,11 @@ public class GroupInfo {
         }
     }
 
-    public static GroupInfo initGroup(Mesh.Group group, int resX, int resY) {
+    public static GroupInfo initGroup(List<OBJFace> group, int resX, int resY) {
         GroupInfo info = new GroupInfo();
-        Mesh.Face face = group.faces.get(0);
+        OBJFace face = group.get(0);
 
-        List<Pair<Vec3d, Vec2f>> vertices = group.faces.stream()
+        List<Pair<Vec3d, Vec2f>> vertices = group.stream()
                 .flatMap(f -> IntStream.range(0, f.vertices.size())
                         .mapToObj(i -> Pair.of(f.vertices.get(i), f.uv.get(i))))
                 .distinct()

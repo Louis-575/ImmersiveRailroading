@@ -58,7 +58,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		}
 	}
 
-	public Vec3d getSeatPosition(UUID passenger) {
+	protected Vec3d getSeatPosition(UUID passenger) {
 		String seat = seatedPassengers.entrySet().stream()
 				.filter(x -> x.getValue().equals(passenger))
 				.map(Map.Entry::getKey).findFirst().orElse(null);
@@ -102,7 +102,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		}
 		return getPassengerCount() < this.getDefinition().getMaxPassengers();
 	}
-
+	
 	@Override
 	public boolean shouldRiderSit(Entity passenger) {
 		boolean nonSeated = this.getDefinition().shouldSit != null ? this.getDefinition().shouldSit : this.gauge.shouldSit();
@@ -126,7 +126,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		return offset;
 	}
 
-	public boolean isNearestDoorOpen(Player source) {
+	protected boolean isNearestDoorOpen(Player source) {
 		// Find any doors that are close enough that are closed (and then negate)
 		return !this.getDefinition().getModel().getDoors().stream()
 				.filter(d -> d.type == Door.Types.CONNECTING)
@@ -136,7 +136,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 				.isPresent();
 	}
 
-	private Vec3d playerMovement(Player source, Vec3d offset) {
+	protected Vec3d playerMovement(Player source, Vec3d offset) {
 		Vec3d movement = source.getMovementInput();
         /*
         if (sprinting) {
@@ -181,13 +181,13 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 					return offset;
 				}
 			}
-		}
+        }
 
-		if (getDefinition().getModel().getDoors().stream().anyMatch(x -> x.isAtOpenDoor(source, this, Door.Types.EXTERNAL)) &&
+        if (getDefinition().getModel().getDoors().stream().anyMatch(x -> x.isAtOpenDoor(source, this, Door.Types.EXTERNAL)) &&
 				getWorld().isServer &&
 				!this.getDefinition().correctPassengerBounds(gauge, offset, shouldRiderSit(source)).equals(offset)
 		) {
-			this.removePassenger(source);
+        	this.removePassenger(source);
 		}
 
 		return offset;
