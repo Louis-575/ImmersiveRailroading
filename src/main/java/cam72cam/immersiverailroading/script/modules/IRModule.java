@@ -515,6 +515,9 @@ public class IRModule implements LuaModule {
         if (stock instanceof Locomotive) {
             ((Locomotive) stock).setCurrentTractiveEffort(value.tofloat());
         }
+    }
+    
+    @LuaFunction(module = "IR")
     public LuaValue isSliding() {
         return LuaValue.valueOf(stock.isSliding());
     }
