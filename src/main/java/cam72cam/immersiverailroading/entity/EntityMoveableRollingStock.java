@@ -519,7 +519,7 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
     }
 
     public void setHandBrake(float newHandBrake) {
-        newHandBrake = Math.min(1, Math.max(0, newHandBrake));
+        newHandBrake = MathUtil.clamp(newHandBrake, 0, 1);
         if (this.getHandBrake() != newHandBrake && getDefinition().hasHandBrake()) {
             setControlPositions(ModelComponentType.HAND_BRAKE_X, newHandBrake);
             handBrake = newHandBrake;

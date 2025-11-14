@@ -10,6 +10,7 @@ import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
+import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.sync.TagSync;
@@ -422,7 +423,7 @@ public class LocomotiveDiesel extends Locomotive {
     }
 
     private void setRealDynamicBrake(float newDynamicBrakePos) {
-        newDynamicBrakePos = Math.min(1, Math.max(0, newDynamicBrakePos));
+        newDynamicBrakePos = MathUtil.clamp(newDynamicBrakePos, 0, 1);
         if (this.getDynamicBrake() != newDynamicBrakePos) {
             if (getDefinition().isLinearBrakeControl()) {
                 setControlPositions(ModelComponentType.DYNAMIC_BRAKE_X, newDynamicBrakePos);

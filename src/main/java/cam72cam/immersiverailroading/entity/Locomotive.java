@@ -611,7 +611,8 @@ public abstract class Locomotive extends FreightTank{
 			this.mapTrain(this, true, false, this::copySettings);
 		}
 	}
-	private void setRealThrottle(float newThrottle) {
+	
+	protected void setRealThrottle(float newThrottle) {
 		newThrottle = MathUtil.clamp(newThrottle, 0, 1);
 		if (this.getThrottle() != newThrottle) {
 			setControlPositions(ModelComponentType.THROTTLE_X, newThrottle);
@@ -735,7 +736,7 @@ public abstract class Locomotive extends FreightTank{
     
     public void mainAirReservoir(float pressureDelta) {
         float newMainReservoir = getMainAirReservoir() + pressureDelta;
-        newMainReservoir = Math.min(1, Math.max(0, newMainReservoir));
+        newMainReservoir = MathUtil.clamp(newMainReservoir, 0, 1);
         mainAirReservoir = newMainReservoir;
     }
     
