@@ -181,6 +181,9 @@ public class LocomotiveSteam extends Locomotive {
         if (cylinderDrainsEnabled()) {
             chestPressure -= 0.07;
         }
+        
+        // Leakage
+        chestPressure -= 0.005;
 
         float factor = (float) ((0.015 * chestPressure
                 * reverser * speedPercent * Math.PI * getDefinition().getWheelDiameter(gauge)) + 0.001f);
