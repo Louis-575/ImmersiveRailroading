@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
+import cam72cam.immersiverailroading.gui.overlay.Stat;
 import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.immersiverailroading.script.LuaFunction;
 import cam72cam.immersiverailroading.script.LuaModule;
@@ -59,6 +60,20 @@ public class IRModule implements LuaModule {
     public LuaValue getReadout(LuaValue readout) {
         Readouts readouts = Readouts.valueOf(readout.tojstring().toUpperCase());
         float value = readouts.getValue(stock);
+        return LuaValue.valueOf(value);
+    }
+    
+    @LuaFunction(module = "IR")
+    public LuaValue getStat(LuaValue stat) {
+        Stat stats = Stat.valueOf(stat.tojstring().toUpperCase());
+        String value = stats.getValue(stock);
+        return LuaValue.valueOf(value);
+    }
+    
+    @LuaFunction(module = "IR")
+    public LuaValue getStat(LuaValue stat, LuaValue digit) {
+        Stat stats = Stat.valueOf(stat.tojstring().toUpperCase());
+        String value = stats.getValue(stock, digit.toint());
         return LuaValue.valueOf(value);
     }
 
@@ -530,5 +545,28 @@ public class IRModule implements LuaModule {
     @LuaFunction(module = "IR")
     public LuaValue getWeight() {
         return LuaValue.valueOf(stock.getWeight());
+    }
+    
+    @LuaFunction(module = "IR")
+    public LuaValue getDistanceTraveled() {
+        return LuaValue.valueOf(stock.distanceTraveledReal);
+    }
+    
+    @LuaFunction(module = "IR")
+    public void setBrakeCylinderPressure(LuaValue value) {
+        stock.setBrakeCylinderPressure(value.tofloat());
+    }
+    
+    @LuaFunction(module = "IR")
+    public LuaValue getBrakeCylinderPressure() {
+        return LuaValue.valueOf(stock.getBrakeCylinderPressure());
+    }
+    
+    @LuaFunction(module = "IR")
+    public LuaValue getCargoPercent() {
+        if (stock instanceof Freight) {
+            return LuaValue.valueOf(((Freight) stock).getPercentCargoFull());
+        }
+        return LuaValue.valueOf(0);
     }
 }

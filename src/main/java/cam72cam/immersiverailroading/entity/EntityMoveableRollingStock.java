@@ -529,6 +529,11 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
     public float getBrakeCylinderPressure() {
         return brakeCylinderPressure;
     }
+    
+    public void setBrakeCylinderPressure(float pressure) {
+        pressure = MathUtil.clamp(pressure, 0, 1);
+        brakeCylinderPressure = pressure;
+    }
 
     public float getBrakePressure() {
         return trainBrakePressure;
