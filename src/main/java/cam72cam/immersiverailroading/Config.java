@@ -239,6 +239,9 @@ public class Config {
         @Comment("Sand Efficiency")
         @Range(min = 1, max = 10)
         public static int SandEfficiency = 1;
+        
+        @Comment("Instant Main air reservoir (Serverside)")
+        public static boolean instantMainAirReservoir = false;
 	}
 
 	@Name("performance")
