@@ -466,26 +466,29 @@ public abstract class Locomotive extends FreightTank{
 			}
 		}
 
-		this.distanceTraveled += simulateWheelSlip();
-
 		if (getWorld().isServer) {
 			setControlPosition("REVERSERFORWARD", getReverser() > 0 ? 1 : 0);
 			setControlPosition("REVERSERNEUTRAL", getReverser() == 0 ? 1 : 0);
 			setControlPosition("REVERSERBACKWARD", getReverser() < 0 ? 1 : 0);
+			
+            if (getDefinition().isCog() && getTickCount() % 20 == 0) {
+                SimulationState state = getCurrentState();
+                if (state != null) {
+                    ITrack found = MovementTrack.findTrack(getWorld(), state.couplerPositionFront, state.yaw, gauge.value());
+                    if (found instanceof TileRailBase) {
+                        TileRailBase onTrack = (TileRailBase) found;
+                        cogging = onTrack.isCog();
+                    }
+                }
+            }			
+			
+	        // Compressor
+	        if(providesElectricalPower()) {
+	            raiseMainAirReservoir();
+	        }
 		}
 
-		if (getWorld().isServer) {
-			if (getDefinition().isCog() && getTickCount() % 20 == 0) {
-				SimulationState state = getCurrentState();
-				if (state != null) {
-					ITrack found = MovementTrack.findTrack(getWorld(), state.couplerPositionFront, state.yaw, gauge.value());
-					if (found instanceof TileRailBase) {
-						TileRailBase onTrack = (TileRailBase) found;
-						cogging = onTrack.isCog();
-					}
-				}
-			}
-		}
+        this.distanceTraveled += simulateWheelSlip();
 		
 		if (sandingKeyTimeout > 0) {
             sandingKeyTimeout--;
@@ -504,11 +507,6 @@ public abstract class Locomotive extends FreightTank{
             }
         }
         
-        // Compressor
-        if(providesElectricalPower()) {
-            raiseMainAirReservoir();
-        }
-        
         if (getWorld().isClient && getTickCount() % 10 == 0)
             trainBrakeDelta();
 	}
@@ -523,7 +521,7 @@ public abstract class Locomotive extends FreightTank{
 	public abstract double getAppliedTractiveEffort(Speed speed);
 
 	/** Maximum force that can be between the wheels and the rails before it slips */
-    protected final double getStaticTractiveEffort(Speed speed) {        
+    protected final double getStaticTractiveEffort() {        
         return getDefinition().getScriptedStartingTractionNewtons(gauge, this)
                 * Config.ConfigBalance.tractionMultiplier * adhesionCoefficient();
     }
@@ -538,16 +536,15 @@ public abstract class Locomotive extends FreightTank{
     }
 	
     protected double simulateWheelSlip() {
-        Speed speed = super.getCurrentSpeed();
-        double appliedTractiveEffort = Math.abs(getAppliedTractiveEffort(speed));
-        double staticTractiveEffort = getStaticTractiveEffort(speed);
+        double appliedTractiveEffort = Math.abs(getAppliedTractiveEffort(super.getCurrentSpeed()));
+        double staticTractiveEffort = getStaticTractiveEffort();
         slipping = appliedTractiveEffort > staticTractiveEffort;
         
         if (cogging || !slipping)
             return 0;
         
         double adhesionFactor = appliedTractiveEffort / staticTractiveEffort;
-        return Math.copySign((adhesionFactor - 1) / 8, getReverser());
+        return Math.copySign((adhesionFactor) / 5, getReverser());
     }
 	
     public double getTractiveEffortNewtons(Speed speed) {
@@ -726,8 +723,6 @@ public abstract class Locomotive extends FreightTank{
     }
 
     private void raiseMainAirReservoir() {
-        if (getWorld().isClient)
-            return;
         if (!isLowAir() && getMainAirReservoir() < 0.85) {
             isLowAir = true;
         } else if (isLowAir() && getMainAirReservoir() >= 1.0) {
@@ -744,6 +739,7 @@ public abstract class Locomotive extends FreightTank{
         mainAirReservoir = newMainReservoir;
     }
     
+    // Client-side only
     public void trainBrakeDelta() {
         float brakePressure = getBrakePressure();
         if (brakePressure < this.trainBrakeInternal) {
