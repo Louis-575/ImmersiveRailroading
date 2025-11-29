@@ -23,7 +23,6 @@ import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 public class IRModule implements LuaModule {
     private final EntityScriptableRollingStock stock;
@@ -491,7 +490,7 @@ public class IRModule implements LuaModule {
     @LuaFunction(module = "IR", name = "getBoilerPressure")
     public LuaValue getBoilerPressureLua() {
         if (stock instanceof LocomotiveSteam) {
-            float pressure = ((LocomotiveSteam) stock).getBoilerPressure();
+            float pressure = ((LocomotiveSteam) stock).getBoilerPressurePercent();
             return LuaValue.valueOf(pressure);
         }
 
