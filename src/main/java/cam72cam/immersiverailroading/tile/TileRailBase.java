@@ -603,8 +603,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			return;
 		}
 
-		triggerEvent("onTick");
-
 		ticksExisted += 1;
 		Vec3i pos = getPos();
 		
@@ -845,6 +843,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				break;
 
 				case LUA_SCRIPTER: {
+					this.triggerEvent("onTick");
+
 					EntityScriptableRollingStock stock = this.getStockNearBy(EntityScriptableRollingStock.class);
 					if (stock != null) {
 						this.triggerEvent("onStock", stock.getGlobals());
