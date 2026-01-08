@@ -723,6 +723,8 @@ public abstract class Locomotive extends FreightTank{
     }
 
     private void raiseMainAirReservoir() {
+        if (getDefinition().isCabCar())
+            return;
         if (!isLowAir() && getMainAirReservoir() < 0.85) {
             isLowAir = true;
         } else if (isLowAir() && getMainAirReservoir() >= 1.0) {
