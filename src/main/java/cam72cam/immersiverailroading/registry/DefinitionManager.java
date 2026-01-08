@@ -222,7 +222,7 @@ public class DefinitionManager {
         Progress.Bar bar = Progress.push("Loading Models", definitionIDMap.size());
 
         stockTags = new BiMultiMap<>();
-        Map<String, EntityRollingStockDefinition> loaded = getStockLoadingStream(definitionIDMap.entrySet()).map(tuple -> {
+        Map<String, Object> loaded = getStockLoadingStream(definitionIDMap.entrySet()).map(tuple -> {
             String defID = tuple.getKey();
             String defType = tuple.getValue();
 
@@ -252,7 +252,9 @@ public class DefinitionManager {
                     System.out.println("GC");
                     System.gc();
                 }
-                stockDefinition.tags.forEach(tag -> stockTags.put(tag, stockDefinition));
+                
+                if (definition instanceof EntityRollingStockDefinition)
+                    ((EntityRollingStockDefinition) definition).tags.forEach(tag -> stockTags.put(tag, (EntityRollingStockDefinition) definition));
 
                 if (definition instanceof UnitDefinition) {
                     return Pair.of(((UnitDefinition) definition).defId, definition);
