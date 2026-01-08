@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.Config.ConfigPerformance;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.util.BiMultiMap;
 import cam72cam.immersiverailroading.util.CAML;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -25,6 +26,7 @@ import java.util.stream.Stream;
 
 public class DefinitionManager {
     private static Map<String, EntityRollingStockDefinition> definitions;
+    private static BiMultiMap<String, EntityRollingStockDefinition> stockTags;
     private static Map<String, TrackDefinition> tracks;
     private static final Map<String, StockLoader> stockLoaders;
     private static Map<String, UnitDefinition> units;
@@ -219,7 +221,8 @@ public class DefinitionManager {
 
         Progress.Bar bar = Progress.push("Loading Models", definitionIDMap.size());
 
-        Map<String, Object> loaded = getStockLoadingStream(definitionIDMap.entrySet()).map(tuple -> {
+        stockTags = new BiMultiMap<>();
+        Map<String, EntityRollingStockDefinition> loaded = getStockLoadingStream(definitionIDMap.entrySet()).map(tuple -> {
             String defID = tuple.getKey();
             String defType = tuple.getValue();
 
@@ -249,6 +252,7 @@ public class DefinitionManager {
                     System.out.println("GC");
                     System.gc();
                 }
+                stockDefinition.tags.forEach(tag -> stockTags.put(tag, stockDefinition));
 
                 if (definition instanceof UnitDefinition) {
                     return Pair.of(((UnitDefinition) definition).defId, definition);
@@ -401,6 +405,18 @@ public class DefinitionManager {
         return definitions.keySet();
     }
 
+    public static Set<EntityRollingStockDefinition> getTaggedStocks(String tag) {
+        return stockTags.getValues(tag);
+    }
+
+    public static Set<String> getStockTags(EntityRollingStockDefinition def) {
+        return stockTags.getKeys(def);
+    }
+
+    public static boolean isTaggedWith(EntityRollingStockDefinition def, String tag) {
+        return stockTags.containsEntry(tag, def);
+    }
+
     public static List<TrackDefinition> getTracks() {
         return new ArrayList<>(tracks.values());
     }
@@ -425,5 +441,4 @@ public class DefinitionManager {
     private interface StockLoader {
         Object apply(String defID, DataBlock data) throws Exception;
     }
-
 }

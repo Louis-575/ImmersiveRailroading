@@ -21,7 +21,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
 	
     public boolean toggleBell;
     public SoundDefinition bell;
-    private String works;
+    public String works;
     private double power_kW;
     private double traction_N;
     private Speed maxSpeed;
