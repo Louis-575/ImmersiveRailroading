@@ -498,6 +498,12 @@ public class IRModule implements LuaModule {
     }
     
     @LuaFunction(module = "IR")
+    public void setMaxBoilerPressure(LuaValue value) {
+        if (stock instanceof LocomotiveSteam)
+            ((LocomotiveSteam) stock).setMaxBoilerPressure(value.tofloat());
+    }
+    
+    @LuaFunction(module = "IR")
     public LuaValue getChestPressure() {
         if (stock instanceof LocomotiveSteam) {
             float pressure = ((LocomotiveSteam) stock).getChestPressurePercent();

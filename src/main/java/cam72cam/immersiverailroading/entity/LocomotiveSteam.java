@@ -56,6 +56,10 @@ public class LocomotiveSteam extends Locomotive {
 
 	private float drainRemainder;
 	
+	@TagSync
+	@TagField("localMaxBoilerPressure")
+	private float localMaxBoilerPressure = -1;
+	
 	public LocomotiveSteam() {
 		boilerTemperature = ambientTemperature();
 	}
@@ -82,8 +86,12 @@ public class LocomotiveSteam extends Locomotive {
 		boilerTemperature = temp;
 	}
 	
-	private float getMaxBoilerPSI( ) {
-	    return getDefinition().getMaxPSI(gauge);
+	public float getMaxBoilerPSI( ) {
+	    return localMaxBoilerPressure != -1 ? localMaxBoilerPressure : getDefinition().getMaxPSI(gauge);
+	}
+	
+	public void setMaxBoilerPressure(float pressure) {
+	    localMaxBoilerPressure = pressure;
 	}
 	
 	public float getBoilerPressureBar() {
