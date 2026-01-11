@@ -49,7 +49,7 @@ public abstract class Locomotive extends FreightTank{
 	public boolean trainBrakeDelta = false;
 	
 	// TODO How many decimal places?
-    @TagSync(floatPrecision = 10)
+    @TagSync(floatPrecision = 5)
     @TagField("MAIN_AIR_RESERVOIR")
     private float mainAirReservoir = Config.ConfigBalance.instantMainAirReservoir ? 1 : 0;
     
