@@ -238,6 +238,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         }
         addGauge(provider, ModelComponentType.GAUGE_BRAKE_PRESSURE_X, Readouts.BRAKE_PRESSURE);
         addGauge(provider, ModelComponentType.GAUGE_BRAKE_CYLINDER_PRESSURE_X, Readouts.BRAKE_CYLINDER_PRESSURE);
+        addGauge(provider, ModelComponentType.GAUGE_MAGNETIC_BRAKE_X, Readouts.MAGNETIC_BRAKE);
         addControl(provider, ModelComponentType.WINDOW_X);
         addControl(provider, ModelComponentType.WIDGET_X);
 
