@@ -490,7 +490,7 @@ public class IRModule implements LuaModule {
     @LuaFunction(module = "IR", name = "getBoilerPressure")
     public LuaValue getBoilerPressureLua() {
         if (stock instanceof LocomotiveSteam) {
-            float pressure = ((LocomotiveSteam) stock).getBoilerPressurePercent();
+            float pressure = ((LocomotiveSteam) stock).getBoilerPressure();
             return LuaValue.valueOf(pressure);
         }
 
