@@ -41,33 +41,79 @@ jobs:
             - branch: 1.21.1-neoforge
               java-version: '21'
     steps:
-    - uses: actions/checkout@v4
+    - name: checkout repository
+      uses: actions/checkout@v4
+
     - name: Set up JDK
       uses: actions/setup-java@v4
       with:
         java-version: ${{ matrix.java-version }}
         distribution: 'temurin'
+
     - name: keyscan
       run: mkdir -p ~/.ssh/ && ssh-keyscan -t rsa teamopenindustry.cc >> ~/.ssh/known_hosts
+
     - name: Install deps
       run: sudo apt install -y pngquant findutils xvfb
+
+    - name: Download LuaJ 3.0.2 JAR
+      run: |
+        mkdir -p libs
+        curl -L -o libs/luaj-jse-3.0.2.jar https://github.com/luaj/luaj/releases/download/v3.0.2/luaj-jse-3.0.2.jar
+
     - name: Setup Universal Mod Core (and helpers)
       env:
         BRANCH: ${{ matrix.branch }}
       run: java -jar UMCSetup.jar ${BRANCH} https
+
+    - name: Modify build.gradle to Include LuaJ and Merge JARs
+      run: |
+        echo "" >> build.gradle
+        echo "repositories {" >> build.gradle
+        echo "    flatDir { dirs 'libs' }" >> build.gradle
+        echo "}" >> build.gradle
+        echo "" >> build.gradle
+        echo "dependencies {" >> build.gradle
+        echo "    implementation fileTree(dir: 'libs', include: ['*.jar'])" >> build.gradle
+        echo "}" >> build.gradle
+        echo "" >> build.gradle
+        echo "jar {" >> build.gradle
+        echo "    duplicatesStrategy = DuplicatesStrategy.EXCLUDE" >> build.gradle
+        echo "    from {" >> build.gradle
+        echo "        fileTree(dir: 'libs', include: ['*.jar']).collect { zipTree(it) }" >> build.gradle
+        echo "    }" >> build.gradle
+        echo "}" >> build.gradle
+
     - name: Gradle compile
       run: ./gradlew classes
+
     - name: Process images
       run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
+
     - name: Run Data (optionalish)
       run: xvfb-run --auto-servernum ./gradlew runData || xvfb-run --auto-servernum ./gradlew runData || true
-    - name: Gradle build
+
+    - name: Gradle build (Including LuaJ)
       run: ./gradlew build
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Immersive Railroading ${{matrix.branch}}
+        path: build/libs/ImmersiveRailroading-${{matrix.branch}}-*
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v${{ github.run_number }}
+        name: Testbuild v${{ github.run_number }}
+        draft: false
+        prerelease: false
+        files: build/libs/*.jar
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Gradle publish
       env:
         MAVENCI_PASS: ${{ secrets.MAVENCI_PASS }}
       run: ./gradlew publish
-    - uses: actions/upload-artifact@v4
-      with:
-        name: Immersive Railroading ${{matrix.branch}}
-        path: build/libs/ImmersiveRailroading-${{matrix.branch}}-*
