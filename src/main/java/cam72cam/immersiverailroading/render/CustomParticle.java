@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 public class CustomParticle extends Particle {
     public static class CustomParticleData extends ParticleData {
+        @SuppressWarnings("unused")
         private final float darken;
         private final float thickness;
         private final double diameter;

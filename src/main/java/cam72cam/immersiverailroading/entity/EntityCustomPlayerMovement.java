@@ -3,7 +3,6 @@ package cam72cam.immersiverailroading.entity;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.floor.NavMesh;
 import cam72cam.immersiverailroading.model.part.Door;
-import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
@@ -334,9 +333,5 @@ public abstract class EntityCustomPlayerMovement extends EntityRidableRollingSto
         double y = vec.y * cos - vec.z * sin;
         double z = vec.y * sin + vec.z * cos;
         return new Vec3d(vec.x, y, z);
-    }
-
-    private static double clamp(double val, double min, double max) {
-        return Math.max(min, Math.min(max, val));
     }
 }

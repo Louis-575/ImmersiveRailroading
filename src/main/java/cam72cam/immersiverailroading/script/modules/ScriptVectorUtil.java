@@ -1,12 +1,9 @@
 package cam72cam.immersiverailroading.script.modules;
 
-import cam72cam.immersiverailroading.script.LuaContext;
 import cam72cam.immersiverailroading.script.LuaFunction;
 import cam72cam.immersiverailroading.script.LuaModule;
-import cam72cam.immersiverailroading.script.library.LuaLibrary;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import util.Matrix4;

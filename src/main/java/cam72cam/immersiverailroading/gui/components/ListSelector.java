@@ -29,6 +29,7 @@ public abstract class ListSelector<T> {
     Map<Button, Integer> buttonsX;
     Map<Button, Integer> buttonsY;
 
+    @SuppressWarnings("deprecation")
     public ListSelector(IScreenBuilder screen, int xOff, int width, int height, T currentValue, Map<String, T> rawOptions) {
         this.width = width;
         this.rawOptions = rawOptions;

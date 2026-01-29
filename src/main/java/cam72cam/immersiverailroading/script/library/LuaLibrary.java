@@ -245,7 +245,7 @@ public class LuaLibrary {
     /**
      * Internal function to set up functions
      */
-    @SuppressWarnings("All")
+    @SuppressWarnings("all")
     private LuaTable initFunctions(LuaTable object){
         for(Map.Entry<String, Object[]> func : functions.entrySet()){
             object.set(func.getKey(), new VarArgFunction() {

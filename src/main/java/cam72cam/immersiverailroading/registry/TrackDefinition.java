@@ -90,6 +90,7 @@ public class TrackDefinition {
             }
         }
 
+        @SuppressWarnings("deprecation")
         public List<ItemStack> examples(Gauge gauge) {
             List<ItemStack> examples = new ArrayList<>();
 
@@ -109,6 +110,7 @@ public class TrackDefinition {
             return examples;
         }
 
+        @SuppressWarnings("deprecation")
         public boolean matches(ItemStack stack) {
             if (item.startsWith("ore:")) {
                 String oreName = item.replace("ore:", "");

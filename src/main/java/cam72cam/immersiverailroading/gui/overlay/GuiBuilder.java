@@ -281,6 +281,7 @@ public class GuiBuilder {
         }
     }
 
+    @SuppressWarnings("incomplete-switch")
     private float getValue(EntityRollingStock stock) {
         float value = 0;
         if (readout != null) {

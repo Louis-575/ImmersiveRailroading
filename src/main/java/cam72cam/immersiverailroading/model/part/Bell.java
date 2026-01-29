@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 
 public class Bell extends PartSound {
+    @SuppressWarnings("unused")
     private final ModelComponent component;
 
     public static Bell get(ComponentProvider provider, ModelState state, EntityRollingStockDefinition.SoundDefinition soundFile) {

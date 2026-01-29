@@ -73,7 +73,8 @@ public class ItemManual extends CustomItem {
 		}
 	}
 	
-	@Override
+	@SuppressWarnings("deprecation")
+    @Override
 	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Player.Hand hand, Facing facing, Vec3d hit) {
 		if (world.isServer) {
 			ItemStack item = player.getHeldItem(hand);

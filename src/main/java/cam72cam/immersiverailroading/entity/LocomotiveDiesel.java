@@ -117,7 +117,8 @@ public class LocomotiveDiesel extends Locomotive {
 	 * Sets the throttle or brake on all connected diesel locomotives if the
 	 * throttle or brake has been changed
 	 */
-	@Override
+	@SuppressWarnings("incomplete-switch")
+    @Override
 	public void handleKeyPress(Player source, KeyTypes key, boolean disableIndependentThrottle) {
 	    super.handleKeyPress(source, key, disableIndependentThrottle);
         if (getDefinition().isLinkedDynBrakeThrottle()) {
@@ -366,7 +367,8 @@ public class LocomotiveDiesel extends Locomotive {
 		return relativeRPM;
 	}
 	
-	@Override
+	@SuppressWarnings("incomplete-switch")
+    @Override
 	public void onDrag(Control<?> component, double newValue) {
 	    super.onDrag(component, newValue);
 	    switch (component.part.type) {
@@ -411,7 +413,8 @@ public class LocomotiveDiesel extends Locomotive {
         }
 	}
 	
-	@Override
+	@SuppressWarnings("incomplete-switch")
+    @Override
 	public boolean playerCanDrag(Player player, Control<?> control) {
 	    switch (control.part.type) {
 	        case DYNAMIC_BRAKE_X:

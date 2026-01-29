@@ -22,6 +22,7 @@ public abstract class ArrowSelector {
      * @param minValue Minimal value of the ArrowSelector
      * @param maxValue Maximal value of the ArrowSelector
      */
+    @SuppressWarnings("deprecation")
     public ArrowSelector(IScreenBuilder screen, int xOff, int yOff, int width, int height, int currentValue, int minValue, int maxValue) {
         this.min = minValue;
         this.max = maxValue;
@@ -78,6 +79,7 @@ public abstract class ArrowSelector {
      * @param increment Value of which this Selector should be incremented
      */
 
+    @SuppressWarnings("deprecation")
     public ArrowSelector(IScreenBuilder screen, int xOff, int yOff, int width, int height, float currentFloat, int minValue, int maxValue, float increment) {
         this.min = minValue;
         this.max = maxValue;

@@ -5,7 +5,6 @@ import cam72cam.immersiverailroading.script.LuaModule;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
-import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 
 public class WorldModule implements LuaModule {

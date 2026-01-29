@@ -95,7 +95,8 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	public EntityRollingStockDefinition getDefinition() {
 		return this.getDefinition(EntityRollingStockDefinition.class);
 	}
-	public <T extends EntityRollingStockDefinition> T getDefinition(Class<T> type) {
+	@SuppressWarnings("unchecked")
+    public <T extends EntityRollingStockDefinition> T getDefinition(Class<T> type) {
 		EntityRollingStockDefinition def = DefinitionManager.getDefinition(defID);
 		if (def == null) {
 			// This should not be hit, entity should be removed handled by tryJoinWorld
@@ -139,7 +140,8 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	}
 
 	public void setTexture(String variant) {
-		Map<String, String> names = getDefinition().textureNames;
+		@SuppressWarnings("unused")
+        Map<String, String> names = getDefinition().textureNames;
 		if (getDefinition().textureNames.containsKey(variant)) {
 			this.texture = variant;
 		}

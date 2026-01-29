@@ -24,7 +24,9 @@ public class MBBlueprintRender {
 
         state.blend(new BlendMode(BlendMode.GL_CONSTANT_ALPHA, BlendMode.GL_ONE).constantColor(1, 1, 1, 0.3f)).lightmap(1, 1);
         Vec3d cameraPos = GlobalRender.getCameraPos(partialTicks);
+        @SuppressWarnings("unused")
         Vec3d playerPos = player.getPosition();
+        @SuppressWarnings("unused")
         Vec3d lastPos = player.getLastTickPos();
         Vec3d offset = new Vec3d(pos).add(0.5, 0.5, 0.5).subtract(cameraPos);
         state.translate(offset);

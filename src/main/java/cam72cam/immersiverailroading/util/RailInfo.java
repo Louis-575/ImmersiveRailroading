@@ -407,7 +407,8 @@ public class RailInfo {
 			newPositionFormat.setDouble("z", nbt.getDouble("placementPositionZ"));
 			nbt.set("placementPosition", newPositionFormat);
 
-			PlacementInfo placementInfo = new PlacementInfo(nbt);
+			@SuppressWarnings("deprecation")
+            PlacementInfo placementInfo = new PlacementInfo(nbt);
 			placementInfo = new PlacementInfo(placementInfo.placementPosition, placementInfo.direction, placementInfo.yaw, null);
 
 			SwitchState switchState = SwitchState.values()[nbt.getInteger("switchState")];

@@ -162,6 +162,7 @@ public enum Readouts {
         return 0.5f + yaw / deltaYaw;
     }
 
+    @SuppressWarnings("incomplete-switch")
     public void setValue(EntityRollingStock stock, float value) {
         switch (this) {
             case THROTTLE:

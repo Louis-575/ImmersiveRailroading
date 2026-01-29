@@ -258,6 +258,7 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
         return noInteract;
     }
 
+    @SuppressWarnings("unused")
     private static String formatLabel(ModelComponentType label) {
         return WordUtils.capitalizeFully(label.name().replace("_X", "").replaceAll("_CONTROL", "").replaceAll("_", " ").toLowerCase(Locale.ROOT));
     }
@@ -360,11 +361,13 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
         return m.apply(point);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Vec3d center(EntityRollingStock stock) {
         return transform(part.center, (T)stock);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public IBoundingBox getBoundingBox(EntityRollingStock stock) {
         return IBoundingBox.from(
@@ -375,6 +378,7 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
 
     /** Client only! */
     private Vec3d lastClientLook = null;
+    @SuppressWarnings("unchecked")
     public float clientMovementDelta(Player player, EntityRollingStock stockRaw) {
         /*
           -X

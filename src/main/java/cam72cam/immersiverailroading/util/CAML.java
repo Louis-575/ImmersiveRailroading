@@ -180,12 +180,14 @@ public class CAML {
         };
     }
 
+    @SuppressWarnings("serial")
     public static class ParseException extends RuntimeException {
         public ParseException(String text, Object... params) {
             super(String.format(text, params));
         }
     }
 
+    @SuppressWarnings("serial")
     public static class FormatException extends RuntimeException {
         public FormatException(String text, Object... params) {
             super(String.format(text, params));

@@ -12,7 +12,8 @@ public class FilteredStackHandler extends ItemStackHandler {
 	public Map<Integer, SlotFilter> filter = new HashMap<>();
 	public SlotFilter defaultFilter = SlotFilter.ANY;
 
-	private FilteredStackHandler() {
+	@SuppressWarnings("unused")
+    private FilteredStackHandler() {
 		// Serialization
 		this(0);
 	}

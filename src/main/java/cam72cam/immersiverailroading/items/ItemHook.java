@@ -5,8 +5,6 @@ import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.item.CreativeTab;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.CustomItem;
-import cam72cam.mod.item.Recipes;
-
 import java.util.Collections;
 import java.util.List;
 

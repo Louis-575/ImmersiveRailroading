@@ -27,6 +27,9 @@ public class PaintBrushPicker implements IScreen {
     private double zoom = 1;
     private long frame;
 
+    @SuppressWarnings({
+            "deprecation", "unused"
+    })
     @Override
     public void init(IScreenBuilder screen) {
         frame = 0;

@@ -2,8 +2,6 @@ package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ModelComponentType;
-import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
-import cam72cam.immersiverailroading.library.ValveGearConfig;
 import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;

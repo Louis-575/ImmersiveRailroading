@@ -40,7 +40,8 @@ public class ItemGoldenSpike extends CustomItem {
 		return Collections.singletonList(ItemTabs.MAIN_TAB);
 	}
 
-	@Override
+	@SuppressWarnings("deprecation")
+    @Override
 	public ClickResult onClickBlock(Player player, World world, Vec3i pos, Player.Hand hand, Facing facing, Vec3d hit) {
 		ItemStack held = player.getHeldItem(hand);
 		if (world.isBlock(pos, IRBlocks.BLOCK_RAIL_PREVIEW)) {

@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.gui;
 
-import cam72cam.immersiverailroading.gui.components.GuiUtils;
 import cam72cam.immersiverailroading.gui.helpers.MouseHelper;
 import cam72cam.immersiverailroading.registry.LuaAugmentDefinition;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -23,7 +22,9 @@ public class LuaSelector implements IScreen {
 
     private List<ScriptDef> scriptDef = new ArrayList<>();
 
+    @SuppressWarnings("unused")
     private static final int GUI_WIDTH = 200;
+    @SuppressWarnings("unused")
     private static final int GUI_HEIGHT = 150;
     private int guiLeft, guiTop;
     private static final int DROPDOWN_HEIGHT = 80;
@@ -49,6 +50,7 @@ public class LuaSelector implements IScreen {
         filteredScripts = new ArrayList<>(scriptDef);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void init(IScreenBuilder screen) {
         guiLeft = (int) (GUIHelpers.getScreenWidth() / 1.5);

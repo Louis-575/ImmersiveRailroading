@@ -78,7 +78,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	private boolean willBeReplaced = false;
 	@TagField("replaced")
 	private TagCompound replaced;
-	private boolean skipNextRefresh = false;
 	public ItemStack railBedCache = null;
 	private final FluidTank emptyTank = new FluidTank(null, 0);
 	private final IInventory emptyInventory = new ItemStackHandler(0);
@@ -154,7 +153,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		return scaleModel;
 	}
 	
-	public void setAugment(Augment augment) {
+	@SuppressWarnings("incomplete-switch")
+    public void setAugment(Augment augment) {
 		this.augment = augment;
 		Augment.Properties properties = new Augment.Properties("", "","",
 															   CouplerAugmentMode.ENGAGED,
@@ -613,7 +613,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 	}
 
-	@Override
+	@SuppressWarnings("incomplete-switch")
+    @Override
 	public IInventory getInventory(Facing side) {
 		if (this.getAugment() != null) {
 			switch (this.getAugment()) {
@@ -632,7 +633,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		return null;
 	}
 
-	@Override
+	@SuppressWarnings("incomplete-switch")
+    @Override
 	public ITank getTank(Facing side) {
 		if (this.getAugment() != null) {
 			switch (this.getAugment()) {
@@ -651,7 +653,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		return null;
 	}
 
-	@Override
+	@SuppressWarnings("incomplete-switch")
+    @Override
 	public void update() {
 	    World world = this.getWorld();
 		if (this.getWorld().isClient) {
@@ -889,7 +892,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					if (stock != null) {
 						float value = getWorld().getRedstone(getPos())/15f;
 						if (actuatorFilter == null || actuatorFilter.isEmpty()) {
-							for (Door d : stock.getDefinition().getModel().getDoors()) {
+							for (@SuppressWarnings("rawtypes") Door d : stock.getDefinition().getModel().getDoors()) {
 								if (d.type == Door.Types.EXTERNAL) {
 									stock.setControlPosition(d, value);
 								}
@@ -942,7 +945,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		return getAugment() == Augment.DETECTOR || getAugment() == Augment.LUA_SCRIPTER ? this.redstoneLevel : 0;
 	}
 
-	public Vec3i getParentReplaced() {
+	@SuppressWarnings("deprecation")
+    public Vec3i getParentReplaced() {
 		if (this.replaced == null) {
 			return null;
 		}

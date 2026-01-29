@@ -2,7 +2,6 @@ package cam72cam.immersiverailroading.util;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 
 import cam72cam.mod.entity.boundingbox.IBoundingBox;

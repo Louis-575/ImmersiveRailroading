@@ -18,7 +18,6 @@ import cam72cam.immersiverailroading.script.sound.SoundConfig;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.render.OptiFine;
-import cam72cam.mod.render.Particle.VanillaParticles;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.RenderState;
 import util.Matrix4;
@@ -27,6 +26,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION extends EntityRollingStockDefinition> extends OBJModel {
+    @SuppressWarnings("unused")
     private final DEFINITION def;
     public final List<ModelComponent> allComponents;
     protected ModelState base;
@@ -272,6 +272,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         return serverSideSounds.get(config.location);
     }
 
+    @SuppressWarnings("unchecked")
     public void createServerSideSound(SoundConfig config, EntityRollingStock stock) {
         ServerSideSound<ENTITY> sound = new ServerSideSound<>();
         sound.setConfig((ENTITY) stock, config);
@@ -279,6 +280,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         this.serverSideSounds.put(config.location, sound);
     }
 
+    @SuppressWarnings("unchecked")
     public final void onClientTick(EntityMoveableRollingStock stock) {
         tick((ENTITY) stock);
     }
@@ -319,6 +321,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         serverSideSounds.forEach((n, s) -> s.effects(stock));
     }
 
+    @SuppressWarnings("unchecked")
     public final void onClientRemoved(EntityMoveableRollingStock stock) {
         removed((ENTITY) stock);
     }
@@ -395,6 +398,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         }
     }
 
+    @SuppressWarnings("unchecked")
     public void postRenderEntity(EntityMoveableRollingStock stock, RenderState state, float partialTicks) {
         postRender((ENTITY) stock, state, partialTicks);
     }

@@ -53,6 +53,7 @@ public class GroupInfo {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public static GroupInfo initGroup(List<OBJFace> group, int resX, int resY) {
         GroupInfo info = new GroupInfo();
         OBJFace face = group.get(0);
