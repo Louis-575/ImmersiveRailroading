@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import cam72cam.immersiverailroading.entity.*;
+import cam72cam.immersiverailroading.items.ItemMultipleUnit;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -140,7 +141,7 @@ public class SpawnUtil {
 
 			List<ItemComponentType> list = def.getItemComponents();
 
-			ItemRollingStock.Data data = new ItemRollingStock.Data(player.getHeldItem(hand));
+			ItemMultipleUnit.Data data = new ItemMultipleUnit.Data(player.getHeldItem(hand));
 
 			ITrack initte = ITrack.get(worldIn, spawnPos.add(0, 0.7, 0), true);
 			if (initte == null) {

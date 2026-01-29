@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.entity.physics;
 
 import cam72cam.immersiverailroading.Config.ImmersionConfig;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
  * */
 public class Consist {
     static boolean debug = false;
-    static int trainLength = 0;
+    private static int trainLength = 0;
 
     public static class Particle {
         public SimulationState state;
@@ -501,19 +502,18 @@ public class Consist {
                     
                     if (needsBrakeEqualization) {
                         float brakePressureDelta;
+                        trainLength = 50;
                         switch (ImmersionConfig.brakeMode) {
                             case DEFAULT:
                                 brakePressureDelta = 0.1f / linked.stream().filter(s -> s.config.hasPressureBrake).count();
                                 break;
                             case REALISTIC:
-                                trainLength = 0;
-                                linked.forEach(s -> {
-                                    trainLength += s.config.length;
+                                linked.forEach(s -> {trainLength += s.config.stock.getDefinition().hasEpBrake() ? 1 :
+                                     s.config.length;
                                 });
-                                //System.out.println("Length: " + trainLength);
-                                //TODO Temporary until fixed values
-                                float fastBrake =   0.031f * 600 / (trainLength * 13.5f);
-                                float normalBrake = 0.008f * 600 / (trainLength * 25f);
+                                
+                                float fastBrake =   1.37f / trainLength;
+                                float normalBrake = 0.192f / trainLength;
                                 brakePressureDelta = linked.stream().anyMatch(s -> s.config.trainBrakePosition == 1) ? fastBrake : normalBrake;
                                 break;
                             case INSTANT:
@@ -521,24 +521,22 @@ public class Consist {
                                 brakePressureDelta = 1;
                                 break;
                         }
-                        
-                        //System.out.println("Delta: " + brakePressureDelta);
-                        
                         linked.forEach(p -> {
                             if (p.config.hasPressureBrake) {
                                 if (p.config.trainBrakePressure > desiredBrakePressure + brakePressureDelta) {
-                                    // Druckabfall
+                                    // pressure decrease
                                     p.config.trainBrakePressure -= brakePressureDelta;
                                 } else if (p.config.trainBrakePressure < desiredBrakePressure - brakePressureDelta) {
-                                    // Druckaufbau
-                                    p.config.trainBrakePressure += brakePressureDelta * 0.5f;
+                                    // pressure increase
+                                    p.config.trainBrakePressure += brakePressureDelta * 0.75;
+                                    if (p.config.stock instanceof Locomotive)
+                                        ((Locomotive) p.config.stock).mainAirReservoir(-0.000003f * (float) Math.pow(trainLength, ((Locomotive) p.config.stock).getMainAirReservoir()));
                                 } else {
                                     p.config.trainBrakePressure = desiredBrakePressure;
                                 }
                             }
                         });
                     }
-
                     linked.clear();
                 }
             }

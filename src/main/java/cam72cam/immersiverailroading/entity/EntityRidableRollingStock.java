@@ -6,7 +6,6 @@ import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.Coupler
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Door;
 import cam72cam.immersiverailroading.model.part.Seat;
-import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.custom.IRidable;
@@ -23,9 +22,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class EntityRidableRollingStock extends EntityBuildableRollingStock implements IRidable {
-	public float getRidingSoundModifier() {
-		return getDefinition().dampeningAmount;
-	}
 
 	@TagField(value = "payingPassengerPositions", mapper = PassengerMapper.class)
 	private Map<UUID, Vec3d> payingPassengerPositions = new HashMap<>();
@@ -37,7 +33,9 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	// Hack to remount players if they were seated
 	private Map<UUID, Vec3d> remount = new HashMap<>();
 
-
+    public float getRidingSoundModifier() {
+        return getDefinition().dampeningAmount;
+    }
 
 	@Override
 	public ClickResult onClick(Player player, Player.Hand hand) {
@@ -58,7 +56,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		}
 	}
 
-	public Vec3d getSeatPosition(UUID passenger) {
+	protected Vec3d getSeatPosition(UUID passenger) {
 		String seat = seatedPassengers.entrySet().stream()
 				.filter(x -> x.getValue().equals(passenger))
 				.map(Map.Entry::getKey).findFirst().orElse(null);
@@ -102,7 +100,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		}
 		return getPassengerCount() < this.getDefinition().getMaxPassengers();
 	}
-
+	
 	@Override
 	public boolean shouldRiderSit(Entity passenger) {
 		boolean nonSeated = this.getDefinition().shouldSit != null ? this.getDefinition().shouldSit : this.gauge.shouldSit();
@@ -126,7 +124,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		return offset;
 	}
 
-	public boolean isNearestDoorOpen(Player source) {
+	protected boolean isNearestDoorOpen(Player source) {
 		// Find any doors that are close enough that are closed (and then negate)
 		return !this.getDefinition().getModel().getDoors().stream()
 				.filter(d -> d.type == Door.Types.CONNECTING)
@@ -136,7 +134,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 				.isPresent();
 	}
 
-	private Vec3d playerMovement(Player source, Vec3d offset) {
+	protected Vec3d playerMovement(Player source, Vec3d offset) {
 		Vec3d movement = source.getMovementInput();
         /*
         if (sprinting) {
@@ -181,13 +179,13 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 					return offset;
 				}
 			}
-		}
+        }
 
-		if (getDefinition().getModel().getDoors().stream().anyMatch(x -> x.isAtOpenDoor(source, this, Door.Types.EXTERNAL)) &&
+        if (getDefinition().getModel().getDoors().stream().anyMatch(x -> x.isAtOpenDoor(source, this, Door.Types.EXTERNAL)) &&
 				getWorld().isServer &&
 				!this.getDefinition().correctPassengerBounds(gauge, offset, shouldRiderSit(source)).equals(offset)
 		) {
-			this.removePassenger(source);
+        	this.removePassenger(source);
 		}
 
 		return offset;

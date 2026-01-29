@@ -27,8 +27,9 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     private int notches;
     private float enginePitchRange;
     public boolean hasDynamicTractionControl;
-    private float dynamicBrake;
+    private int dynamicBrake;
     private boolean isLinkedDynBrakeThrottle;
+    private boolean isLinkedBrakeDynBrake;
 
     public LocomotiveDieselDefinition(String defID, DataBlock data) throws Exception {
         super(LocomotiveDiesel.class, defID, data);
@@ -70,7 +71,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
             } else {
                 overriddenFuels = Collections.emptyMap();
             }
-            hasDynamicTractionControl = properties.getValue("dynamic_traction_control").asBoolean(true);
+            hasDynamicTractionControl = properties.getValue("dynamic_traction_control").asBoolean();
         } else {
             fuelCapacity_l = 0;
             overriddenFuels = Collections.emptyMap();
@@ -78,15 +79,15 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
         notches = properties.getValue("throttle_notches").asInteger();
 
         hornSus = properties.getValue("horn_sustained").asBoolean();
-        dynamicBrake = properties.getValue("dynamic_brake_factor").asFloat(0);
+        dynamicBrake = properties.getValue("dynamic_brake_newton").asInteger(0);
         isLinkedDynBrakeThrottle = properties.getValue("isLinkedDynamicBrakeThrottle").asBoolean(false);
-
+        isLinkedBrakeDynBrake = properties.getValue("isLinkedBrakeDynamicBrake").asBoolean(false);
+        
         DataBlock sounds = data.getBlock("sounds");
         idle = SoundDefinition.getOrDefault(sounds, "idle");
         running = SoundDefinition.getOrDefault(sounds, "running");
         enginePitchRange = sounds.getValue("engine_pitch_range").asFloat();
         horn = SoundDefinition.getOrDefault(sounds, "horn");
-        bell = SoundDefinition.getOrDefault(sounds, "bell");
     }
 
     @Override
@@ -133,7 +134,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
         return enginePitchRange;
     }
     
-    public float getDynamicBrake() {
+    public int getDynamicBrakeNewton() {
         return dynamicBrake;
     }
     
@@ -141,6 +142,10 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
         return isLinkedDynBrakeThrottle;
     }
 
+    public boolean isLinkedBrakeDynBrake() {
+        return isLinkedBrakeDynBrake;
+    }
+    
     public Map<Fluid, Integer> getOverriddenFuels() {
         return overriddenFuels;
     }

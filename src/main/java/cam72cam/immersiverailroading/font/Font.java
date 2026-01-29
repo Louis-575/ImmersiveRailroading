@@ -26,7 +26,7 @@ public class Font {
      * Constructor for the struct used by the loader
      * @see FontLoader
      */
-    public Font(int textureHeight, int textureWidth, Identifier texture, Map<Character, Glyph> glyphs) {
+    protected Font(int textureHeight, int textureWidth, Identifier texture, Map<Character, Glyph> glyphs) {
         this.textureHeight = textureHeight;
         this.textureWidth = textureWidth;
         this.texture = texture;

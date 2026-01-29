@@ -52,6 +52,7 @@ public class BuilderTurnTable extends BuilderBase {
 				if (toCenter > info.settings.length-0.5) {
 					tgu.setHeight(1);
 					tgu.setFlexible();
+					tgu.setScaleModel(false);
 				}
 				tracks.add(tgu);
 			}
@@ -86,8 +87,8 @@ public class BuilderTurnTable extends BuilderBase {
 		}
 
 		float angle = (float)info.tablePos - info.placementInfo.facing().getAngle();
-		data.add(new VecYPR(offset.x, offset.y, offset.z, -angle, 0, info.settings.length * 2, 0,
-							TrackModelPart.RAIL_LEFT, TrackModelPart.RAIL_RIGHT, TrackModelPart.TABLE, TrackModelPart.GROUND));
+		data.add(new VecYPR(offset.x, offset.y, offset.z, -angle, 0, 0, info.settings.length * 2,
+							TrackModelPart.RAIL_LEFT, TrackModelPart.RAIL_RIGHT, TrackModelPart.TABLE, TrackModelPart.WELL));
 		return data;
 	}
 	

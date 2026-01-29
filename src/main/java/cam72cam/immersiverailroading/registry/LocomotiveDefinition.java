@@ -3,14 +3,15 @@ package cam72cam.immersiverailroading.registry;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.library.unit.ForceDisplayType;
 import cam72cam.immersiverailroading.library.unit.PowerDisplayType;
+import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.model.LocomotiveModel;
 import cam72cam.immersiverailroading.model.StockModel;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.SoundDefinition;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.resource.Identifier;
 
@@ -20,7 +21,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
 	
     public boolean toggleBell;
     public SoundDefinition bell;
-    private String works;
+    public String works;
     private double power_kW;
     private double traction_N;
     private Speed maxSpeed;
@@ -33,6 +34,8 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     private boolean speedLimiter;
     protected double powerMultiplier;
     private int brakeNotches;
+    private boolean hasBrakeNotches;
+    public SoundDefinition compressor;
 
     LocomotiveDefinition(Class<? extends EntityRollingStock> type, String defID, DataBlock data) throws Exception {
         super(type, defID, data);
@@ -91,6 +94,11 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
         isCog = properties.getValue("cog").asBoolean();
         speedLimiter = properties.getValue("speed_limiter").asBoolean(true);
         brakeNotches = properties.getValue("brake_notches").asInteger(25);
+        hasBrakeNotches = properties.getValue("has_brake_notches").asBoolean(false);
+        
+        DataBlock sounds = data.getBlock("sounds");
+        bell = SoundDefinition.getOrDefault(sounds, "bell");
+        compressor = SoundDefinition.getOrDefault(sounds, "compressor");
     }
 
     protected boolean readCabCarFlag(DataBlock data) {
@@ -124,14 +132,20 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
         return (float) (gauge.scale() * this.power_kW * PowerDisplayType.kWToHp);
     }
 
+    public float getScriptedHorsePower(Gauge gauge, Locomotive stock) {
+        return stock.localHorsepower != -1
+                ? (float) (gauge.scale() * stock.localHorsepower * PowerDisplayType.kWToHp)
+                : getHorsePower(gauge);
+    }
+
     public float getWatt(Gauge gauge) {
         return (float) (gauge.scale() * this.power_kW * 1000);
     }
 
-    public int getScriptedHorsePower(Gauge gauge, Locomotive stock) {
-        return stock.localHorsepower != -1
-                ? (int) Math.ceil(gauge.scale() * stock.localHorsepower)
-                : (int) Math.ceil(gauge.scale() * this.power_kW * PowerDisplayType.kWToHp);
+    public float getScriptedWatt(Gauge gauge, Locomotive stock) {
+        return stock.localWatt != -1
+                ? (float) (gauge.scale() * stock.localWatt * 100)
+                : getWatt(gauge);
     }
 
     /**
@@ -141,10 +155,10 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
         return (float) (gauge.scale() * this.traction_N);
     }
 
-    public int getScriptedStartingTractionNewtons(Gauge gauge, Locomotive stock) {
+    public float getScriptedStartingTractionNewtons(Gauge gauge, Locomotive stock) {
         return stock.localTraction != -1
-                ? (int) Math.ceil(gauge.scale() * stock.localTraction)
-                : (int) Math.ceil(gauge.scale() * this.traction_N);
+                ? (float) (gauge.scale() * stock.localTraction)
+                : getStartingTractionNewtons(gauge);
     }
 
     public Speed getMaxSpeed(Gauge gauge){
@@ -181,36 +195,6 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     public double factorOfAdhesion() {
         return this.factorOfAdhesion;
     }
-
-    @Override
-    public void setTraction(double val) {
-        this.traction_N = val;
-    }
-
-    @Override
-    public void setHorsepower(double val) {
-        this.power_kW = val;
-    }
-
-    @Override
-    public void setMaxSpeed(double val) {
-        this.maxSpeed = Speed.fromMetric(val);
-    }
-
-    @Override
-    public double getMaxSpeed() {
-        return this.maxSpeed.metric();
-    }
-
-    @Override
-    public double getTraction() {
-        return traction_N;
-    }
-
-    @Override
-    public double getHorsepower() {
-        return this.power_kW * PowerDisplayType.kWToHp;
-    }
     
     public boolean isSpeedLimiter() {
         return this.speedLimiter;
@@ -226,5 +210,9 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     
     public int getBrakeNotches() {
         return brakeNotches;
+    }
+    
+    public boolean hasBrakeNotches() {
+        return hasBrakeNotches;
     }
 }

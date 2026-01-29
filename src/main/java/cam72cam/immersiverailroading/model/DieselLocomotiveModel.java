@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
+import cam72cam.immersiverailroading.util.MathUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +37,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel, Loc
         addControl(provider, ModelComponentType.ENGINE_START_X);
         addControl(provider, ModelComponentType.HORN_CONTROL_X);
         
-        if (def.getDynamicBrake() != 0) {
+        if (def.getDynamicBrakeNewton() != 0) {
             addControl(provider, ModelComponentType.DYNAMIC_BRAKE_X);
             addGauge(provider, ModelComponentType.GAUGE_DYNAMIC_BRAKE_X, Readouts.DYNAMIC_BRAKE);
         }
@@ -72,8 +73,8 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel, Loc
     }
 
     @Override
-    protected void effects(LocomotiveDiesel stock) {
-        super.effects(stock);
+    protected void tick(LocomotiveDiesel stock) {
+        super.tick(stock);
         exhaust.effects(stock);
         horn.effects(stock,
                 stock.getHornTime() > 0 && (stock.isRunning() || stock.getDefinition().isCabCar())
@@ -91,7 +92,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel, Loc
                     boolean isThrottledUp = stock.getRelativeRPM() > 0.01;
                     float fade = runningFade.getOrDefault(stock.getUUID(), 0f);
                     fade += 0.05f * (isThrottledUp ? 1 : -1);
-                    fade = Math.min(Math.max(fade, 0), 1);
+                    fade = MathUtil.clamp(fade, 0, 1);
                     runningFade.put(stock.getUUID(), fade);
 
                     idle.effects(stock, 1 - fade + 0.01f, 1);

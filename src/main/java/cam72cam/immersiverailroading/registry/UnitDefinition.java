@@ -42,12 +42,14 @@ public class UnitDefinition {
             Map<String, DataBlock.Value> valueMap = dataBlock.getValueMap();
             String stock = valueMap.get("stock").asString();
 
-            EntityRollingStockDefinition stockDef = DefinitionManager.getDefinitions().stream().filter(s -> s.defID.contains(stock)).findFirst().orElseGet(() -> {
-                ModCore.warn("RollingStock %s of consist %s doesn't exist, this stock will be skipped!", stock, name);
-                return null;
-            });
+            EntityRollingStockDefinition stockDef = DefinitionManager.getDefinitions().stream().filter(def -> {
+                String name = def.defID.substring(def.defID.lastIndexOf('/') + 1);
+                name = name.replaceAll(".json|.caml", "");
+                return name.equals(stock);
+            }).findFirst().orElse(null);
 
             if (stockDef == null) {
+                ModCore.warn("RollingStock %s of consist %s doesn't exist, this stock will be skipped!", stock, name);
                 continue;
             }
 

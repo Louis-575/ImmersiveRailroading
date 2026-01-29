@@ -100,6 +100,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	@TagSync
 	@TagField("hasElectricalPower")
 	private boolean hasElectricalPower;
+
+	@TagSync
+	@TagField("linkedToLocomotive")
 	private boolean linkedToLocomotive;
 	private boolean hadElectricalPower = false;
 	private int gotElectricalPowerTick = -1;
@@ -157,15 +160,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		World world = getWorld();
 
 		if (world.isClient) {
-			// Only couple server side
-
-			//ParticleUtil.spawnParticle(internal, EnumParticleTypes.REDSTONE, this.getCouplerPosition(CouplerType.FRONT));
-			//ParticleUtil.spawnParticle(internal, EnumParticleTypes.SMOKE_NORMAL, this.getCouplerPosition(CouplerType.BACK));
-
 			if (!hadElectricalPower && hasElectricalPower()) {
 				gotElectricalPowerTick = getTickCount();
 			}
-
+			// Only couple server side
 			return;
 		}
 
@@ -239,6 +237,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	public void keepLoaded() {
 		World world = getWorld();
 		world.keepLoaded(getBlockPosition());
+		//TODO Debugging
+		if (ConfigDebug.debugLog && getTickCount() % 200 == 0)
+		    System.out.println("Loaded Chunk at: " + getBlockPosition().x + ", " + getBlockPosition().y + ", " + getBlockPosition().z);
 		if (getCurrentState() != null && !getCurrentState().atRest) {
 			world.keepLoaded(new Vec3i(this.guessCouplerPosition(CouplerType.FRONT)));
 			world.keepLoaded(new Vec3i(this.guessCouplerPosition(CouplerType.BACK)));
@@ -389,46 +390,6 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			fn.accept(stock.stock, stock.direction);
 		}
 	}
-
-	public final List<List<EntityCoupleableRollingStock>> getUnit(boolean followDisengaged) {
-		List<List<EntityCoupleableRollingStock>> units = new ArrayList<>();
-		List<EntityCoupleableRollingStock> currentUnit = new ArrayList<>();
-		final boolean[] firstLocomotiveFound = {false};
-
-		this.mapUnit(this, followDisengaged, (EntityCoupleableRollingStock e) -> {
-			if (e.defID.contains("locomotive")) {
-				if (firstLocomotiveFound[0]) {
-					currentUnit.add(e);
-					units.add(new ArrayList<>(currentUnit));
-					currentUnit.clear();
-					firstLocomotiveFound[0] = false;
-				} else {
-					currentUnit.add(e);
-					firstLocomotiveFound[0] = true;
-				}
-			} else if (e.defID.contains("passenger")) {
-				if (firstLocomotiveFound[0]) {
-					currentUnit.add(e);
-				}
-			}
-		});
-		if (!currentUnit.isEmpty() && firstLocomotiveFound[0]) {
-			units.add(currentUnit);
-		}
-
-		return units;
-	}
-
-	public final void mapUnit(EntityCoupleableRollingStock prev, boolean followDisengaged, Consumer<EntityCoupleableRollingStock> fn) {
-		this.mapUnit(prev, true, followDisengaged, (EntityCoupleableRollingStock e, Boolean b) -> fn.accept(e));
-	}
-
-	public final void mapUnit(EntityCoupleableRollingStock prev, boolean direction, boolean followDisengaged, BiConsumer<EntityCoupleableRollingStock, Boolean> fn) {
-		for (DirectionalStock stock : getDirectionalTrain(followDisengaged)) {
-			fn.accept(stock.stock, stock.direction);
-		}
-	}
-
 
 
 	public static class DirectionalStock {

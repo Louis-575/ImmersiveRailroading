@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.entity.EntityScriptableRollingStock;
-import cam72cam.immersiverailroading.floor.Mesh;
 import cam72cam.immersiverailroading.gui.components.ArrowSelector;
 import cam72cam.immersiverailroading.gui.components.DynamicListSelector;
 import cam72cam.immersiverailroading.model.StockModel;
@@ -15,6 +14,8 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.gui.screen.*;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.model.obj.FaceAccessor;
+import cam72cam.mod.model.obj.OBJFace;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
 
@@ -331,11 +332,17 @@ public class TextFieldGui implements IScreen {
 
         StockModel<?, ?> model = stock.getDefinition().getModel();
 
-        Mesh.Group group = stock.getDefinition().getMesh().getGroupContains(textField.getObject()).get(0);
+        FaceAccessor accessor = stock.getDefinition().getModel().getFaceAccessor();
+
+        // Not great TODO change!
+        String fullName = stock.getDefinition().getModel().groups().stream().filter(g -> g.contains(textField.getObject())).collect(Collectors.toList()).get(0);
+        FaceAccessor sub = accessor.getSubByGroup(fullName);
+
+        OBJFace face1 = sub.stream().findFirst().get().asOBJFace();
 
         int scale = (int) ((double) GUIHelpers.getScreenWidth() / 40 * zoom);
         state.translate(200 + (double) (GUIHelpers.getScreenWidth() - 200) / 2, (double) builder.getHeight() / 2 + 10, 400);
-        state.rotate(getRotationFromNormal(group.faces.get(0).normal), 0, 1, 0);
+        state.rotate(getRotationFromNormal(face1.normal), 0, 1, 0);
         state.scale(-scale, -scale, -scale);
         state.lightmap(1, 1);
         state.depth_test(true);

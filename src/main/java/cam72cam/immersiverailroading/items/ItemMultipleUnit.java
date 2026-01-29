@@ -91,8 +91,9 @@ public class ItemMultipleUnit extends BaseItemRollingStock {
             tooltip.add(GuiText.LOCO_WORKS.toString(String.join(", ", works)));
         }
 
+        // TODO re-add
         if (horsePower != 0) {
-            tooltip.add(GuiText.LOCO_POWER.toString(horsePower));
+            // tooltip.add(GuiText.LOCO_HORSE_POWER.toString(horsePower));
         }
 
         if (traction != 0) {

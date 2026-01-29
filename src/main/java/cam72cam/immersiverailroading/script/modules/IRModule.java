@@ -3,8 +3,8 @@ package cam72cam.immersiverailroading.script.modules;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
-import cam72cam.immersiverailroading.floor.Mesh;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
+import cam72cam.immersiverailroading.gui.overlay.Stat;
 import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.immersiverailroading.script.LuaFunction;
 import cam72cam.immersiverailroading.script.LuaModule;
@@ -59,6 +59,20 @@ public class IRModule implements LuaModule {
     public LuaValue getReadout(LuaValue readout) {
         Readouts readouts = Readouts.valueOf(readout.tojstring().toUpperCase());
         float value = readouts.getValue(stock);
+        return LuaValue.valueOf(value);
+    }
+    
+    @LuaFunction(module = "IR")
+    public LuaValue getStat(LuaValue stat) {
+        Stat stats = Stat.valueOf(stat.tojstring().toUpperCase());
+        String value = stats.getValue(stock);
+        return LuaValue.valueOf(value);
+    }
+    
+    @LuaFunction(module = "IR")
+    public LuaValue getStat(LuaValue stat, LuaValue digit) {
+        Stat stats = Stat.valueOf(stat.tojstring().toUpperCase());
+        String value = stats.getValue(stock, digit.toint());
         return LuaValue.valueOf(value);
     }
 
@@ -267,14 +281,15 @@ public class IRModule implements LuaModule {
     @LuaFunction(module = "IR")
     public LuaValue initTextField(LuaValue group, LuaValue resX, LuaValue resY) {
         String groupName = String.format("TEXTFIELD_%s", group.tojstring());
-        List<Mesh.Group> groupList = stock.getDefinition().getMesh().getGroupContains(groupName);
 
-        if (groupList.isEmpty()) {
+        long objectCount = stock.getDefinition().getModel().groups().stream().filter(s -> s.contains(groupName)).count();
+
+        if (objectCount == 0L) {
             ModCore.error("[Lua] Found no TextField named %s in: %s", groupName, stock.getDefinitionID());
-            return new LuaTable();
+            return LuaValue.tableOf();
         }
 
-        if (groupList.size() > 1) {
+        if (objectCount > 1L) {
             ModCore.info("[Lua] Found more than one TextField defined as %s, using first!", groupName);
         }
 
@@ -475,11 +490,17 @@ public class IRModule implements LuaModule {
     @LuaFunction(module = "IR", name = "getBoilerPressure")
     public LuaValue getBoilerPressureLua() {
         if (stock instanceof LocomotiveSteam) {
-            float pressure = ((LocomotiveSteam) stock).getBoilerPressure();
+            float pressure = ((LocomotiveSteam) stock).getBoilerPressurePercent();
             return LuaValue.valueOf(pressure);
         }
 
         return LuaValue.valueOf(0);
+    }
+    
+    @LuaFunction(module = "IR")
+    public void setMaxBoilerPressure(LuaValue value) {
+        if (stock instanceof LocomotiveSteam)
+            ((LocomotiveSteam) stock).setMaxBoilerPressure(value.tofloat());
     }
     
     @LuaFunction(module = "IR")
@@ -490,6 +511,67 @@ public class IRModule implements LuaModule {
         }
         return LuaValue.valueOf(0);
     }
+    
+    @LuaFunction(module = "IR")
+    public LuaValue getBrakingWeight() {
+        return LuaValue.valueOf(stock.getBrakingWeight());
+    }
+    
+    @LuaFunction(module = "IR")
+    public void setBrakingWeight(LuaValue value) {
+        stock.setBrakingWeight(value.todouble());
+    }
 
+    @LuaFunction(module = "IR")
+    public LuaValue getTractiveEffort() {
+        if (stock instanceof Locomotive) {
+            return LuaValue.valueOf(((Locomotive) stock).getCurrentTractiveEffort());
+        }
+        return LuaValue.valueOf(0);
+    }
 
+    @LuaFunction(module = "IR")
+    public void setTractiveEffort(LuaValue value) {
+        if (stock instanceof Locomotive) {
+            ((Locomotive) stock).setCurrentTractiveEffort(value.tofloat());
+        }
+    }
+    
+    @LuaFunction(module = "IR")
+    public LuaValue isSliding() {
+        return LuaValue.valueOf(stock.isSliding());
+    }
+
+    @LuaFunction(module = "IR")
+    public LuaValue getBrakePressure() {
+        return LuaValue.valueOf(stock.getBrakePressure());
+    }
+
+    @LuaFunction(module = "IR")
+    public LuaValue getWeight() {
+        return LuaValue.valueOf(stock.getWeight());
+    }
+    
+    @LuaFunction(module = "IR")
+    public LuaValue getDistanceTraveled() {
+        return LuaValue.valueOf(stock.distanceTraveledReal);
+    }
+    
+    @LuaFunction(module = "IR")
+    public void setBrakeCylinderPressure(LuaValue value) {
+        stock.setBrakeCylinderPressure(value.tofloat());
+    }
+    
+    @LuaFunction(module = "IR")
+    public LuaValue getBrakeCylinderPressure() {
+        return LuaValue.valueOf(stock.getBrakeCylinderPressure());
+    }
+    
+    @LuaFunction(module = "IR")
+    public LuaValue getCargoPercent() {
+        if (stock instanceof Freight) {
+            return LuaValue.valueOf(((Freight) stock).getPercentCargoFull());
+        }
+        return LuaValue.valueOf(0);
+    }
 }

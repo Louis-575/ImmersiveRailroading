@@ -10,11 +10,11 @@ import cam72cam.immersiverailroading.library.BrakeMode;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.Permissions;
-import cam72cam.immersiverailroading.library.PhysicalMaterials;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.entity.Entity;
@@ -25,6 +25,7 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
+import cam72cam.mod.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,15 +60,23 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
 
     @TagSync
     @TagField("BRAKE_PRESSURE")
-    private float trainBrakePressure = 1;
+    private float trainBrakePressure = 0;
 
     @TagSync
     @TagField("BRAKE_CYLINDER_PRESSURE")
     private float brakeCylinderPressure = 0;
+    private float cylinderPressureInternal = 0;
+    public boolean brakeCylinderDelta = false;
+    
+    private boolean brakesApply = false;
 
     @TagSync
     @TagField("SLIDING")
     public boolean sliding = false;
+    
+    @TagSync
+    @TagField("luaBrakingWeight")
+    private double luaBrakingWeight = -1;
 
     public long lastCollision = 0;
 
@@ -259,7 +268,7 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
             if (getDefinition().hasIndependentBrake()) {
                 for (Control<?> control : getDefinition().getModel().getControls()) {
                     if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.INDEPENDENT_BRAKE_X) {
-                        setIndependentBrake(Math.max(0, Math.min(1, getIndependentBrake() + (getControlPosition(control) - 0.5f) / 8)));
+                        setIndependentBrake(MathUtil.clamp(getIndependentBrake() + (getControlPosition(control) - 0.5f) / 8, 0, 1));
                     }
                 }
             }
@@ -293,6 +302,9 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
 
         if (getWorld().isClient) {
             getDefinition().getModel().onClientTick(this);
+            brakesApply();
+            if (getTickCount() % 10 == 0)
+                brakePressureDelta();
         }
 
         // Apply position onTick
@@ -493,7 +505,7 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
     }
     
     private void setRealIndependentBrake(float newIndependentBrake) {
-        newIndependentBrake = Math.min(1, Math.max(0, newIndependentBrake));
+        newIndependentBrake = MathUtil.clamp(newIndependentBrake, 0, 1);
         if (this.getIndependentBrake() != newIndependentBrake && getDefinition().hasIndependentBrake()) {
             if (getDefinition().isLinearBrakeControl()) {
                 setControlPositions(ModelComponentType.INDEPENDENT_BRAKE_X, newIndependentBrake);
@@ -507,7 +519,7 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
     }
 
     public void setHandBrake(float newHandBrake) {
-        newHandBrake = Math.min(1, Math.max(0, newHandBrake));
+        newHandBrake = MathUtil.clamp(newHandBrake, 0, 1);
         if (this.getHandBrake() != newHandBrake && getDefinition().hasHandBrake()) {
             setControlPositions(ModelComponentType.HAND_BRAKE_X, newHandBrake);
             handBrake = newHandBrake;
@@ -516,6 +528,11 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
 
     public float getBrakeCylinderPressure() {
         return brakeCylinderPressure;
+    }
+    
+    public void setBrakeCylinderPressure(float pressure) {
+        pressure = MathUtil.clamp(pressure, 0, 1);
+        brakeCylinderPressure = pressure;
     }
 
     public float getBrakePressure() {
@@ -527,21 +544,52 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
         return getTickPos();
     }
 
-    /**
-     * This assumes that the brake system is designed to apply a percentage of the total adhesion
-     * That percentage was improved over time, with the materials used (friction coefficient) helping inform our guess
-     * Though, I'm going to limit it to 75% of the total possible adhesion
-     */
     public float getBrakeSystemEfficiency() {
         float value = getDefinition().getBrakeShoeFriction();
         if (ImmersionConfig.brakeMode.equals(BrakeMode.REALISTIC)) {
-            if (getDefinition().getBrakeMaterials().equals(PhysicalMaterials.CAST_IRON)) {
-                value *= 0.5f + (float) Math.pow(0.6f, 0.05f * Math.abs(getCurrentSpeed().metric()));
-            } else if (getDefinition().getBrakeMaterials().equals(PhysicalMaterials.COMPOSITE)) {
-                value *= 0.2f + (float) Math.pow(0.95f, Math.pow(0.75f * Math.abs(getCurrentSpeed().metric()), 0.5f));
+            switch (getDefinition().getBrakeMaterials()) {
+                case CAST_IRON:
+                    return value *= 0.5f + (float) Math.pow(0.45f, 0.03f * Math.abs(getCurrentSpeed().metric() - 0.7f));
+                case COMPOSITE:
+                    return value *= 0.2f + (float) Math.pow(0.95f, Math.pow(0.75f * Math.abs(getCurrentSpeed().metric()), 0.6f));
+                case WOOD:
+                    return value *= 0.2f + (float) Math.pow(0.6f, 0.05f * Math.abs(getCurrentSpeed().metric()));
+                default:
+                    return value;
             }
         }
         return value;
+    }
+    
+    private void brakesApply() {
+        float pressure = getBrakeCylinderPressure();
+        if (!brakesApply && pressure > 0) {
+            brakesApply = true;
+        } else if (brakesApply && pressure == 0) {
+            brakesApply = false;
+        }
+    }
+    
+    public void brakePressureDelta() {
+        float cylinderPressure = getBrakeCylinderPressure();
+        if (cylinderPressure < this.cylinderPressureInternal) {
+            brakeCylinderDelta = true;
+        } else {
+            brakeCylinderDelta = false;
+        }
+        this.cylinderPressureInternal = cylinderPressure;
+    }
+    
+    public boolean getBrakesApply() {
+        return brakesApply;
+    }
+    
+    public double getBrakingWeight() {
+        return luaBrakingWeight == -1 ? getWeight() : luaBrakingWeight;
+    }
+    
+    public void setBrakingWeight(double weight) {
+        luaBrakingWeight = weight;
     }
 
     public boolean isSliding() {
@@ -554,7 +602,7 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
         for (Vec3i bp : track) {
             TileRailBase te = getWorld().getBlockEntity(bp, TileRailBase.class);
             if (te != null) {
-                if (te.getAugment() == Augment.SPEED_RETARDER) {
+                if (te.getAugment() == Augment.SPEED_RETARDER && te.canInteractWith(this)) {
                     double red = getWorld().getRedstone(bp);
                     retardedNewtons += red / 15f / track.size() * newtons;
                 }
@@ -570,7 +618,24 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
         return false;
     }
 
-    public double getBrakeAdhesionEfficiency() {
-        return 1;
+    public float adhesionCoefficient() {
+        float adhMult = 1;
+        World world = getWorld();
+        Vec3i blockPos = getBlockPosition();
+        if (world.isPrecipitating() && world.canSeeSky(blockPos)) {
+            if (world.isRaining(blockPos))
+                adhMult *= 0.7f;
+            else if (world.isSnowing(blockPos))
+                adhMult *= 0.35f;
+        }
+        return adhMult;
+    }
+
+    public float getBrakeAdhesionEfficiency() {
+        return adhesionCoefficient();
+    }
+    
+    public double getMagnetBrakeNewton() {
+        return getCurrentSpeed().metric() > 50 && getBrakeCylinderPressure() > 0.95 ? this.getDefinition().getMagnetBrakeNewton() : 0;
     }
 }
