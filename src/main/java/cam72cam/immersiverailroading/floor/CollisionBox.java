@@ -2,8 +2,6 @@ package cam72cam.immersiverailroading.floor;
 
 import cam72cam.mod.math.Vec3d;
 
-import java.util.List;
-
 public class CollisionBox {
     public Vec3d min;
     public Vec3d max;

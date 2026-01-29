@@ -49,7 +49,8 @@ public class PlateRollerGUI implements IScreen {
 		);
 	}
 
-	@Override
+	@SuppressWarnings("deprecation")
+    @Override
 	public void init(IScreenBuilder screen) {
 		gaugeButton = new Button(screen, 0 - 100, -24 + 0 * 30, GuiText.SELECTOR_GAUGE.toString(gauge)) {
 			@Override

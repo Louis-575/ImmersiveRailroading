@@ -15,6 +15,7 @@ public class DrivingAssembly {
     private final ValveGear center;
     private final ValveGear inner_left;
     private final ValveGear left;
+    @SuppressWarnings("unused")
     private final ModelComponent steamChest;
 
     public static DrivingAssembly get(ValveGearConfig type, ComponentProvider provider, ModelState state, float angleOffset, WheelSet... backups) {

@@ -9,6 +9,7 @@ public class ClickListHelper {
         return values.get((values.indexOf(value) + values.size() + (hand == Player.Hand.PRIMARY ? 1 : -1)) % values.size());
     }
 
+    @SuppressWarnings("unchecked")
     public static <E extends Enum<?>> E next(E value, Player.Hand hand) {
         E[] values = (E[]) value.getClass().getEnumConstants();
         return values[(value.ordinal() + values.length + (hand == Player.Hand.PRIMARY ? 1 : -1)) % values.length];

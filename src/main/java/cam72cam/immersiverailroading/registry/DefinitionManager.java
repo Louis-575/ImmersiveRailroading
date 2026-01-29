@@ -24,6 +24,7 @@ import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@SuppressWarnings("restriction")
 public class DefinitionManager {
     private static Map<String, EntityRollingStockDefinition> definitions;
     private static BiMultiMap<String, EntityRollingStockDefinition> stockTags;

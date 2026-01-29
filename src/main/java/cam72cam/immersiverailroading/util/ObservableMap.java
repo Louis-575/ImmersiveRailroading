@@ -6,6 +6,7 @@ import java.util.*;
  * An HashMap that triggers an event if a value is changed
  * @author poizzy
  */
+@SuppressWarnings("serial")
 public abstract class ObservableMap<K, V> extends HashMap<K, V> {
     public ObservableMap(int initialCapacity, float loadFactor) {
         super(initialCapacity, loadFactor);

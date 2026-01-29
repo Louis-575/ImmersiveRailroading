@@ -111,6 +111,7 @@ public class TextFieldRenderer {
     }
 
     private VertexBuffer createVBO(TextFieldConfig config, GroupInfo group, Font font) {
+        @SuppressWarnings("unused")
         List<float[]> vertexList = new ArrayList<>();
 
         String[] lines = config.getText().split("\n");

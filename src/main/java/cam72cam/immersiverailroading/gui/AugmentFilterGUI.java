@@ -36,6 +36,7 @@ public class AugmentFilterGUI implements IScreen {
                           : tileRailBase.getAugmentProperties();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void init(IScreenBuilder screen) {
         int xtop = -GUIHelpers.getScreenWidth() / 2;
@@ -158,7 +159,9 @@ public class AugmentFilterGUI implements IScreen {
 
         GUIHelpers.drawRect(0, 0, 220, GUIHelpers.getScreenHeight(), 0xCC000000);
 
+        @SuppressWarnings("unused")
         int xtop = -GUIHelpers.getScreenWidth() / 2;
+        @SuppressWarnings("unused")
         int ytop = -GUIHelpers.getScreenHeight() / 4;
 
         int xOffset = 110;

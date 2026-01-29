@@ -66,7 +66,8 @@ public class ImmersiveRailroading extends ModCore.Mod {
 		return MODID;
 	}
 
-	@Override
+	@SuppressWarnings("incomplete-switch")
+    @Override
 	public void commonEvent(ModEvent event) {
 		CompatLoader.common(event);
 
@@ -131,7 +132,8 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 	}
 
-	@Override
+	@SuppressWarnings("incomplete-switch")
+    @Override
 	public void clientEvent(ModEvent event) {
 		switch (event) {
 			case CONSTRUCT:

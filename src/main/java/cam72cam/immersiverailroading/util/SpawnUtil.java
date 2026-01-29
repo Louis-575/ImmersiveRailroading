@@ -41,7 +41,8 @@ public class SpawnUtil {
 		}
 		
 		double offset = def.getCouplerPosition(CouplerType.BACK, gauge) - ConfigDebug.couplerRange;
-		float yaw = player.getYawHead();
+		@SuppressWarnings("deprecation")
+        float yaw = player.getYawHead();
 
 		if (worldIn.isServer) {
 			EntityRollingStock stock = def.spawn(worldIn, new Vec3d(pos).add(0.5, 0.1, 0.5), yaw, gauge, data.texture);
@@ -158,7 +159,8 @@ public class SpawnUtil {
 
 			// That's the reason why I don't call placeStock inside this loop
 			double offset = def.getCouplerPosition(isFlipped ? CouplerType.FRONT : CouplerType.BACK, gauge) - ConfigDebug.couplerRange;
-			float yaw = player.getYawHead();
+			@SuppressWarnings("deprecation")
+            float yaw = player.getYawHead();
 
 			float originalRot = yaw;
 			if (isFlipped) {

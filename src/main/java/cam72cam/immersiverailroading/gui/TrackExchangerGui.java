@@ -47,7 +47,8 @@ public class TrackExchangerGui implements IScreen {
 		oreDict.addAll(IRFuzzy.IR_RAIL_BED.enumerate());
 	}
 
-	@Override
+	@SuppressWarnings("deprecation")
+    @Override
 	public void init(IScreenBuilder screen) {
 		trackSelector = new Button(screen, -100, 1 * 22, GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(this.track).name)) {
 			@Override

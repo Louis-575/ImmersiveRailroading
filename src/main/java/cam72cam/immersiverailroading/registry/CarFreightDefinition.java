@@ -14,6 +14,7 @@ public class CarFreightDefinition extends FreightDefinition {
 
     private double numSlots;
     private double width;
+    @SuppressWarnings("unused")
     private List<String> validCargo;
 
     public CarFreightDefinition(Class<? extends CarFreight> cls, String defID, DataBlock data) throws Exception {

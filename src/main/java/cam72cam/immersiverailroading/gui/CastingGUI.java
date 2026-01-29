@@ -56,7 +56,8 @@ public class CastingGUI implements IScreen {
 		}
 	}
 
-	@Override
+	@SuppressWarnings("deprecation")
+    @Override
 	public void init(IScreenBuilder screen) {
 		pickerButton = new Button(screen, -100, -20 - 10, GuiText.SELECTOR_TYPE.toString("")) {
 			@Override

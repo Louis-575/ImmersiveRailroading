@@ -7,7 +7,8 @@ import java.util.Map;
 
 public class TextFieldMapMapper implements TagMapper<Map<String, TextFieldConfig>> {
     @Override
-    public TagAccessor<Map<String, TextFieldConfig>> apply(Class type, String fieldName, TagField tag) throws SerializationException {
+    public TagAccessor<Map<String, TextFieldConfig>> apply(@SuppressWarnings("rawtypes")
+    Class type, String fieldName, TagField tag) throws SerializationException {
         return new TagAccessor<>(
                 (d, o) -> d.setMap(fieldName, o, k -> k, m -> {
                     try {

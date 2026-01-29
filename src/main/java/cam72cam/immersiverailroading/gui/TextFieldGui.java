@@ -32,6 +32,7 @@ public class TextFieldGui implements IScreen {
     private DynamicListSelector<Identifier> fontSelector;
     private DynamicListSelector<TextFieldConfig> objectSelector;
     private Button alignButton;
+    @SuppressWarnings("unused")
     private Button font;
     private ArrowSelector gap;
     private ArrowSelector offset;
@@ -45,12 +46,15 @@ public class TextFieldGui implements IScreen {
     private int frame = 0;
     private List<Identifier> availableFonts;
     private Button fullbright;
+    @SuppressWarnings("unused")
     private Button gapButton;
+    @SuppressWarnings("unused")
     private Button gapUp;
     private Button global;
     private Button verticalAlign;
     private ArrowSelector scale;
 
+    @SuppressWarnings("deprecation")
     @Override
     public void init(IScreenBuilder screen) {
         int width = 200;
@@ -193,6 +197,7 @@ public class TextFieldGui implements IScreen {
         };
 
 
+        @SuppressWarnings("unused")
         Slider zoom_slider = new Slider(screen, xTop + width + 15, (int) (GUIHelpers.getScreenHeight()*0.75 - height), "Zoom: ", 0.1, 3, 1, true) {
             @Override
             public void onSlider() {

@@ -129,8 +129,6 @@ public abstract class EntityRollingStockDefinition {
     // used for unique text fields to check if text field input is already assigned
     public Map<UUID, Map<String, String>> inputs = new HashMap<>();
 
-    private List<DataBlock> textFieldData;
-
     public static class SoundDefinition {
         public final Identifier start;
         public final Identifier main;
@@ -532,7 +530,6 @@ public abstract class EntityRollingStockDefinition {
                 loadedFonts.add(i, font);
             }
         }
-        textFieldData = data.getBlocks("textfield");
 
         try {
             brakeMaterials = PhysicalMaterials.valueOf(properties.getValue("brake_shoe_material").asString(PhysicalMaterials.CAST_IRON.toString()));

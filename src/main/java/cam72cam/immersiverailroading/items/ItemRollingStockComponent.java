@@ -33,7 +33,8 @@ public class ItemRollingStockComponent extends BaseItemRollingStock {
 		return 64;
 	}
 
-	@Override
+	@SuppressWarnings("unchecked")
+    @Override
 	public List<CreativeTab> getCreativeTabs() {
 		return Collections.EMPTY_LIST;
 	}
@@ -43,7 +44,8 @@ public class ItemRollingStockComponent extends BaseItemRollingStock {
 		return super.getCustomName(stack) + " " + new Data(stack).componentType.toString();
 	}
 
-	@Override
+	@SuppressWarnings("unchecked")
+    @Override
 	public List<ItemStack> getItemVariants(CreativeTab tab) {
 		return Collections.EMPTY_LIST;
 	}

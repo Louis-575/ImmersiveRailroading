@@ -2,12 +2,8 @@ package cam72cam.immersiverailroading.multiblock;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
-import cam72cam.immersiverailroading.items.ItemRollingStock;
-import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
-import cam72cam.immersiverailroading.library.CraftingType;
 import cam72cam.immersiverailroading.library.GuiTypes;
-import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.ItemCastingCost;
 import cam72cam.mod.energy.IEnergy;
@@ -27,7 +23,6 @@ import cam72cam.mod.world.World.ParticleType;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CastingMultiblock extends Multiblock {
 	private static FuzzyProvider STONE = () -> Fuzzy.STONE_BRICK;

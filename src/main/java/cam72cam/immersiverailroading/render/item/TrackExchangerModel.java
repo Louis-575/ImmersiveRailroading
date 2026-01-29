@@ -77,7 +77,8 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 		}
 	}
 
-	@Override
+	@SuppressWarnings("incomplete-switch")
+    @Override
 	public void applyTransform(ItemStack stack, ItemRender.ItemRenderType type, RenderState state) {
 		switch (type) {
 			case THIRD_PERSON_LEFT_HAND:

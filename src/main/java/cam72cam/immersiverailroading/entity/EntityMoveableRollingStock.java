@@ -213,6 +213,7 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
         return TickPos.skew(current, next, tick);
     }
 
+    @SuppressWarnings("incomplete-switch")
     @Override
     public void onDrag(Control<?> control, double newValue) {
         switch (control.part.type) {

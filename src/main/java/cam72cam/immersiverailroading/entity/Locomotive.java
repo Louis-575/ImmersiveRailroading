@@ -135,7 +135,8 @@ public abstract class Locomotive extends FreightTank{
 		return false;
 	}
 
-	@Override
+	@SuppressWarnings("incomplete-switch")
+    @Override
 	public void handleKeyPress(Player source, KeyTypes key, boolean disableIndependentThrottle) {
 
 		if (disableIndependentThrottle) {
@@ -291,7 +292,8 @@ public abstract class Locomotive extends FreightTank{
 		return 0.04f;
 	}
 
-	public void onDrag(Control<?> component, double newValue) {
+	@SuppressWarnings("incomplete-switch")
+    public void onDrag(Control<?> component, double newValue) {
 		super.onDrag(component, newValue);
 		//System.out.println("DRAG " + component + ": "+ getControlPosition(component));
 		switch (component.part.type) {

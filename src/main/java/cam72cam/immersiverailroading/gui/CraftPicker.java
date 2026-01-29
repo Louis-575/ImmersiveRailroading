@@ -11,7 +11,6 @@ import cam72cam.immersiverailroading.library.PlateType;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.gui.screen.IScreenBuilder;
 import cam72cam.mod.gui.helpers.ItemPickerGUI;
-import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 
 import java.util.ArrayList;

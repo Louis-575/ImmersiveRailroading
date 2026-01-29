@@ -7,7 +7,6 @@ import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.energy.IEnergy;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3i;

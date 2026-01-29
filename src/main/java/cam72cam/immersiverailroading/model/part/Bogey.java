@@ -7,9 +7,6 @@ import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.math.Vec3d;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class Bogey {
     public final ModelComponent bogey;
     public final WheelSet wheels;

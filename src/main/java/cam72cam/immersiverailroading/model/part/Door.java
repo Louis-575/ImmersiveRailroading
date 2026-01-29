@@ -62,6 +62,7 @@ public class Door<T extends EntityMoveableRollingStock> extends Control<T> {
             return false;
         }
         Matrix4 model = stock.getModelMatrix();
+        @SuppressWarnings("unchecked")
         Matrix4 delta = state.getMatrix((T) stock, 0);
         if (delta != null) {
             model = model.multiply(delta);

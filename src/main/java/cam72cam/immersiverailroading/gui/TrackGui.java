@@ -2,7 +2,6 @@ package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.gui.components.ListSelector;
-import cam72cam.immersiverailroading.gui.components.NumberInputer;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
@@ -93,7 +92,8 @@ public class TrackGui implements IScreen {
 		return stack.getDisplayName();
 	}
 
-	public void init(IScreenBuilder screen) {
+	@SuppressWarnings("deprecation")
+    public void init(IScreenBuilder screen) {
 
 		// Left pane
 		int width = 200;
@@ -352,7 +352,8 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-		Slider zoom_slider = new Slider(screen, GUIHelpers.getScreenWidth() / 2 - 150, (int) (GUIHelpers.getScreenHeight()*0.75 - height),
+		@SuppressWarnings("unused")
+        Slider zoom_slider = new Slider(screen, GUIHelpers.getScreenWidth() / 2 - 150, (int) (GUIHelpers.getScreenHeight()*0.75 - height),
 										GuiText.SLIDER_ZOOM.toString(), 0.1, 2, 1, true) {
 			@Override
 			public void onSlider() {

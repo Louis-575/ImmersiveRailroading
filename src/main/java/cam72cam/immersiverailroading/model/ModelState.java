@@ -7,12 +7,10 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.BlendMode;
 import cam72cam.mod.render.opengl.RenderState;
-import org.apache.commons.lang3.tuple.Pair;
 import util.Matrix4;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ModelState {
@@ -214,10 +212,15 @@ public class ModelState {
 
     // TODO Lighting rework...
     public static final Pattern lcgPattern = Pattern.compile("_LCG_([^_]+)");
+    @SuppressWarnings("unused")
     private static final Map<String, String> lcgCache = new HashMap<>();
+    @SuppressWarnings("unused")
     private static final Map<String, Boolean> linvertCache = new HashMap<>();
+    @SuppressWarnings("unused")
     private static final Map<String, Boolean> interiorCache = new HashMap<>();
+    @SuppressWarnings("unused")
     private static final Map<String, Boolean> fullbrightCache = new HashMap<>();
+    @SuppressWarnings("unused")
     private boolean hasGroupFlag(String group, String filter) {
         for (String x : group.split("_")) {
             if (x.equals(filter)) {
@@ -227,10 +230,12 @@ public class ModelState {
         return false;
     }
 
+    @SuppressWarnings("unused")
     private static class Opacity {
         final List<String> opaque = new ArrayList<>();
         final List<String> transparent = new ArrayList<>();
 
+        @SuppressWarnings("unused")
         void add(boolean isTransparent, String group) {
             if (isTransparent) {
                 transparent.add(group);
