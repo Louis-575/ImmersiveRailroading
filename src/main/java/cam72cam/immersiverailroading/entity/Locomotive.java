@@ -86,7 +86,7 @@ public abstract class Locomotive extends FreightTank{
     @TagSync
     @TagField("sanding")
     public boolean sandingKey = false;
-    protected boolean isSanding = false;
+    public boolean isSanding = false;
     protected int sandTime = 0;
     protected int sandingKeyTimeout = 0;
 
@@ -504,7 +504,7 @@ public abstract class Locomotive extends FreightTank{
             ItemStack stack = this.cargoItems.get(2);
             if (sandTime == 0) {
                 stack.setCount(stack.getCount() - 1);
-                sandTime = 60 * Config.ConfigBalance.SandEfficiency;
+                sandTime = maxSandTime();
             }
             if (stack.getCount() > 0 || !Config.isFuelRequired(gauge)) {
                 sandTime--;
@@ -515,6 +515,14 @@ public abstract class Locomotive extends FreightTank{
         if (getWorld().isClient && getTickCount() % 10 == 0)
             trainBrakeDelta();
 	}
+    
+    public float getSandTimePercentage() {
+        return (float) sandTime / maxSandTime();
+    }
+    
+    private int maxSandTime() {
+        return 1000 * Config.ConfigBalance.SandEfficiency;
+    }
 	
 	@Override
 	public Speed getCurrentSpeed() {
