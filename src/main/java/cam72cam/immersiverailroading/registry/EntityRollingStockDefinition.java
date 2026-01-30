@@ -940,7 +940,7 @@ public abstract class EntityRollingStockDefinition {
                         Optional.ofNullable(config.getValue("color").asString()).ifPresent(c -> defaults.setColor(RGBA.fromHex(c)));
                         Optional.ofNullable(config.getValue("fullbright").asBoolean()).ifPresent(defaults::setFullbright);
                         Optional.ofNullable(config.getValue("gap").asInteger()).ifPresent(defaults::setGap);
-                        Optional.ofNullable(config.getValue("align").asString()).ifPresent(a -> defaults.setAlign(TextFieldConfig.Align.valueOf(a)));
+                        Optional.ofNullable(config.getValue("align").asString()).ifPresent(a -> defaults.setAlign(TextFieldConfig.Align.valueOf(a.toUpperCase())));
                         Optional.ofNullable(config.getValue("font").asIdentifier()).ifPresent(defaults::setFont);
                         Optional.ofNullable(config.getValues("linked")).ifPresent(l -> defaults.setLinked(l.stream().map(v -> String.format("TEXTFIELD_%s", v.asString())).collect(Collectors.toList())));
                         Optional.ofNullable(config.getValue("global").asBoolean()).ifPresent(defaults::setGlobal);
