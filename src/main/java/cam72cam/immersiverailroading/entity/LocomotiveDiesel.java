@@ -250,7 +250,7 @@ public class LocomotiveDiesel extends Locomotive {
 			double applied = maxPowerAtSpeed * relativeRPM * getReverser();
 			
 			if (localTractiveEffort != -1) {
-			    applied = Math.copySign(localTractiveEffort, getReverser()) * getDefinition().getScriptedStartingTractionNewtons(gauge, this) * getReverser();
+			    applied = Math.copySign(localTractiveEffort, getReverser()) * getDefinition().getScriptedStartingTractionNewtons(gauge, this);
 			}
 			
 			if (getDefinition().hasDynamicTractionControl) {
