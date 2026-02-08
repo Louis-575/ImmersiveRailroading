@@ -255,26 +255,26 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		this.markDirty();
 	}
 
-    public void compileFilter() {
-        Predicate<EntityRollingStock> positive;
-        Predicate<EntityRollingStock> negative;
-        try {
-            positive = StockFilterCompiler.compile(this.positive);
-            negative = StockFilterCompiler.compile(this.negative);
-        } catch (Exception e) {
-            if (getWorld().isServer) {
-                getWorld().getEntities(Player.class).stream()
-                          .filter(player -> player.getPosition().distanceTo(new Vec3d(this.getPos())) < 20)
-                          .forEach(player -> player.asPlayer().sendMessage(
-                                  PlayerMessage.translate(ChatText.AUGMENT_FILTER_FAIL.getRaw(),
-                                                          this.getPos().x, this.getPos().y, this.getPos().z)));
-            }
-            compiledFilter = stock -> true;
-            return;
-        }
-        positive = positive.and(negative.negate());
-        compiledFilter = positive;
-    }
+	public void compileFilter() {
+		Predicate<EntityRollingStock> positive;
+		Predicate<EntityRollingStock> negative;
+		try {
+			positive = StockFilterCompiler.compile(this.positive, true);
+			negative = StockFilterCompiler.compile(this.negative, false);
+		} catch (Exception e) {
+			if (getWorld().isServer) {
+				getWorld().getEntities(Player.class).stream()
+						  .filter(player -> player.getPosition().distanceTo(new Vec3d(this.getPos())) < 20)
+						  .forEach(player -> player.asPlayer().sendMessage(
+								  PlayerMessage.translate(ChatText.AUGMENT_FILTER_FAIL.getRaw(),
+														  this.getPos().x, this.getPos().y, this.getPos().z)));
+			}
+			compiledFilter = stock -> true;
+			return;
+		}
+		positive = positive.and(negative.negate());
+		compiledFilter = positive;
+	}
 
 	public Augment getAugment() {
 		return this.augment;
