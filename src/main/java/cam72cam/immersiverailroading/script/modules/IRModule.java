@@ -574,4 +574,9 @@ public class IRModule implements LuaModule {
         }
         return LuaValue.valueOf(0);
     }
+    
+    @LuaFunction(module = "IR")
+    public void setGuiText(LuaValue identifier, LuaValue value) {
+        stock.setGuiText(identifier.tostring(), value.tostring());
+    }
 }

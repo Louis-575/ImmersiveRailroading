@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.EntityScriptableRollingStock;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -26,6 +27,7 @@ import cam72cam.mod.serialization.TagField;
 import util.Matrix4;
 
 import javax.imageio.ImageIO;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -44,6 +46,9 @@ public class GuiBuilder {
 
     private final String text;
     private final float textHeight;
+    
+    private final String luaTextID;
+    private final float luaTextHeight;
 
     private final Readouts readout;
     private final String control;
@@ -153,6 +158,16 @@ public class GuiBuilder {
             text = null;
             textHeight = 0;
         }
+        
+        // Lua Text stuff
+        DataBlock luaTxt = data.getBlock("lua_text");
+        if (luaTxt != null) {
+            luaTextID = luaTxt.getValue("key").asString();
+            luaTextHeight = luaTxt.getValue("height").asFloat(0f);
+        } else {
+            luaTextID = null;
+            luaTextHeight = 0;
+        }
 
         // Image stuff
         this.image = data.getValue("image").asIdentifier(null);
@@ -163,6 +178,9 @@ public class GuiBuilder {
         } else if (text != null) {
             width = (int) (textHeight/4 * text.length()); // Guesstimate
             height = (int) textHeight;
+        } else if (luaTextID != null) {
+            width = (int) (luaTextHeight/4 * luaTextID.length()); // TODO Get real text
+            height = (int) luaTextHeight;
         } else {
             width = 0;
             height = 0;
@@ -409,6 +427,18 @@ public class GuiBuilder {
             mat.scale(scale, scale, scale);
             GUIHelpers.drawCenteredString(out, 0, 0, baseColor, mat);
         }
+        if (luaTextID != null && stock instanceof EntityScriptableRollingStock) {        
+            Map<String, String> texts = ((EntityScriptableRollingStock) stock).getLuaGuiText();
+            String out = texts.get(luaTextID);
+            if (out != null) {
+             // Text is 8px tall
+                float scale = luaTextHeight / 8f;
+                Matrix4 mat = state.model_view().copy();
+                mat.scale(scale, scale, scale);
+                //GUIHelpers.drawString(out, 0, 0, baseColor, mat);
+                GUIHelpers.drawCenteredString(out, 0, 0, baseColor, mat);
+            }
+        }
         for (GuiBuilder element : elements) {
             element.render(stock, state, maxx, maxy, baseColor);
         }
@@ -429,7 +459,7 @@ public class GuiBuilder {
             }
         }
 
-        if (interactable() && (image != null || text != null)) {
+        if (interactable() && (image != null || text != null) || luaTextID != null) {
             if (control == null && setting == null && texture_variant == null) {
                 if (readout == null) {
                     return null;

@@ -63,6 +63,18 @@ public class LuaSerialization {
         }
         return LuaValue.NIL;
     }
+    
+    private static TagCompound serializeValue(TagCompound compound, String key, String value) {
+        compound.setString(key, value);
+        return compound;
+    }
+    
+    private static String deserializeValue(TagCompound compound, String key) {
+        if (compound.hasKey(key)) {
+            return String.valueOf(compound.getString(key));
+        }
+        return null;
+    }
 
     public static class LuaMapper implements TagMapper<Map<String, LuaValue>> {
 
@@ -71,6 +83,17 @@ public class LuaSerialization {
             return new TagAccessor<>(
                     (d, o) -> d.setMap(fieldName, o, Function.identity(), v -> serializeLuaValue(new TagCompound(), "value", v)),
                     d -> d.getMap(fieldName, Function.identity(), v -> deserializeLuaValue(v, "value"))
+            );
+        }
+    }
+    
+    public static class LuaTextMapper implements TagMapper<Map<String, String>> {
+
+        @Override
+        public TagAccessor<Map<String, String>> apply(Class<Map<String, String>> type, String fieldName, TagField tag) throws SerializationException {
+            return new TagAccessor<>(
+                    (d, o) -> d.setMap(fieldName, o, Function.identity(), v -> serializeValue(new TagCompound(), "value", v)),
+                    d -> d.getMap(fieldName, Function.identity(), v -> deserializeValue(v, "value"))
             );
         }
     }
