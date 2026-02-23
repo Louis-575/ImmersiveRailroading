@@ -111,6 +111,7 @@ public abstract class EntityRollingStockDefinition {
     public double rollingResistanceCoefficient;
     public double directFrictionCoefficient;
     private int magneticTrackBrake;
+    private int speedBrakeSqueal;
     
     public SoundDefinition brakeHighSpeedSound;
     public SoundDefinition brakeLowSpeedSound;
@@ -517,6 +518,7 @@ public abstract class EntityRollingStockDefinition {
         magneticTrackBrake = properties.getValue("magnetic_brake_newton").asInteger(0);
         // Locomotives default to linear brake control
         isLinearBrakeControl = properties.getValue("linear_brake_control").asBoolean();
+        speedBrakeSqueal = properties.getValue("speed_brake_squeal").asInteger(45);
 
         script = data.getValue("script").asIdentifier();
 
@@ -1097,5 +1099,9 @@ public abstract class EntityRollingStockDefinition {
     
     public int getMagnetBrakeNewton() {
         return magneticTrackBrake;
+    }
+    
+    public int getSpeedBrakeSqueal() {
+        return speedBrakeSqueal;
     }
 }
