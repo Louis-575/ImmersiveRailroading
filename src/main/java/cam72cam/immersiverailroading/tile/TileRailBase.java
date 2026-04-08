@@ -298,12 +298,32 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				}
 			}
 		case 5:
-			if (this.stockTag != null && !this.stockTag.isEmpty()) {
-				this.positive = this.positive + "&& nametag:" + stockTag;
-			}
-			if (this.augmentFilterID != null && !this.augmentFilterID.isEmpty()) {
-				this.positive = this.positive + "&& stock:" + augmentFilterID.split("/")[2]
-						.replace(".json", "").replace(".caml", "");
+			if (getWorld().isServer) {
+				StringBuilder builder = new StringBuilder();
+				if (this.stockTag != null && !this.stockTag.isEmpty()) {
+					//Migrate old stockTag to nametag
+					String tag = "nametag:" + stockTag;
+					builder.append(tag);
+				}
+				if (this.augmentFilterID != null && !this.augmentFilterID.isEmpty()) {
+					//Migrate old augmentFilterID to stock
+					String stockName = augmentFilterID.split("/")[2]
+							//remove suffix
+							.replace(".json", "")
+							.replace(".caml", "");
+					String tag = "stock:" + stockName;
+					if (builder.length() != 0) {
+						tag = " && " + tag;
+					}
+					builder.append(tag);
+				}
+				//In some cases the code is executed twice... check here if it is the second time
+				if (builder.length() > 0 && !positive.contains(builder.toString())) {
+					if (!this.positive.isEmpty()) {
+						builder.insert(0, " && ");
+					}
+					positive += builder.toString();
+				}
 			}
 		}
 		this.compileFilter();

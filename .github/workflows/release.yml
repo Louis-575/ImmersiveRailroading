@@ -27,8 +27,6 @@ jobs:
       run: ./gradlew classes
     - name: Process images
       run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
-    - name: Run Data (optionalish)
-      run: xvfb-run --auto-servernum ./gradlew runData || xvfb-run --auto-servernum ./gradlew runData || true
     - name: Gradle build
       run: ./gradlew build -Dtarget=release
     - name: Gradle publish
