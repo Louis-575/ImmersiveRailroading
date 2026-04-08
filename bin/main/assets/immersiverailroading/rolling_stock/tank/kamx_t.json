@@ -1,0 +1,26 @@
+{
+	"name": "Kamx T",
+	"model": "immersiverailroading:models/rolling_stock/tank/kamx_t/kamx_t.obj",
+	"properties": {
+		"weight_kg": 21060,
+		"independent_brake": true
+	},
+	"passenger": {
+		"slots": 1,
+		"center_x": 0,
+		"center_y": 4,
+		"length": 2,
+		"width": 1.5
+	},
+	"tank": {
+		"capacity_l": 55000 
+	},
+	"trucks": {
+		"front": 4, 
+		"rear": -4
+	},
+	"couplers": {
+		"front_offset": -0.08,
+		"rear_offset": -0.08
+	}
+}

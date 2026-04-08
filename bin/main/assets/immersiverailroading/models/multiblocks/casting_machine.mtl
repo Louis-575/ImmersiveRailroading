@@ -1,0 +1,46 @@
+# Blender MTL File: 'CB_Fancy_New_NoDoublesUV.blend'
+# Material Count: 4
+
+newmtl MainBody
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd castingbasin_uv_main.png
+
+newmtl Sand
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 0.870180 0.486543
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd castingbasin_uv_sand.png
+
+newmtl WHITE_HOT_STEEL.000
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd castingbasin_uv_steel.png
+
+newmtl moltenspill.001
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd castingbasin_uv_steel.png
