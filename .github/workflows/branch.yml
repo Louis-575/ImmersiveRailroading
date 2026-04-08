@@ -26,6 +26,23 @@ jobs:
       env:
         BRANCH: ${{ matrix.branch }}
       run: java -jar UMCSetup.jar ${BRANCH} https
+    - name: Modify build.gradle to Include LuaJ and Merge JARs
+      run: |
+        echo "" >> build.gradle
+        echo "repositories {" >> build.gradle
+        echo "    flatDir { dirs 'libs' }" >> build.gradle
+        echo "}" >> build.gradle
+        echo "" >> build.gradle
+        echo "dependencies {" >> build.gradle
+        echo "    implementation fileTree(dir: 'libs', include: ['*.jar'])" >> build.gradle
+        echo "}" >> build.gradle
+        echo "" >> build.gradle
+        echo "jar {" >> build.gradle
+        echo "    duplicatesStrategy = DuplicatesStrategy.EXCLUDE" >> build.gradle
+        echo "    from {" >> build.gradle
+        echo "        fileTree(dir: 'libs', include: ['*.jar']).collect { zipTree(it) }" >> build.gradle
+        echo "    }" >> build.gradle
+        echo "}" >> build.gradle
     - name: Gradle compile
       run: ./gradlew classes
     - name: Process images
