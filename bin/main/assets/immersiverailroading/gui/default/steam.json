@@ -1,4 +1,0 @@
-{
-  "comment": "Legacy JSON wrapper",
-  "import": "immersiverailroading:gui/steam.caml"
-}
