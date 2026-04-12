@@ -189,7 +189,7 @@ public class IRModule implements LuaModule {
     @LuaFunction(module = "IR")
     public LuaValue isSanding() {
         if (stock instanceof Locomotive) {
-            return LuaValue.valueOf(((Locomotive) stock).isSanding());
+            return LuaValue.valueOf(((Locomotive) stock).isSanding);
         }
         return LuaValue.valueOf(false);
     }

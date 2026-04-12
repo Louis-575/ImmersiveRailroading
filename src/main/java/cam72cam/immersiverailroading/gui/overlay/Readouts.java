@@ -145,7 +145,7 @@ public enum Readouts {
                         ((EntityMoveableRollingStock) stock).getMagnetBrakeNewton() > 0 ?
                                 1 : 0 : 0;
             case SANDING:
-                return stock instanceof Locomotive && ((Locomotive)stock).sandingKey ? 1 : 0;
+                return stock instanceof Locomotive && ((Locomotive)stock).isSanding ? 1 : 0;
         }
         return 0;
     }

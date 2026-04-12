@@ -157,8 +157,7 @@ public class SimulationState {
                 tractiveEffortFactors = locomotive.getThrottle() + (locomotive.getReverser() * 10);
                 desiredBrakePressure = Math.min(locomotive.getMainAirReservoir() * 2 ,Config.ImmersionConfig.brakeMode.equals(BrakeMode.DEFAULT) ?
                         1 - locomotive.getTrainBrake() : locomotive.getTrainBrake() == 1 ? 0 : 1 - 0.31 * (double)locomotive.getTrainBrake());
-                isSanding = locomotive.isSanding();
-                isSanding = locomotive.isSanding();
+                isSanding = locomotive.isSanding;
             } else {
                 tractiveEffortNewtons = speed -> 0d;
                 tractiveEffortFactors = 0;
