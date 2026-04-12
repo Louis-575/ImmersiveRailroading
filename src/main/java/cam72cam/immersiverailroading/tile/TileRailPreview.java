@@ -114,8 +114,7 @@ public class TileRailPreview extends BlockEntityTickable {
 		this.markDirty();
 	}
 	
-	@SuppressWarnings("deprecation")
-    @Override
+	@Override
 	public boolean onClick(Player player, Player.Hand hand, Facing facing, Vec3d hit) {
 		if (player.isCrouching()) {
 			if (getWorld().isServer) {

@@ -2,12 +2,9 @@ package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.floor.NavMesh;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Door;
-import cam72cam.immersiverailroading.model.part.Seat;
-import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.Entity;

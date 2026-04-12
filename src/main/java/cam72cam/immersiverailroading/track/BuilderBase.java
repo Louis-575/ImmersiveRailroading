@@ -18,7 +18,6 @@ import java.util.List;
 
 //TODO @cam72cam use Vec3i and Vec3i
 
-@SuppressWarnings("incomplete-switch")
 public abstract class BuilderBase {
 	protected final World world;
 	protected ArrayList<TrackBase> tracks = new ArrayList<>();
