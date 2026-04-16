@@ -137,7 +137,7 @@ public class IRModule implements LuaModule {
     @LuaFunction(module = "IR")
     protected LuaValue getTrainBrake() {
         if (stock instanceof Locomotive) {
-            float brake = ((Locomotive) stock).getTrainBrake();
+            float brake = ((Locomotive) stock).getTrainBrakePos();
             return LuaValue.valueOf(brake);
         }
 

@@ -44,6 +44,7 @@ public enum ChatText {
 	WIRELESS_REMOTECONTROL_CANTLINK("wireless.remotecontrol.cantlink"),
 	TYPEWRITER_NO_STOCK("typewriter.no_stock"),
 	MULTIBLOCK_SELECTING("multiblock.select"),
+	LOCKED_BRAKE("brake.locked"),
 	;
 	
 	private String value;
