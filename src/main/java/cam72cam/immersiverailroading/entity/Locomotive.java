@@ -21,10 +21,8 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.serialization.StrictTagMapper;
 import cam72cam.mod.serialization.TagField;
 import org.luaj.vm2.LuaValue;
-import java.util.List;
 import java.util.OptionalDouble;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public abstract class Locomotive extends FreightTank{
 	private static final float throttleDelta = 0.04f;
@@ -270,12 +268,7 @@ public abstract class Locomotive extends FreightTank{
                 sandingKey = !sandingKey;
                 sandingKeyTimeout = 5;
                 
-                List<Control<?>> sanding = getDefinition().getModel().getControls().stream()
-                        .filter(x -> x.part.type == ModelComponentType.SANDING_CONTROL_X)
-                        .collect(Collectors.toList());
-                for (Control<?> sand : sanding) {
-                    setControlPosition(sand, sandingKey ? 1 : 0);
-                }
+                setControlPositions(ModelComponentType.SANDING_CONTROL_X, sandingKey ? 1 : 0);
             }
             break;
 		default:
@@ -455,10 +448,7 @@ public abstract class Locomotive extends FreightTank{
 			if (hornTime == 0) {
 				hornPull = 0;
 			}
-			OptionalDouble control = this.getDefinition().getModel().getControls().stream()
-					.filter(x -> x.part.type == ModelComponentType.BELL_CONTROL_X)
-					.mapToDouble(this::getControlPosition)
-					.max();
+			OptionalDouble control = getMaxControlPositions(ModelComponentType.BELL_CONTROL_X);
 			if (control.isPresent() && control.getAsDouble() > 0) {
 				bellTime = 10;
 				bellControl = true;
@@ -835,10 +825,7 @@ public abstract class Locomotive extends FreightTank{
 	}
 	
     public boolean isSandingWidgetActive() {
-        List<Control<?>> sanding = getDefinition().getModel().getControls().stream()
-                .filter(x -> x.part.type == ModelComponentType.SANDING_CONTROL_X)
-                .collect(Collectors.toList());
-        return sanding.stream().anyMatch(c -> getControlPosition(c) > 0.5f);
+        return getControls(ModelComponentType.SANDING_CONTROL_X).stream().anyMatch(c -> getControlPosition(c) > 0.5f);
     }
     
     public void setSanding(boolean sanding) {

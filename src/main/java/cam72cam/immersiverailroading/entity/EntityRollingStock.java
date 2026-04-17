@@ -28,9 +28,12 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.luaj.vm2.LuaValue;
 import util.Matrix4;
 
+import java.util.List;
 import java.util.Map;
+import java.util.OptionalDouble;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class EntityRollingStock extends CustomEntity implements ITickable, IClickable, IKillable {
 	@TagField("defID")
@@ -339,6 +342,16 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 
 	public float getControlPosition(String control) {
 		return getControlData(control).getRight();
+	}
+	
+	public List<Control<?>> getControls(ModelComponentType type) {
+        return getDefinition().getModel().getControls().stream().filter(x -> x.part.type == type)
+                .collect(Collectors.toList());
+	}
+	
+	public OptionalDouble getMaxControlPositions(ModelComponentType type) {
+	    return getDefinition().getModel().getControls().stream().filter(x -> x.part.type == type)
+                .mapToDouble(this::getControlPosition).max();
 	}
 
 	public void setControlPosition(Control<?> control, float val) {

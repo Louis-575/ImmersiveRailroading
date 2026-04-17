@@ -582,7 +582,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     }
     
     private void brakesApply() {
-        float pressure = getBrakeCylinderPressure();
+        float pressure = Math.max(getBrakeCylinderPressure(), getHandBrake());
         if (!brakesApply && pressure > 0) {
             brakesApply = true;
         } else if (brakesApply && pressure == 0) {
