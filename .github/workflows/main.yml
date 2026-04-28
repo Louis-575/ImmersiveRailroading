@@ -93,6 +93,7 @@ jobs:
       
     - name: Gradle build
       run: ./gradlew build
+
     # - name: Gradle publish
     #  env:
     #    MAVENCI_PASS: ${{ secrets.MAVENCI_PASS }}
