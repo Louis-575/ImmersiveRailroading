@@ -302,32 +302,30 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				}
 			}
 		case 5:
-			if (getWorld().isServer) {
-				StringBuilder builder = new StringBuilder();
-				if (this.stockTag != null && !this.stockTag.isEmpty()) {
-					//Migrate old stockTag to nametag
-					String tag = "nametag:" + stockTag;
-					builder.append(tag);
+			StringBuilder builder = new StringBuilder();
+			if (this.stockTag != null && !this.stockTag.isEmpty()) {
+				//Migrate old stockTag to nametag
+				String tag = "nametag:" + stockTag;
+				builder.append(tag);
+			}
+			if (this.augmentFilterID != null && !this.augmentFilterID.isEmpty()) {
+				//Migrate old augmentFilterID to stock
+				String stockName = augmentFilterID.split("/")[2]
+						//remove suffix
+						.replace(".json", "")
+						.replace(".caml", "");
+				String tag = "stock:" + stockName;
+				if (builder.length() != 0) {
+					tag = " && " + tag;
 				}
-				if (this.augmentFilterID != null && !this.augmentFilterID.isEmpty()) {
-					//Migrate old augmentFilterID to stock
-					String stockName = augmentFilterID.split("/")[2]
-							//remove suffix
-							.replace(".json", "")
-							.replace(".caml", "");
-					String tag = "stock:" + stockName;
-					if (builder.length() != 0) {
-						tag = " && " + tag;
-					}
-					builder.append(tag);
+				builder.append(tag);
+			}
+			//Make sure we only add it once
+			if (!positive.contains(builder.toString())) {
+				if (!this.positive.isEmpty()) {
+					builder.insert(0, " && ");
 				}
-				//In some cases the code is executed twice... check here if it is the second time
-				if (builder.length() > 0 && !positive.contains(builder.toString())) {
-					if (!this.positive.isEmpty()) {
-						builder.insert(0, " && ");
-					}
-					positive += builder.toString();
-				}
+				positive += builder.toString();
 			}
 		}
 		this.compileFilter();
