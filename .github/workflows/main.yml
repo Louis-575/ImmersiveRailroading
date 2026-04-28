@@ -93,14 +93,14 @@ jobs:
       
     - name: Gradle build
       run: ./gradlew build
-    - name: Gradle publish
-      env:
-        MAVENCI_PASS: ${{ secrets.MAVENCI_PASS }}
-      run: ./gradlew publish
-    - uses: actions/upload-artifact@v6
-      with:
-        name: Immersive Railroading ${{matrix.branch}}
-        path: build/libs/ImmersiveRailroading-${{matrix.branch}}-*
+    # - name: Gradle publish
+    #  env:
+    #    MAVENCI_PASS: ${{ secrets.MAVENCI_PASS }}
+    #  run: ./gradlew publish
+    # - uses: actions/upload-artifact@v6
+    #  with:
+    #    name: Immersive Railroading ${{matrix.branch}}
+    #    path: build/libs/ImmersiveRailroading-${{matrix.branch}}-*
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
