@@ -227,6 +227,8 @@ part.immersiverailroading:controls.throttle=Дроссель
 part.immersiverailroading:controls.reverser=Реверсор
 part.immersiverailroading:controls.throttle_brake=Дроссельный тормоз
 part.immersiverailroading:controls.engine_start=Пуск двигателя
+part.immersiverailroading:controls.sanding_control=пескование
+part.immersiverailroading:controls.compressor_control=управление компрессором
 
 multiblock.immersiverailroading:boiler_machine=Котловой вальцовочный стан
 multiblock.immersiverailroading:casting=Литейный бассейн

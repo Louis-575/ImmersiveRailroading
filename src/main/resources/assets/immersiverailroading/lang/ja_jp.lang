@@ -227,6 +227,8 @@ part.immersiverailroading:controls.throttle=加減弁
 part.immersiverailroading:controls.reverser=逆転機
 part.immersiverailroading:controls.throttle_brake=エンジンブレーキ
 part.immersiverailroading:controls.engine_start=エンジンスイッチ
+part.immersiverailroading:controls.sanding_control=撒砂
+part.immersiverailroading:controls.compressor_control=コンプレッサ制御装置
 
 multiblock.immersiverailroading:boiler_machine=ボイラーマシーン
 multiblock.immersiverailroading:casting=鋳造機
