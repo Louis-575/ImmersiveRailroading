@@ -52,6 +52,10 @@ public abstract class EntityScriptableRollingStock extends EntityCoupleableRolli
     private Map<String, LuaValue> tagFields = new HashMap<>();
 
     protected final Set<ScheduleEvent> schedule = new HashSet<>();
+    
+    @TagSync
+    @TagField(value = "LUAGUITEXT", mapper = LuaSerialization.LuaTextMapper.class)
+    private Map<String, String> luaGuiText = new HashMap<>();
 
     /**
      * <h2>Overrides</h2>
@@ -218,5 +222,13 @@ public abstract class EntityScriptableRollingStock extends EntityCoupleableRolli
 
         ScheduleEvent event = new ScheduleEvent(runnable, ticks, func);
         schedule.add(event);
+    }
+
+    public void setGuiText(LuaValue id, LuaValue value) {
+        luaGuiText.put(id.toString(), value.toString());
+    }
+
+    public Map<String, String> getLuaGuiText() {
+        return luaGuiText;
     }
 }

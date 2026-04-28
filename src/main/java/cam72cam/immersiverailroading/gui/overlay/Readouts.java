@@ -76,7 +76,7 @@ public enum Readouts {
             case REVERSER:
                 return stock instanceof Locomotive ? (((Locomotive) stock).getReverser() + 1) / 2 : 0;
             case TRAIN_BRAKE:
-                return stock instanceof Locomotive ? ((Locomotive) stock).getTrainBrake() : 0;
+                return stock instanceof Locomotive ? ((Locomotive) stock).getTrainBrakePos() : 0;
             case TRAIN_BRAKE_LEVER:
                 return stock.getDefinition().isLinearBrakeControl() ? TRAIN_BRAKE.getValue(stock) : lever;
             case INDEPENDENT_BRAKE:
@@ -145,7 +145,7 @@ public enum Readouts {
                         ((EntityMoveableRollingStock) stock).getMagnetBrakeNewton() > 0 ?
                                 1 : 0 : 0;
             case SANDING:
-                return stock instanceof Locomotive && ((Locomotive)stock).sandingKey ? 1 : 0;
+                return stock instanceof Locomotive && ((Locomotive)stock).isSanding ? 1 : 0;
         }
         return 0;
     }
@@ -186,7 +186,7 @@ public enum Readouts {
                 } else {
                     if (stock instanceof Locomotive) {
                         // Logic duplicated in Locomotive#onTick
-                        ((Locomotive) stock).setTrainBrake(MathUtil.clamp(((Locomotive) stock).getTrainBrake() + (value - 0.5f) / 80, 0, 1));
+                        ((Locomotive) stock).setTrainBrake(MathUtil.clamp(((Locomotive) stock).getTrainBrakePos() + (value - 0.5f) / 80, 0, 1));
                     }
                 }
                 break;

@@ -24,7 +24,6 @@ import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.serialization.TagMapper;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class LocomotiveSteam extends Locomotive {
 	// PSI
@@ -227,10 +226,7 @@ public class LocomotiveSteam extends Locomotive {
 		}
 
 
-		OptionalDouble control = this.getDefinition().getModel().getControls().stream()
-				.filter(x -> x.part.type == ModelComponentType.WHISTLE_CONTROL_X)
-				.mapToDouble(this::getControlPosition)
-				.max();
+		OptionalDouble control = getMaxControlPositions(ModelComponentType.WHISTLE_CONTROL_X);
 		if (control.isPresent() && control.getAsDouble() > 0) {
 			this.setHorn(10, hornPlayer);
 		}
@@ -490,7 +486,7 @@ public class LocomotiveSteam extends Locomotive {
 
 	public boolean cylinderDrainsEnabled() {
 		// This could be optimized to once-per-tick, but I'm not sure that is necessary
-		List<Control<?>> drains = getDefinition().getModel().getControls().stream().filter(x -> x.part.type == ModelComponentType.CYLINDER_DRAIN_CONTROL_X).collect(Collectors.toList());
+	    List<Control<?>> drains = getControls(ModelComponentType.CYLINDER_DRAIN_CONTROL_X);
 		if (drains.isEmpty()) {
 			double csm = Math.abs(super.getCurrentSpeed().metric()) / gauge.scale();
 			return csm < 20;
@@ -501,10 +497,6 @@ public class LocomotiveSteam extends Locomotive {
 
 	public void setCylinderDrains(boolean enabled) {
 		// This could be optimized to once-per-tick, but I'm not sure that is necessary
-		List<Control<?>> drains = getDefinition().getModel().getControls().stream().filter(x -> x.part.type == ModelComponentType.CYLINDER_DRAIN_CONTROL_X).collect(Collectors.toList());
-
-		for (Control<?> drain : drains) {
-			setControlPosition(drain, enabled ? 1 : 0);
-		}
+	    setControlPositions(ModelComponentType.CYLINDER_DRAIN_CONTROL_X, enabled ? 1 : 0);
 	}
 }

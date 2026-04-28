@@ -58,9 +58,10 @@ public class GroupInfo {
         GroupInfo info = new GroupInfo();
         OBJFace face = group.get(0);
 
+        // TODO idk what poizzy even do
         List<Pair<Vec3d, Vec2f>> vertices = group.stream()
-                .flatMap(f -> IntStream.range(0, f.vertices.size())
-                        .mapToObj(i -> Pair.of(f.vertices.get(i), f.uv.get(i))))
+                .flatMap(f -> IntStream.range(0, 2)
+                        .mapToObj(i -> Pair.of(f.vertex0.pos, f.vertex0.uv)))
                 .distinct()
                 .collect(Collectors.toList());
 

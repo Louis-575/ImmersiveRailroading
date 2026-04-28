@@ -69,7 +69,7 @@ chat.immersiverailroading:switch_state.reset=The last-locked switch has been wir
 chat.immersiverailroading:switch_state.cant_reset=You haven't locked any switches with this key!
 chat.immersiverailroading:switch_state.already_reset=The last-locked switch is already unlocked!
 chat.immersiverailroading:typewriter.no_stock=Not looking at any stock
-
+chat.immersiverailroading:brake.locked=Brake locked: %s
 chat.immersiverailroading:wireless.remotecontrol.link=Wireless Remotecontrol linked!
 chat.immersiverailroading:wireless.remotecontrol.relink=Wireless Remotecontrol relinked!
 chat.immersiverailroading:wireless.remotecontrol.unlink=Wireless Remotecontrol unlinked!
@@ -261,6 +261,8 @@ part.immersiverailroading:controls.throttle=Throttle
 part.immersiverailroading:controls.reverser=Reverser
 part.immersiverailroading:controls.throttle_brake=Throttle Brake
 part.immersiverailroading:controls.engine_start=Engine Start
+part.immersiverailroading:controls.sanding_control=Sanding
+part.immersiverailroading:controls.compressor_control=Compressor Control
 
 multiblock.immersiverailroading:boiler_machine=Boiler Machine
 multiblock.immersiverailroading:casting=Casting Basin
@@ -283,8 +285,8 @@ itemGroup.immersiverailroading.components=Immersive Railroading Components
 itemGroup.immersiverailroading.unit=Immersive Railroading Units
 
 death.attack.immersiverailroading:casting=%s discovered that molten metal does not make a good swimming pool
-death.attack.immersiverailroading:hitByTrain=%s failed to outrun a train
-death.attack.immersiverailroading:hitByTrainInDarkness=%s failed to see the headlight of the oncoming train
+death.attack.immersiverailroading:hit_by_train=%s failed to outrun a train
+death.attack.immersiverailroading:hit_by_train_in_darkness=%s failed to see the headlight of the oncoming train
 
 immersiverailroading:detector_mode.simple=Detecting Stock
 immersiverailroading:detector_mode.speed=Detecting Speed

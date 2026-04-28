@@ -99,6 +99,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	private EntityMoveableRollingStock overhead;
 	@TagField("pushPull")
 	private boolean pushPull = true;
+	@TagField("powered")
+	@TagSync
+	private boolean isPowered = true;
 
 	/*
 	 * Variables for the Lua Augment
@@ -385,12 +388,32 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				}
 			}
 		case 5:
-			if (this.stockTag != null && !this.stockTag.isEmpty()) {
-				this.positive = this.positive + "&& nametag:" + stockTag;
-			}
-			if (this.augmentFilterID != null && !this.augmentFilterID.isEmpty()) {
-				this.positive = this.positive + "&& stock:" + augmentFilterID.split("/")[2]
-						.replace(".json", "").replace(".caml", "");
+			if (getWorld().isServer) {
+				StringBuilder builder = new StringBuilder();
+				if (this.stockTag != null && !this.stockTag.isEmpty()) {
+					//Migrate old stockTag to nametag
+					String tag = "nametag:" + stockTag;
+					builder.append(tag);
+				}
+				if (this.augmentFilterID != null && !this.augmentFilterID.isEmpty()) {
+					//Migrate old augmentFilterID to stock
+					String stockName = augmentFilterID.split("/")[2]
+							//remove suffix
+							.replace(".json", "")
+							.replace(".caml", "");
+					String tag = "stock:" + stockName;
+					if (builder.length() != 0) {
+						tag = " && " + tag;
+					}
+					builder.append(tag);
+				}
+				//In some cases the code is executed twice... check here if it is the second time
+				if (builder.length() > 0 && !positive.contains(builder.toString())) {
+					if (!this.positive.isEmpty()) {
+						builder.insert(0, " && ");
+					}
+					positive += builder.toString();
+				}
 			}
 		}
 		if (augment == Augment.LUA_SCRIPTER && selectedScript != null && getWorld().isServer) {
@@ -604,9 +627,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			case ENABLED:
 				return true;
 			case REQUIRED:
-				return getWorld().getRedstone(getPos()) > 0;
+				return isPowered;
 			case INVERTED:
-				return getWorld().getRedstone(getPos()) == 0;
+				return !isPowered;
 			case DISABLED:
 			default:
 				return false;
@@ -735,62 +758,86 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 		try {
 			switch (this.augment) {
-				case ITEM_LOADER:
+				case ITEM_LOADER: {
 					if (pushPull) {
 						Freight freight = this.getStockNearBy(Freight.class);
 						if (freight == null) {
 							break;
 						}
 						for (Facing side : Facing.values()) {
-							IInventory inventory = getWorld().getInventory(getPos().offset(side));
+							Vec3i posOff = getPos().offset(side);
+							if (BlockUtil.isIRRail(getWorld(), posOff)) {
+								// Can't transfer to another rail augment directly
+								continue;
+							}
+							IInventory inventory = getWorld().getInventory(posOff);
 							if (inventory != null) {
 								inventory.transferAllTo(freight.cargoItems);
 							}
 						}
 					}
 					break;
-				case ITEM_UNLOADER:
+				}
+				case ITEM_UNLOADER: {
 					if (pushPull) {
 						Freight freight = this.getStockNearBy(Freight.class);
 						if (freight == null) {
 							break;
 						}
 						for (Facing side : Facing.values()) {
-							IInventory inventory = getWorld().getInventory(getPos().offset(side));
+							Vec3i posOff = getPos().offset(side);
+							if (BlockUtil.isIRRail(getWorld(), posOff)) {
+								// Can't transfer to another rail augment directly
+								continue;
+							}
+							IInventory inventory = getWorld().getInventory(posOff);
 							if (inventory != null) {
 								inventory.transferAllFrom(freight.cargoItems);
 							}
 						}
 					}
 					break;
-				case FLUID_LOADER:
+				}
+				case FLUID_LOADER: {
 					if (pushPull) {
 						FreightTank stock = this.getStockNearBy(FreightTank.class);
 						if (stock == null) {
 							break;
 						}
 						for (Facing side : Facing.values()) {
-							List<ITank> tanks = getWorld().getTank(getPos().offset(side));
+							Vec3i posOff = getPos().offset(side);
+							if (BlockUtil.isIRRail(getWorld(), posOff)) {
+								// Can't transfer to another rail augment directly
+								continue;
+							}
+							List<ITank> tanks = getWorld().getTank(posOff);
 							if (tanks != null) {
 								tanks.forEach(tank -> stock.theTank.drain(tank, 100, false));
 							}
 						}
 					}
 					break;
-				case FLUID_UNLOADER:
+				}
+				case FLUID_UNLOADER: {
 					if (pushPull) {
 						FreightTank stock = this.getStockNearBy(FreightTank.class);
 						if (stock == null) {
 							break;
 						}
 						for (Facing side : Facing.values()) {
-							List<ITank> tanks = getWorld().getTank(getPos().offset(side));
+							Vec3i posOff = getPos().offset(side);
+							if (BlockUtil.isIRRail(getWorld(), posOff)) {
+								// Can't transfer to another rail augment directly
+								continue;
+							}
+							List<ITank> tanks = getWorld().getTank(posOff);
 							if (tanks != null) {
 								tanks.forEach(tank -> stock.theTank.fill(tank, 100, false));
 							}
 						}
 					}
 					break;
+				}
 				case WATER_TROUGH:
 				/*
 				if (this.augmentTank == null) {
@@ -1142,6 +1189,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 
 		blockUpdate = true;
+		isPowered = getWorld().getRedstone(getPos()) > 0;
 
 		TagCompound data = te.getReplaced();
 		while (true) {

@@ -2,14 +2,11 @@ package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ImmersionConfig;
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
-import cam72cam.immersiverailroading.library.Augment;
-import cam72cam.immersiverailroading.library.BrakeMode;
-import cam72cam.immersiverailroading.library.KeyTypes;
-import cam72cam.immersiverailroading.library.ModelComponentType;
-import cam72cam.immersiverailroading.library.Permissions;
+import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
@@ -19,8 +16,10 @@ import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.entity.Player.Hand;
 import cam72cam.mod.entity.custom.ICollision;
 import cam72cam.mod.entity.sync.TagSync;
+import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagCompound;
@@ -31,11 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovement implements ICollision {
-
-    public static final String DAMAGE_SOURCE_HIT = "immersiverailroading:hitByTrain";
-    public static final String DAMAGE_SOURCE_HIT_IN_DARKNESS = "immersiverailroading:hitByTrainInDarkness";
-
+public abstract class EntityMoveableRollingStock extends EntityRidableRollingStock implements ICollision {
     @TagField("frontYaw")
     private Float frontYaw;
     @TagField("rearYaw")
@@ -61,6 +56,7 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
     @TagSync
     @TagField("BRAKE_PRESSURE")
     private float trainBrakePressure = 0;
+    public boolean locked = true;
 
     @TagSync
     @TagField("BRAKE_CYLINDER_PRESSURE")
@@ -212,6 +208,20 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
         // Skew
         return TickPos.skew(current, next, tick);
     }
+    
+    @Override
+    public ClickResult onClick(Player player, Hand hand) {
+        if (player.getHeldItem(Hand.PRIMARY).is(IRItems.ITEM_SWITCH_KEY) && player.hasPermission(Permissions.COUPLING_HOOK)) {
+            if (locked) {
+                locked = false;
+            } else {
+                locked = true;
+            }
+            player.sendMessage(ChatText.LOCKED_BRAKE.getMessage(locked));
+            return ClickResult.ACCEPTED;
+        }
+        return super.onClick(player, hand);
+    }
 
     @SuppressWarnings("incomplete-switch")
     @Override
@@ -232,8 +242,17 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
     @Override
     public void onDragRelease(Control<?> control) {
         super.onDragRelease(control);
-        if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.INDEPENDENT_BRAKE_X) {
-            setControlPosition(control, 0.5f);
+        switch (control.part.type) {
+            case INDEPENDENT_BRAKE_X:
+                if (!getDefinition().isLinearBrakeControl()) {
+                    setControlPosition(control, 0.5f);
+                }
+            case HAND_BRAKE_X:
+                if (control.toggle) {
+                    setHandBrake(getControlPosition(control));
+                }
+            default:
+                break;
         }
     }
     
@@ -383,7 +402,7 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
 				    boolean isBlockDark = getWorld().getBlockLightLevel(entity.getBlockPosition()) < 0.5;
 				    boolean isNightime = getWorld().getTime() > 13000 && getWorld().getTime() < 23000;
 				    boolean isDark = isBlockDark && isNightime;
-				    entity.directDamage(isDark ? DAMAGE_SOURCE_HIT_IN_DARKNESS : DAMAGE_SOURCE_HIT, speedDamage);
+				    entity.directDamage(isDark ? DamageTypes.HIT_IN_DARKNESS : DamageTypes.HIT, speedDamage);
 				}
 			}
 	
@@ -563,7 +582,7 @@ public abstract class EntityMoveableRollingStock extends EntityCustomPlayerMovem
     }
     
     private void brakesApply() {
-        float pressure = getBrakeCylinderPressure();
+        float pressure = Math.max(getBrakeCylinderPressure(), getHandBrake());
         if (!brakesApply && pressure > 0) {
             brakesApply = true;
         } else if (brakesApply && pressure == 0) {

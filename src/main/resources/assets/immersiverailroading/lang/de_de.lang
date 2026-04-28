@@ -65,7 +65,7 @@ chat.immersiverailroading:switch_state.reset=Die zuletzt gesperrte Weiche wurde 
 chat.immersiverailroading:switch_state.cant_reset=Sie haben mit diesem Schlüssel keine Weiche gesperrt!
 chat.immersiverailroading:switch_state.already_reset=Die zuletzt gesperrte Weiche ist bereits entsperrt!
 chat.immersiverailroading:multiblock.select=Ausgewählter Multiblock: %s
-
+chat.immersiverailroading:brake.locked=Bremse abgesperrt: %s
 chat.immersiverailroading:wireless.remotecontrol.link=Funksteuerung verlinkt!
 chat.immersiverailroading:wireless.remotecontrol.relink=Funksteuerung verlinkt!
 chat.immersiverailroading:wireless.remotecontrol.unlink=Funksteuerung getrennt!
@@ -234,6 +234,8 @@ part.immersiverailroading:controls.throttle=Leistungsregler
 part.immersiverailroading:controls.reverser=Richtungswender
 part.immersiverailroading:controls.throttle_brake=Fahr-Bremshebel
 part.immersiverailroading:controls.engine_start=Motorstart
+part.immersiverailroading:controls.sanding_control=Sanden
+part.immersiverailroading:controls.compressor_control=Kompressorsteuerung
 
 multiblock.immersiverailroading:boiler_machine=Kessel Maschine
 multiblock.immersiverailroading:casting=Gußbecken
@@ -255,8 +257,8 @@ itemGroup.immersiverailroading.passenger=Immersive Railroading Personenwagen
 itemGroup.immersiverailroading.components=Immersive Railroading Bauteile
 
 death.attack.immersiverailroading:casting=%s hat herausgefunden, dass sich geschmolzenes Metall nicht so gut zum schwimmen eignet.
-death.attack.immersiverailroading:hitByTrain=%s versagte bei dem Versuch vor einem Zug wegzurennen.
-death.attack.immersiverailroading:hitByTrainInDarkness=%s hat die Scheinwerfer des herannahenden Zuges nicht gesehen.
+death.attack.immersiverailroading:hit_by_train=%s versagte bei dem Versuch vor einem Zug wegzurennen.
+death.attack.immersiverailroading:hit_by_train_in_darkness=%s hat die Scheinwerfer des herannahenden Zuges nicht gesehen.
 
 immersiverailroading:detector_mode.simple=Fahrzeuge erkennen
 immersiverailroading:detector_mode.speed=Geschwindigkeit erkennen

@@ -235,7 +235,6 @@ public class ModelState {
         final List<String> opaque = new ArrayList<>();
         final List<String> transparent = new ArrayList<>();
 
-        @SuppressWarnings("unused")
         void add(boolean isTransparent, String group) {
             if (isTransparent) {
                 transparent.add(group);

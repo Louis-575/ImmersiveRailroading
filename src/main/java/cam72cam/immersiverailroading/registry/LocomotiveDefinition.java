@@ -35,6 +35,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     private int brakeNotches;
     private boolean hasBrakeNotches;
     public SoundDefinition compressor;
+    private boolean hasCompressor;
 
     LocomotiveDefinition(Class<? extends EntityRollingStock> type, String defID, DataBlock data) throws Exception {
         super(type, defID, data);
@@ -94,6 +95,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
         speedLimiter = properties.getValue("speed_limiter").asBoolean(true);
         brakeNotches = properties.getValue("brake_notches").asInteger(25);
         hasBrakeNotches = properties.getValue("has_brake_notches").asBoolean(false);
+        hasCompressor = properties.getValue("has_compressor").asBoolean(true);
         
         DataBlock sounds = data.getBlock("sounds");
         bell = SoundDefinition.getOrDefault(sounds, "bell");
@@ -213,5 +215,9 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     
     public boolean hasBrakeNotches() {
         return hasBrakeNotches;
+    }
+    
+    public boolean hasCompressor() {
+        return hasCompressor;
     }
 }

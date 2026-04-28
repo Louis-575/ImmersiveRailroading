@@ -283,9 +283,7 @@ public class LocomotiveDiesel extends Locomotive {
 			return;
 		}
 
-		OptionalDouble control = this.getDefinition().getModel().getControls().stream()
-				.filter(x -> x.part.type == ModelComponentType.HORN_CONTROL_X).mapToDouble(this::getControlPosition)
-				.max();
+		OptionalDouble control = getMaxControlPositions(ModelComponentType.HORN_CONTROL_X);
 		if (control.isPresent() && control.getAsDouble() > 0) {
 			this.setHorn(10, hornPlayer);
 		}
@@ -342,6 +340,10 @@ public class LocomotiveDiesel extends Locomotive {
 		}
 
 		setEngineTemperature(engineTemperature);
+		
+		if (!isRunning()) {
+		    mainAirReservoir(-0.001f);
+		}
 	}
 
 	@Override
@@ -425,11 +427,11 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 	
 	@Override
-    protected void copySettings(final EntityRollingStock stock, final boolean direction) {
+    protected void copyBrakeSetting(final EntityRollingStock stock, final boolean direction) {
         if (stock instanceof LocomotiveDiesel && ((LocomotiveDiesel) stock).getDefinition().muliUnitCapable) {
             ((LocomotiveDiesel) stock).setRealDynamicBrake(this.getDynamicBrake());
         }
-        super.copySettings(stock, direction);
+        super.copyBrakeSetting(stock, direction);
     }
 	
 	public float getDynamicBrake() {
@@ -450,7 +452,7 @@ public class LocomotiveDiesel extends Locomotive {
     public void setDynamicBrake(final float newDynamicBrakePos) {
         setRealDynamicBrake(newDynamicBrakePos);
         if (this.getDefinition().muliUnitCapable) {
-            this.mapTrain(this, true, false, this::copySettings);
+            this.mapTrain(this, true, false, this::copyBrakeSetting);
         }
     }
 

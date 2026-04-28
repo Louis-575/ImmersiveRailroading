@@ -137,7 +137,7 @@ public class IRModule implements LuaModule {
     @LuaFunction(module = "IR")
     protected LuaValue getTrainBrake() {
         if (stock instanceof Locomotive) {
-            float brake = ((Locomotive) stock).getTrainBrake();
+            float brake = ((Locomotive) stock).getTrainBrakePos();
             return LuaValue.valueOf(brake);
         }
 
@@ -189,7 +189,7 @@ public class IRModule implements LuaModule {
     @LuaFunction(module = "IR")
     public LuaValue isSanding() {
         if (stock instanceof Locomotive) {
-            return LuaValue.valueOf(((Locomotive) stock).isSanding());
+            return LuaValue.valueOf(((Locomotive) stock).isSanding);
         }
         return LuaValue.valueOf(false);
     }
@@ -573,5 +573,10 @@ public class IRModule implements LuaModule {
             return LuaValue.valueOf(((Freight) stock).getPercentCargoFull());
         }
         return LuaValue.valueOf(0);
+    }
+    
+    @LuaFunction(module = "IR")
+    public void setGuiText(LuaValue identifier, LuaValue value) {
+        stock.setGuiText(identifier.tostring(), value.tostring());
     }
 }

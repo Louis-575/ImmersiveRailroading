@@ -127,7 +127,6 @@ public class LuaContext {
         globals.set("_TagField", tagFieldTable);
     }
 
-    @SuppressWarnings("unused")
     public Globals getGlobals() {
         return globals;
     }
