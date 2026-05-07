@@ -340,10 +340,6 @@ public class LocomotiveDiesel extends Locomotive {
 		}
 
 		setEngineTemperature(engineTemperature);
-		
-		if (!isRunning()) {
-		    mainAirReservoir(-0.001f);
-		}
 	}
 
 	@Override
