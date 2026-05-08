@@ -67,6 +67,19 @@ element:
           color =
               0 = "0x99DDDDDD"
       element:
+          # main air pressure
+          x = 77
+          y = 75
+          image = "immersiverailroading:gui/main_air_pressure.png"
+          readout = "MAIN_AIR_RESERVOIR"
+          translate =
+              x = 0
+              y = -50
+          scale =
+              y = 1
+          color =
+              0 = "0x9900aae3"
+      element:
           # brake pressure
           x = 71
           y = 74
