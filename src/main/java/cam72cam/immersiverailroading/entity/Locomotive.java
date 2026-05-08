@@ -319,16 +319,12 @@ public abstract class Locomotive extends FreightTank{
 
 	@Override
 	public void onDragRelease(Control<?> control) {
-		super.onDragRelease(control);
-		switch (control.part.type) {
-            case TRAIN_BRAKE_X:
-                if (!getDefinition().isLinearBrakeControl())
-                    setControlPosition(control, 0.5f);
-            case COMPRESSOR_CONTROL_X:
-                compressorActive = getControlPosition(control) > 0.5f;
-            default:
-                break;
-        }
+	    super.onDragRelease(control);
+		if (control.part.type.equals(ModelComponentType.TRAIN_BRAKE_X) && !getDefinition().isLinearBrakeControl()) {
+		    setControlPosition(control, 0.5f);
+		} else if (control.part.type.equals(ModelComponentType.COMPRESSOR_CONTROL_X)) {
+            compressorActive = getControlPosition(control) > 0.5f;
+		}
 	}
 
 	@Override
@@ -494,7 +490,7 @@ public abstract class Locomotive extends FreightTank{
                 raiseMainAirReservoir();
             }
             
-            if (!providesElectricalPower() && getTrainBrakePos() == 1) {
+            if (!providesElectricalPower() && getTrainBrakePos() == 1 && getMainAirReservoir() > 0) {
                 mainAirReservoir(-0.001f);
             }
 		}
@@ -749,8 +745,9 @@ public abstract class Locomotive extends FreightTank{
     }
 
     private void raiseMainAirReservoir() {
-        if (getDefinition().isCabCar())
+        if (getDefinition().isCabCar()) {
             return;
+        }
         if (!getDefinition().hasCompressor()) {
             mainAirReservoir = 1;
             return;
@@ -763,8 +760,9 @@ public abstract class Locomotive extends FreightTank{
         } else if (isLowAir() && getMainAirReservoir() >= 1.0) {
             isLowAir = false;
         }
-        if (!isLowAir())
+        if (!isLowAir()) {
             return;
+        }
         mainAirReservoir(0.0005f);
     }
     
