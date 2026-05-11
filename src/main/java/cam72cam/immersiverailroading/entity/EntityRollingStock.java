@@ -28,13 +28,9 @@ import org.luaj.vm2.LuaValue;
 import util.Matrix4;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.OptionalDouble;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
 import javax.annotation.Nullable;
 
 public class EntityRollingStock extends CustomEntity implements ITickable, IClickable, IKillable {
@@ -335,16 +331,6 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		return getControlData(control).getRight();
 	}
 	
-	public List<Control<?>> getControls(ModelComponentType type) {
-        return getDefinition().getModel().getControls().stream().filter(x -> x.part.type == type)
-                .collect(Collectors.toList());
-	}
-	
-	public OptionalDouble getMaxControlPositions(ModelComponentType type) {
-	    return getDefinition().getModel().getControls().stream().filter(x -> x.part.type == type)
-                .mapToDouble(this::getControlPosition).max();
-	}
-	
 	public void setControlPosition(@Nullable Control<?> control, String controlGroup, float val) {
 	    val = MathUtil.clamp(val, 0, 1);
 	    Pair<Boolean, Float> newPair = control != null ? Pair.of(getControlPressed(control), val) : Pair.of(false, val);
@@ -364,10 +350,6 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 
 	public void setControlPosition(String control, float val) {
 	    setControlPosition(null, control, val);
-	}
-
-	public void setControlPositions(ModelComponentType type, float val) {
-		getDefinition().getModel().getControls().stream().filter(x -> x.part.type == type).forEach(c -> setControlPosition(c, val));
 	}
 
 	public boolean playerCanDrag(Player player, Control<?> control) {
