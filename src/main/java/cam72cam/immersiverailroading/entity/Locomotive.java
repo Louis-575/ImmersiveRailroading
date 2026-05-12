@@ -46,6 +46,9 @@ public abstract class Locomotive extends FreightTank{
 	private float trainBrakeInternal = 0;
 	public boolean trainBrakeDelta = false;
 	
+	private boolean fullBrake = false;
+	private boolean emergencyBrake = false;
+	
 	// TODO How many decimal places?
     @TagSync(floatPrecision = 5)
     @TagField("MAIN_AIR_RESERVOIR")
@@ -179,7 +182,6 @@ public abstract class Locomotive extends FreightTank{
         }
 
 		boolean linkThrottleReverser = forceLinkThrottleReverser() || disableIndependentThrottle;
-		boolean hasBrakeNotches = getDefinition().hasBrakeNotches();
 
 		switch(key) {
 			case HORN:
@@ -239,21 +241,50 @@ public abstract class Locomotive extends FreightTank{
 			}
 			break;
 		case TRAIN_BRAKE_UP:
+		    if (emergencyBrake) {
+		        break;
+		    }
+
+		    float current = getTrainBrakePos() + getBrakeDelta();
+		    
+		    if (!fullBrake) {
+		        if (current >= 1.0f) {
+		            setTrainBrake(0.99f);
+		            fullBrake = true;
+		            brakeCooldown = 20;
+		            break;
+		        }
+	            if (brakeCooldown > 0) {
+	                break;
+	            }
+                if (hasBrakeNotches()) {
+                    brakeCooldown = 3;
+                }
+		        setTrainBrake(current);
+		        break;
+		    }
             if (brakeCooldown > 0) {
                 break;
             }
-            brakeCooldown = hasBrakeNotches ? 2 : 0;		    
-			setTrainBrake(getTrainBrakePos() + getBrakeDelta());
-			break;
+		    setTrainBrake(1f);
+		    fullBrake = false;
+		    emergencyBrake = true;
+		    break;
 		case TRAIN_BRAKE_ZERO:
 			setTrainBrake(0f);
+			emergencyBrake = false;
+			fullBrake = false;
 			break;
 		case TRAIN_BRAKE_DOWN:
-            if (brakeCooldown > 0) {
+		    if (brakeCooldown > 0) {
                 break;
             }
-            brakeCooldown = hasBrakeNotches ? 2 : 0;		   
+		    if (hasBrakeNotches()) {
+                brakeCooldown = 3;
+            }
 			setTrainBrake(getTrainBrakePos() - getBrakeDelta());
+			fullBrake = false;
+            emergencyBrake = false;
 			break;
 		case DEAD_MANS_SWITCH:
 			if (deadManChangeTimeout == 0) { 
@@ -298,7 +329,31 @@ public abstract class Locomotive extends FreightTank{
 				break;
 			case TRAIN_BRAKE_X:
 				if (getDefinition().isLinearBrakeControl()) {
-					setTrainBrake(getControlPosition(component));
+				    float controlPos = getControlPosition(component);
+                    if (controlPos < 1.0f) {
+                        emergencyBrake = false;
+                        fullBrake = false;
+                    }
+		            if (emergencyBrake) {
+		                break;
+		            }
+
+		            if (!fullBrake) {
+		                if (controlPos >= 1.0f) {
+		                    setTrainBrake(0.99f);
+		                    fullBrake = true;
+		                    brakeCooldown = 20;
+		                    break;
+		                }
+		                setTrainBrake(controlPos);
+		                break;
+		            }
+		            if (brakeCooldown > 0) {
+		                break;
+		            }
+		            setTrainBrake(1f);
+		            fullBrake = false;
+		            emergencyBrake = true;
 				}
 				break;
 			case REVERSER_X:
@@ -650,7 +705,11 @@ public abstract class Locomotive extends FreightTank{
 	}
 	
 	public float getBrakeDelta() {
-	    return 1F / getDefinition().getBrakeNotches();
+	    return 1f / (hasBrakeNotches() ? (float) getDefinition().getBrakeNotches() : 25f);
+	}
+	
+	public boolean hasBrakeNotches() {
+	    return getDefinition().getBrakeNotches() != 0;
 	}
 
 	public float getReverser() {
