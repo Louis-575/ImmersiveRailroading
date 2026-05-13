@@ -44,6 +44,7 @@ public enum Readouts {
     MAIN_AIR_RESERVOIR,
     MAGNETIC_BRAKE,
     SANDING,
+    SLIPPING,
     ;
 
     public float getValue(EntityRollingStock stock) {
@@ -69,8 +70,7 @@ public enum Readouts {
                 }
                 return 0;
             case BOILER_PRESSURE:
-                return stock instanceof LocomotiveSteam ?
-                        ((LocomotiveSteam) stock).getBoilerPressureBar() / (((LocomotiveSteam) stock).getDefinition().getMaxPSI(stock.gauge) * PressureDisplayType.psiToBar) : 0;
+                return stock instanceof LocomotiveSteam ? ((LocomotiveSteam) stock).getBoilerPressureBar() / (((LocomotiveSteam) stock).getDefinition().getMaxPSI(stock.gauge) * PressureDisplayType.psiToBar) : 0;
             case THROTTLE:
                 return stock instanceof Locomotive ? ((Locomotive) stock).getThrottle() : 0;
             case REVERSER:
@@ -122,30 +122,23 @@ public enum Readouts {
             case ENGINE_RPM:
                 return stock instanceof LocomotiveDiesel ? ((LocomotiveDiesel) stock).getRelativeRPM() : 0;
             case CHEST_PRESSURE:
-                return stock instanceof LocomotiveSteam
-                        ? ((LocomotiveSteam) stock).getChestPressurePercent()
-                        : 0;
+                return stock instanceof LocomotiveSteam ? ((LocomotiveSteam) stock).getChestPressurePercent() : 0;
             case HAND_BRAKE:
-                return stock instanceof EntityMoveableRollingStock
-                        ? ((EntityMoveableRollingStock) stock).getHandBrake()
-                        : 0;
+                return stock instanceof EntityMoveableRollingStock ? ((EntityMoveableRollingStock) stock).getHandBrake() : 0;
             case DYNAMIC_BRAKE:
-                return (float) (stock instanceof LocomotiveDiesel ?
-                        ((LocomotiveDiesel) stock).getDynamicBrakeMultiplier() : 0);
+                return (float) (stock instanceof LocomotiveDiesel ? ((LocomotiveDiesel) stock).getDynamicBrakeMultiplier() : 0);
             case ROLLING_STOCK_PITCH:
                 return stock.getRotationPitch();
             case TRACTIVE_EFFORT:
-                return stock instanceof Locomotive ?
-                        ((Locomotive) stock).getCurrentTractiveEffort() : 0;
+                return stock instanceof Locomotive ? ((Locomotive) stock).getCurrentTractiveEffort() : 0;
             case MAIN_AIR_RESERVOIR:
-                return (float) (stock instanceof Locomotive ?
-                        ((Locomotive) stock).getMainAirReservoir() : 0);
+                return (float) (stock instanceof Locomotive ? ((Locomotive) stock).getMainAirReservoir() : 0);
             case MAGNETIC_BRAKE:
-                return stock instanceof EntityMoveableRollingStock ?
-                        ((EntityMoveableRollingStock) stock).getMagnetBrakeNewton() > 0 ?
-                                1 : 0 : 0;
+                return stock instanceof EntityMoveableRollingStock && ((EntityMoveableRollingStock) stock).getMagnetBrakeNewton() > 0 ? 1 : 0;
             case SANDING:
                 return stock instanceof Locomotive && ((Locomotive)stock).isSanding ? 1 : 0;
+            case SLIPPING:
+                return stock instanceof Locomotive && ((Locomotive)stock).slipping ? 1 : 0;
         }
         return 0;
     }

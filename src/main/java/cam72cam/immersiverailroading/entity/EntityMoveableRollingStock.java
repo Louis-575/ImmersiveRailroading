@@ -242,17 +242,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     @Override
     public void onDragRelease(Control<?> control) {
         super.onDragRelease(control);
-        switch (control.part.type) {
-            case INDEPENDENT_BRAKE_X:
-                if (!getDefinition().isLinearBrakeControl()) {
-                    setControlPosition(control, 0.5f);
-                }
-            case HAND_BRAKE_X:
-                if (control.toggle) {
-                    setHandBrake(getControlPosition(control));
-                }
-            default:
-                break;
+        if (control.part.type.equals(ModelComponentType.INDEPENDENT_BRAKE_X) && !getDefinition().isLinearBrakeControl()) {
+            setControlPosition(control, 0.5f);
+        } else if (control.part.type.equals(ModelComponentType.HAND_BRAKE_X) && control.toggle) {
+            setHandBrake(getControlPosition(control));
         }
     }
     
@@ -286,8 +279,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
         if (getWorld().isServer) {
             if (getDefinition().hasIndependentBrake()) {
-                for (Control<?> control : getDefinition().getModel().getControls()) {
-                    if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.INDEPENDENT_BRAKE_X) {
+                for (Control<?> control : getDefinition().getModel().getControls(ModelComponentType.INDEPENDENT_BRAKE_X)) {
+                    if (!getDefinition().isLinearBrakeControl()) {
                         setIndependentBrake(MathUtil.clamp(getIndependentBrake() + (getControlPosition(control) - 0.5f) / 8, 0, 1));
                     }
                 }
@@ -524,13 +517,13 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         setRealIndependentBrake(newIndependentBrake);
     }
     
-    private void setRealIndependentBrake(float newIndependentBrake) {
-        newIndependentBrake = MathUtil.clamp(newIndependentBrake, 0, 1);
+    private void setRealIndependentBrake(float independentBrake) {
+        float newIndependentBrake = MathUtil.clamp(independentBrake, 0, 1);
         if (this.getIndependentBrake() != newIndependentBrake && getDefinition().hasIndependentBrake()) {
             if (getDefinition().isLinearBrakeControl()) {
-                setControlPositions(ModelComponentType.INDEPENDENT_BRAKE_X, newIndependentBrake);
+                getDefinition().getModel().getControls(ModelComponentType.INDEPENDENT_BRAKE_X).stream().forEach(c -> setControlPosition(c, newIndependentBrake));
             }
-            independentBrake = newIndependentBrake;
+            this.independentBrake = newIndependentBrake;
         }
     }
 
@@ -538,11 +531,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         return getDefinition().hasHandBrake() ? handBrake : 0;
     }
 
-    public void setHandBrake(float newHandBrake) {
-        newHandBrake = MathUtil.clamp(newHandBrake, 0, 1);
+    public void setHandBrake(float handBrake) {
+        float newHandBrake = MathUtil.clamp(handBrake, 0, 1);
         if (this.getHandBrake() != newHandBrake && getDefinition().hasHandBrake()) {
-            setControlPositions(ModelComponentType.HAND_BRAKE_X, newHandBrake);
-            handBrake = newHandBrake;
+            getDefinition().getModel().getControls(ModelComponentType.HAND_BRAKE_X).stream().forEach(c -> setControlPosition(c, newHandBrake));
+            this.handBrake = newHandBrake;
         }
     }
 

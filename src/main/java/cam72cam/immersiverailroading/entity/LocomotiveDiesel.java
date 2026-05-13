@@ -77,7 +77,7 @@ public class LocomotiveDiesel extends Locomotive {
 
 	public void setTurnedOn(boolean value) {
 		turnedOn = value;
-		setControlPositions(ModelComponentType.ENGINE_START_X, turnedOn ? 1 : 0);
+		getDefinition().getModel().getControls(ModelComponentType.ENGINE_START_X).stream().forEach(c -> setControlPosition(c, turnedOn ? 1 : 0));
 	}
 
 	public boolean isTurnedOn() {
@@ -154,13 +154,12 @@ public class LocomotiveDiesel extends Locomotive {
                     break;
             }
             if (getDefinition().isLinkedBrakeDynBrake()) {
-                boolean hasBrakeNotches = getDefinition().hasBrakeNotches();
                 switch (key) {
                     case TRAIN_BRAKE_UP:
                         if (brakeCooldown > 0) {
                             break;
                         }
-                        brakeCooldown = hasBrakeNotches ? 2 : 0;
+                        brakeCooldown = hasBrakeNotches() ? 3 : 0;
                         setDynamicBrake(getDynamicBrake() + dynamicBrakeNotch);
                         break;
                     case TRAIN_BRAKE_ZERO:
@@ -170,7 +169,7 @@ public class LocomotiveDiesel extends Locomotive {
                         if (brakeCooldown > 0) {
                             break;
                         }
-                        brakeCooldown = hasBrakeNotches ? 2 : 0;
+                        brakeCooldown = hasBrakeNotches() ? 3 : 0;
                         setDynamicBrake(getDynamicBrake() - dynamicBrakeNotch);
                         break;
                     default:
@@ -232,7 +231,7 @@ public class LocomotiveDiesel extends Locomotive {
 	@Override
 	public void setRealThrottle(float newThrottle) {
 	    super.setRealThrottle(newThrottle);
-	    setControlPositions(ModelComponentType.THROTTLE_DYN_BRAKE_X, getThrottle()/2 + (1- getDynamicBrake())/2);
+	    getDefinition().getModel().getControls(ModelComponentType.THROTTLE_DYN_BRAKE_X).stream().forEach(c -> setControlPosition(c, getThrottle() / 2 + (1 - getDynamicBrake()) / 2));
 	}
 
 	@Override
@@ -283,7 +282,7 @@ public class LocomotiveDiesel extends Locomotive {
 			return;
 		}
 
-		OptionalDouble control = getMaxControlPositions(ModelComponentType.HORN_CONTROL_X);
+		OptionalDouble control = getDefinition().getModel().getControls(ModelComponentType.HORN_CONTROL_X).stream().mapToDouble(this::getControlPosition).max();
 		if (control.isPresent() && control.getAsDouble() > 0) {
 			this.setHorn(10, hornPlayer);
 		}
@@ -340,10 +339,6 @@ public class LocomotiveDiesel extends Locomotive {
 		}
 
 		setEngineTemperature(engineTemperature);
-		
-		if (!isRunning()) {
-		    mainAirReservoir(-0.001f);
-		}
 	}
 
 	@Override
@@ -395,13 +390,11 @@ public class LocomotiveDiesel extends Locomotive {
 	public void onDragRelease(Control<?> component) {
 		super.onDragRelease(component);
 		if (component.part.type == ModelComponentType.ENGINE_START_X) {
-			turnedOn = getDefinition().getModel().getControls().stream()
-					.filter(c -> c.part.type == ModelComponentType.ENGINE_START_X)
-					.allMatch(c -> getControlPosition(c) == 1);
+			turnedOn = getDefinition().getModel().getControls(ModelComponentType.ENGINE_START_X).stream().allMatch(c -> getControlPosition(c) == 1);
 		}
 		if (component.part.type == ModelComponentType.REVERSER_X) {
 			// Make sure reverser is sync'd
-			setControlPositions(ModelComponentType.REVERSER_X, getReverser() / -2 + 0.5f);
+		    getDefinition().getModel().getControls(ModelComponentType.REVERSER_X).stream().forEach(c -> setControlPosition(c, getReverser() / -2 + 0.5f));
 		}
 	}
 	
@@ -456,14 +449,14 @@ public class LocomotiveDiesel extends Locomotive {
         }
     }
 
-    private void setRealDynamicBrake(float newDynamicBrakePos) {
-        newDynamicBrakePos = MathUtil.clamp(newDynamicBrakePos, 0, 1);
+    private void setRealDynamicBrake(float dynamicBrakePos) {
+        float newDynamicBrakePos = MathUtil.clamp(dynamicBrakePos, 0, 1);
         if (this.getDynamicBrake() != newDynamicBrakePos) {
             if (getDefinition().isLinearBrakeControl()) {
-                setControlPositions(ModelComponentType.DYNAMIC_BRAKE_X, newDynamicBrakePos);
+                getDefinition().getModel().getControls(ModelComponentType.DYNAMIC_BRAKE_X).stream().forEach(c -> setControlPosition(c, newDynamicBrakePos));
             }
             dynamicBrakePosition = newDynamicBrakePos;
-            setControlPositions(ModelComponentType.THROTTLE_DYN_BRAKE_X, getThrottle()/2 + (1- getDynamicBrake())/2);
+            getDefinition().getModel().getControls(ModelComponentType.THROTTLE_DYN_BRAKE_X).stream().forEach(c -> setControlPosition(c, getThrottle() / 2 + (1 - getDynamicBrake()) / 2));
         }
     }
 

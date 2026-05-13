@@ -8,7 +8,6 @@ import java.util.function.Function;
 import cam72cam.immersiverailroading.entity.physics.Consist;
 import cam72cam.immersiverailroading.entity.physics.Simulation;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
-import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Control;
@@ -25,6 +24,7 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.library.ChatText;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.util.VecUtil;
 
 public abstract class EntityCoupleableRollingStock extends EntityMoveableRollingStock {
@@ -166,22 +166,18 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			// Only couple server side
 			return;
 		}
-
-		for (Control<?> control : getDefinition().getModel().getControls()) {
-			if (control.part.type == ModelComponentType.COUPLER_ENGAGED_X) {
-				if (control.part.pos.contains(ModelPosition.FRONT)) {
-					if (isCouplerEngaged(CouplerType.FRONT) ^ (getControlPosition(control) < 0.5)) {
-						setCouplerEngaged(CouplerType.FRONT, getControlPosition(control) < 0.5);
-					}
-				}
-				if (control.part.pos.contains(ModelPosition.REAR)) {
-					if (isCouplerEngaged(CouplerType.BACK) ^ (getControlPosition(control) < 0.5)) {
-						setCouplerEngaged(CouplerType.BACK, getControlPosition(control) < 0.5);
-					}
-				}
-			}
-		}
-
+        for (Control<?> control : getDefinition().getModel().getControls(ModelComponentType.COUPLER_ENGAGED_X)) {
+            if (control.part.pos.contains(ModelPosition.FRONT)) {
+                if (isCouplerEngaged(CouplerType.FRONT) ^ (getControlPosition(control) < 0.5)) {
+                    setCouplerEngaged(CouplerType.FRONT, getControlPosition(control) < 0.5);
+                }
+            }
+            if (control.part.pos.contains(ModelPosition.REAR)) {
+                if (isCouplerEngaged(CouplerType.BACK) ^ (getControlPosition(control) < 0.5)) {
+                    setCouplerEngaged(CouplerType.BACK, getControlPosition(control) < 0.5);
+                }
+            }
+        }
 
 		if (this.getTickCount() % 5 == 0) {
 			hasElectricalPower = false;
@@ -324,24 +320,22 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 	
 	public void setCouplerEngaged(CouplerType coupler, boolean engaged) {
-		switch (coupler) {
-		case FRONT:
-			frontCouplerEngaged = engaged;
-			for (Control<?> control : getDefinition().getModel().getControls()) {
-				if (control.part.type == ModelComponentType.COUPLER_ENGAGED_X && control.part.pos.contains(ModelPosition.FRONT)) {
-					setControlPosition(control, engaged ? 0 : 1);
-				}
-			}
-			break;
-		case BACK:
-			backCouplerEngaged = engaged;
-			for (Control<?> control : getDefinition().getModel().getControls()) {
-				if (control.part.type == ModelComponentType.COUPLER_ENGAGED_X && control.part.pos.contains(ModelPosition.REAR)) {
-					setControlPosition(control, engaged ? 0 : 1);
-				}
-			}
-			break;
-		}
+	    for (Control<?> control : getDefinition().getModel().getControls(ModelComponentType.COUPLER_ENGAGED_X)) {
+	        switch (coupler) {
+	            case FRONT:
+	                frontCouplerEngaged = engaged;
+	                if (control.part.pos.contains(ModelPosition.FRONT)) {
+                        setControlPosition(control, engaged ? 0 : 1);
+                    }
+	                break;
+	            case BACK:
+	                backCouplerEngaged = engaged;
+	                if (control.part.pos.contains(ModelPosition.REAR)) {
+                        setControlPosition(control, engaged ? 0 : 1);
+                    }
+	                break;
+	        }
+	    }
 	}
 
 	/*

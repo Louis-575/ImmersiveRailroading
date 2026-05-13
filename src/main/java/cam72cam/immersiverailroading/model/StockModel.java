@@ -51,6 +51,9 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     protected final Map<String, ServerSideSound<ENTITY>> serverSideSounds = new HashMap<>();
 
     protected List<LightFlare<ENTITY>> headlights;
+    
+    //TODO Performance Testing
+    private EnumMap<ModelComponentType, List<Control<ENTITY>>> modelControls = new EnumMap<>(ModelComponentType.class);
 
     private final TrackFollowers frontTrackers;
     private final TrackFollowers rearTrackers;
@@ -171,6 +174,16 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         brakePressureSound = new PartSound(def.brakePressureSound, true, 40, ConfigSound.SoundCategories.RollingStock::brake);
         flangeSound = new FlangeSound(def.flange_sound, true, 40);
         sway = new SwaySimulator();
+        
+        //TODO Performance Testing
+        buildControlMap();
+    }
+    
+    private void buildControlMap() {        
+        for (Control<ENTITY> control : controls) {
+            ModelComponentType type = control.part.type;
+            modelControls.computeIfAbsent(type, t -> new ArrayList<>()).add(control);
+        }
     }
 
     public ModelState addRoll(ModelState state) {
@@ -431,12 +444,13 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         textFields.forEach(c -> c.render(stock, state, animations, partialTicks));
     }
 
-    public List<Control<ENTITY>> getControls() {
-        return controls;
-    }
-
     public List<Door<ENTITY>> getDoors() {
         return doors;
+    }
+    
+    // TODO Performance Testing
+    public List<Control<ENTITY>> getControls(ModelComponentType type) {
+        return modelControls.getOrDefault(type, Collections.emptyList());
     }
 
     public List<Control<ENTITY>> getDraggable() {

@@ -46,6 +46,9 @@ public abstract class Locomotive extends FreightTank{
 	private float trainBrakeInternal = 0;
 	public boolean trainBrakeDelta = false;
 	
+	private boolean fullBrake = false;
+	private boolean emergencyBrake = false;
+	
 	// TODO How many decimal places?
     @TagSync(floatPrecision = 5)
     @TagField("MAIN_AIR_RESERVOIR")
@@ -82,7 +85,7 @@ public abstract class Locomotive extends FreightTank{
 
 	@TagSync
     @TagField("slipping")
-	protected boolean slipping = false;
+    public boolean slipping = false;
 	
     @TagSync
     @TagField("sanding")
@@ -179,7 +182,6 @@ public abstract class Locomotive extends FreightTank{
         }
 
 		boolean linkThrottleReverser = forceLinkThrottleReverser() || disableIndependentThrottle;
-		boolean hasBrakeNotches = getDefinition().hasBrakeNotches();
 
 		switch(key) {
 			case HORN:
@@ -239,21 +241,50 @@ public abstract class Locomotive extends FreightTank{
 			}
 			break;
 		case TRAIN_BRAKE_UP:
+		    if (emergencyBrake) {
+		        break;
+		    }
+
+		    float current = getTrainBrakePos() + getBrakeDelta();
+		    
+		    if (!fullBrake) {
+		        if (current >= 1.0f) {
+		            setTrainBrake(0.99f);
+		            fullBrake = true;
+		            brakeCooldown = 20;
+		            break;
+		        }
+	            if (brakeCooldown > 0) {
+	                break;
+	            }
+                if (hasBrakeNotches()) {
+                    brakeCooldown = 3;
+                }
+		        setTrainBrake(current);
+		        break;
+		    }
             if (brakeCooldown > 0) {
                 break;
             }
-            brakeCooldown = hasBrakeNotches ? 2 : 0;		    
-			setTrainBrake(getTrainBrakePos() + getBrakeDelta());
-			break;
+		    setTrainBrake(1f);
+		    fullBrake = false;
+		    emergencyBrake = true;
+		    break;
 		case TRAIN_BRAKE_ZERO:
 			setTrainBrake(0f);
+			emergencyBrake = false;
+			fullBrake = false;
 			break;
 		case TRAIN_BRAKE_DOWN:
-            if (brakeCooldown > 0) {
+		    if (brakeCooldown > 0) {
                 break;
             }
-            brakeCooldown = hasBrakeNotches ? 2 : 0;		   
+		    if (hasBrakeNotches()) {
+                brakeCooldown = 3;
+            }
 			setTrainBrake(getTrainBrakePos() - getBrakeDelta());
+			fullBrake = false;
+            emergencyBrake = false;
 			break;
 		case DEAD_MANS_SWITCH:
 			if (deadManChangeTimeout == 0) { 
@@ -271,7 +302,7 @@ public abstract class Locomotive extends FreightTank{
                 sandingKey = !sandingKey;
                 sandingKeyTimeout = 5;
                 
-                setControlPositions(ModelComponentType.SANDING_CONTROL_X, sandingKey ? 1 : 0);
+                getDefinition().getModel().getControls(ModelComponentType.SANDING_CONTROL_X).stream().forEach(c -> setControlPosition(c, sandingKey ? 1 : 0));
             }
             break;
 		default:
@@ -298,7 +329,31 @@ public abstract class Locomotive extends FreightTank{
 				break;
 			case TRAIN_BRAKE_X:
 				if (getDefinition().isLinearBrakeControl()) {
-					setTrainBrake(getControlPosition(component));
+				    float controlPos = getControlPosition(component);
+                    if (controlPos < 1.0f) {
+                        emergencyBrake = false;
+                        fullBrake = false;
+                    }
+		            if (emergencyBrake) {
+		                break;
+		            }
+
+		            if (!fullBrake) {
+		                if (controlPos >= 1.0f) {
+		                    setTrainBrake(0.99f);
+		                    fullBrake = true;
+		                    brakeCooldown = 20;
+		                    break;
+		                }
+		                setTrainBrake(controlPos);
+		                break;
+		            }
+		            if (brakeCooldown > 0) {
+		                break;
+		            }
+		            setTrainBrake(1f);
+		            fullBrake = false;
+		            emergencyBrake = true;
 				}
 				break;
 			case REVERSER_X:
@@ -319,16 +374,12 @@ public abstract class Locomotive extends FreightTank{
 
 	@Override
 	public void onDragRelease(Control<?> control) {
-		super.onDragRelease(control);
-		switch (control.part.type) {
-            case TRAIN_BRAKE_X:
-                if (!getDefinition().isLinearBrakeControl())
-                    setControlPosition(control, 0.5f);
-            case COMPRESSOR_CONTROL_X:
-                compressorActive = getControlPosition(control) > 0.5f;
-            default:
-                break;
-        }
+	    super.onDragRelease(control);
+		if (control.part.type.equals(ModelComponentType.TRAIN_BRAKE_X) && !getDefinition().isLinearBrakeControl()) {
+		    setControlPosition(control, 0.5f);
+		} else if (control.part.type.equals(ModelComponentType.COMPRESSOR_CONTROL_X)) {
+            compressorActive = getControlPosition(control) > 0.5f;
+		}
 	}
 
 	@Override
@@ -430,9 +481,9 @@ public abstract class Locomotive extends FreightTank{
 		
 		if (getWorld().isServer) {
 			sync.setInterval(5);
-			for (Control<?> control : getDefinition().getModel().getControls()) {
+			for (Control<?> control : getDefinition().getModel().getControls(ModelComponentType.TRAIN_BRAKE_X)) {
 				// Logic duplicated in Readouts#setValue
-				if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.TRAIN_BRAKE_X) {
+				if (!getDefinition().isLinearBrakeControl()) {
 					setTrainBrake(MathUtil.clamp(getTrainBrakePos() + (getControlPosition(control) - 0.5f) / 8, 0, 1));
 				}
 			}
@@ -462,7 +513,7 @@ public abstract class Locomotive extends FreightTank{
 			if (hornTime == 0) {
 				hornPull = 0;
 			}
-			OptionalDouble control = getMaxControlPositions(ModelComponentType.BELL_CONTROL_X);
+			OptionalDouble control = getDefinition().getModel().getControls(ModelComponentType.BELL_CONTROL_X).stream().mapToDouble(this::getControlPosition).max();
 			if (control.isPresent() && control.getAsDouble() > 0) {
 				bellTime = 10;
 				bellControl = true;
@@ -492,6 +543,10 @@ public abstract class Locomotive extends FreightTank{
             // Compressor
             if (providesElectricalPower()) {
                 raiseMainAirReservoir();
+            }
+            
+            if (!providesElectricalPower() && getTrainBrakePos() == 1 && getMainAirReservoir() > 0) {
+                mainAirReservoir(-0.001f);
             }
 		}
 
@@ -579,7 +634,7 @@ public abstract class Locomotive extends FreightTank{
     }
     
     public float getCurrentTractiveEffort() {
-        return (float) Math.min(1, Math.abs((getAppliedTractiveEffort(getCurrentSpeed()) / getDefinition().getScriptedStartingTractionNewtons(gauge, this))));
+        return (float) Math.min(1, Math.abs((getAppliedTractiveEffort(super.getCurrentSpeed()) / getDefinition().getScriptedStartingTractionNewtons(gauge, this))));
     }
     
     public void setCurrentTractiveEffort(double effort) {
@@ -636,12 +691,12 @@ public abstract class Locomotive extends FreightTank{
 		}
 	}
 	
-	protected void setRealThrottle(float newThrottle) {
-		newThrottle = MathUtil.clamp(newThrottle, 0, 1);
+	protected void setRealThrottle(float throttle) {
+		float newThrottle = MathUtil.clamp(throttle, 0, 1);
 		if (this.getThrottle() != newThrottle) {
-			setControlPositions(ModelComponentType.THROTTLE_X, newThrottle);
-			throttle = newThrottle;
-			setControlPositions(ModelComponentType.THROTTLE_BRAKE_X, getThrottle()/2 + (1- getTrainBrakePos())/2);
+		    getDefinition().getModel().getControls(ModelComponentType.THROTTLE_X).stream().forEach(c -> setControlPosition(c, newThrottle));
+			this.throttle = newThrottle;
+			getDefinition().getModel().getControls(ModelComponentType.THROTTLE_BRAKE_X).stream().forEach(c -> setControlPosition(c, getThrottle() / 2 + (1 - getTrainBrakePos()) / 2));
 		}
 	}
 	
@@ -650,7 +705,11 @@ public abstract class Locomotive extends FreightTank{
 	}
 	
 	public float getBrakeDelta() {
-	    return 1F / getDefinition().getBrakeNotches();
+	    return 1f / (hasBrakeNotches() ? (float) getDefinition().getBrakeNotches() : 25f);
+	}
+	
+	public boolean hasBrakeNotches() {
+	    return getDefinition().getBrakeNotches() != 0;
 	}
 
 	public float getReverser() {
@@ -663,12 +722,12 @@ public abstract class Locomotive extends FreightTank{
 			this.mapTrain(this, true, false, this::copySettings);
 		}
 	}
-	private void setRealReverser(float newReverser){
-		newReverser = MathUtil.clamp(newReverser, -1, 1);
+	private void setRealReverser(float reverser){
+		float newReverser = MathUtil.clamp(reverser, -1, 1);
 
 		if (this.getReverser() != newReverser) {
-			setControlPositions(ModelComponentType.REVERSER_X, newReverser/-2 + 0.5f);
-			reverser = newReverser;
+		    getDefinition().getModel().getControls(ModelComponentType.REVERSER_X).stream().forEach(c -> setControlPosition(c, newReverser / -2 + 0.5f));
+			this.reverser = newReverser;
 		}
 	}
 
@@ -708,10 +767,8 @@ public abstract class Locomotive extends FreightTank{
 		if (getHornPlayer() != null) {
 			return (getHornPlayer().getRotationPitch() + 90) / 180;
 		}
-		double control = this.getDefinition().getModel().getControls().stream()
-				.filter(x -> x.part.type == ModelComponentType.WHISTLE_CONTROL_X)
-				.mapToDouble(this::getControlPosition)
-				.max().orElse(0);
+		double control = getDefinition().getModel().getControls(ModelComponentType.WHISTLE_CONTROL_X).stream()
+		        .mapToDouble(this::getControlPosition).max().orElse(0);
 
 		return Math.max((float)control, hornPull);
 	}
@@ -725,14 +782,14 @@ public abstract class Locomotive extends FreightTank{
 		this.mapTrain(this, true, false, this::copyBrakeSetting);
 	}
 	
-	private void setRealTrainBrake(float newTrainBrake) {
-		newTrainBrake = MathUtil.clamp(newTrainBrake, 0, 1);
+	private void setRealTrainBrake(float trainBrake) {
+		float newTrainBrake = MathUtil.clamp(trainBrake, 0, 1);
 		if (this.getTrainBrakePos() != newTrainBrake) {
 			if (getDefinition().isLinearBrakeControl()) {
-				setControlPositions(ModelComponentType.TRAIN_BRAKE_X, newTrainBrake);
+			    getDefinition().getModel().getControls(ModelComponentType.TRAIN_BRAKE_X).stream().forEach(c -> setControlPosition(c, newTrainBrake));
 			}
-			trainBrakePosition = newTrainBrake;
-			setControlPositions(ModelComponentType.THROTTLE_BRAKE_X, getThrottle()/2 + (1- getTrainBrakePos())/2);
+			this.trainBrakePosition = newTrainBrake;
+            getDefinition().getModel().getControls(ModelComponentType.THROTTLE_BRAKE_X).stream().forEach(c -> setControlPosition(c, getThrottle() / 2 + (1 - getTrainBrakePos()) / 2));
 		}
 	}
 	
@@ -745,8 +802,9 @@ public abstract class Locomotive extends FreightTank{
     }
 
     private void raiseMainAirReservoir() {
-        if (getDefinition().isCabCar())
+        if (getDefinition().isCabCar()) {
             return;
+        }
         if (!getDefinition().hasCompressor()) {
             mainAirReservoir = 1;
             return;
@@ -759,8 +817,9 @@ public abstract class Locomotive extends FreightTank{
         } else if (isLowAir() && getMainAirReservoir() >= 1.0) {
             isLowAir = false;
         }
-        if (!isLowAir())
+        if (!isLowAir()) {
             return;
+        }
         mainAirReservoir(0.0005f);
     }
     
@@ -842,7 +901,7 @@ public abstract class Locomotive extends FreightTank{
 	}
 	
     public boolean isSandingWidgetActive() {
-        return getControls(ModelComponentType.SANDING_CONTROL_X).stream().anyMatch(c -> getControlPosition(c) > 0.5f);
+        return getDefinition().getModel().getControls(ModelComponentType.SANDING_CONTROL_X).stream().anyMatch(c -> getControlPosition(c) > 0.5f);
     }
     
     public void setSanding(boolean sanding) {
