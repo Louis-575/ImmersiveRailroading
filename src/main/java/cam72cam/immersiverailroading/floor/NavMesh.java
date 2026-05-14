@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.floor;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.VecUtil;
+import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -14,63 +15,56 @@ import cam72cam.mod.util.Axis;
 import java.util.*;
 
 public class NavMesh {
-    public final BVHNode root;
-    public final BVHNode collisionRoot;
+    public BVHNode root;
+    public BVHNode collisionRoot;
+    private final boolean hasNavMesh;
     // Theoretically this could be much lower. IR floor meshes probably won't use the whole depth, but who knows
     private static final int MAX_DEPTH = 20;
     private static final int LEAF_SIZE = 8;
 
     public NavMesh(EntityRollingStockDefinition definition) {
-        StockModel<?, ?> model = definition.getModel();
-        if (model.floor != null) {
-            root = initFloorMesh(model);
-            // Correct bounds to match actual bb
-            Vec3d bounds = model.floor.max.subtract(model.floor.min);
-            definition.passengerCompartmentLength = bounds.x/2;
-            definition.passengerCompartmentWidth = bounds.z/2;
-        } else {
-            root = initFloorLegacy(definition);
-        }
+        hasNavMesh = definition.getModel().floor != null;
 
-        collisionRoot = initCollisionMesh(model);
+        if (hasNavMesh) {
+            initNavMesh(definition.getModel());
+        } else {
+            try {
+                initLegacy(definition);
+            } catch (IllegalArgumentException e) {
+                ModCore.catching(e);
+            }
+        }
     }
 
-    private BVHNode initFloorMesh(StockModel<?, ?> model) {
+    private void initNavMesh(StockModel<?, ?> model) {
         FaceAccessor accessor = model.getFaceAccessor();
 
         List<OBJFace> floor = new ArrayList<>();
         if (model.floor != null) {
-            model.floor.modelIDs.forEach(group -> {
-                FaceAccessor sub = accessor.getSubByGroup(group);
+            model.floor.groups().forEach(group -> {
+                FaceAccessor sub = accessor.getSubByGroup(group.name);
                 sub.forEach(a -> floor.add(a.asOBJFace()));
             });
         }
-        return buildBVH(floor, 0);
-    }
-    private BVHNode initCollisionMesh(StockModel<?, ?> model) {
-        FaceAccessor accessor = model.getFaceAccessor();
+        this.root = buildBVH(floor, 0);
 
         List<OBJFace> collision = new ArrayList<>();
         if (model.collision != null) {
-            model.collision.modelIDs.forEach(group -> {
-                FaceAccessor sub = accessor.getSubByGroup(group);
+            model.collision.groups().forEach(group -> {
+                FaceAccessor sub = accessor.getSubByGroup(group.name);
                 sub.forEach(a -> collision.add(a.asOBJFace()));
             });
         }
-
-        if (collision.isEmpty()) {
-            return null;
-        }
-        return buildBVH(collision, 0);
+        this.collisionRoot = buildBVH(collision, 0);
     }
 
-    private BVHNode initFloorLegacy(EntityRollingStockDefinition def) {
+    private void initLegacy(EntityRollingStockDefinition def) throws IllegalArgumentException {
         Vec3d center = def.passengerCenter;
         Double length = def.passengerCompartmentLength;
         Double width = def.passengerCompartmentWidth;
 
         if (length == null || width == null) {
-            throw new RuntimeException(String.format("Rolling stock %s needs to have either a FLOOR object or have \"length\" and \"width\" defined in the \"passenger\" section of the stocks json", def.name()));
+            throw new IllegalArgumentException(String.format("Rolling stock %s needs to have either a FLOOR object or have \"length\" and \"width\" defined in the \"passenger\" section of the stocks json", def.name()));
         }
 
         if (center == null) {
@@ -99,7 +93,12 @@ public class NavMesh {
         face1.normal = normal;
         face2.normal = normal;
 
-        return buildBVH(Arrays.asList(face1, face2), 0);
+        this.root = buildBVH(Arrays.asList(face1, face2), 0);
+        this.collisionRoot = buildBVH(Collections.emptyList(), 0);
+    }
+
+    public boolean hasNavMesh() {
+        return hasNavMesh;
     }
 
     public static class BVHNode {
