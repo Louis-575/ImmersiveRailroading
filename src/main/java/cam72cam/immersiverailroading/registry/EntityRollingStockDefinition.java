@@ -17,10 +17,8 @@ import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.EntityRegistry;
-import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.FaceAccessor;
-import cam72cam.mod.model.obj.OBJFace;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.serialization.*;
 import cam72cam.mod.serialization.ResourceCache.GenericByteBuffer;
@@ -84,8 +82,8 @@ public abstract class EntityRollingStockDefinition {
     private double rearBounds;
     private double heightBounds;
     private double widthBounds;
-    public Double passengerCompartmentLength;
-    public Double passengerCompartmentWidth;
+    private double passengerCompartmentLength;
+    private double passengerCompartmentWidth;
     private double weight;
     private int maxPassengers;
     private int snowLayers;
@@ -342,7 +340,7 @@ public abstract class EntityRollingStockDefinition {
         this.model = createModel();
         this.itemGroups = model.groups.keySet().stream().filter(x -> !ModelComponentType.shouldRender(x)).collect(Collectors.toList());
 
-        this.navMesh = new NavMesh(this);
+        this.navMesh = new NavMesh(this.model);
 
         this.renderComponents = new EnumMap<>(ModelComponentType.class);
         for (ModelComponent component : model.allComponents) {
@@ -485,19 +483,9 @@ public abstract class EntityRollingStockDefinition {
         modelLoc = data.getValue("model").asIdentifier();
 
         DataBlock passenger = data.getBlock("passenger");
-
-        if (passenger.getValue("center_x") != null && passenger.getValue("center_y") != null) {
-            passengerCenter = new Vec3d(-passenger.getValue("center_x").asDouble(), passenger.getValue("center_y").asDouble() - 0.35, 0).scale(internal_model_scale);
-        }
-
-        if (passenger.getValue("length") != null) {
-            passengerCompartmentLength = passenger.getValue("length").asDouble() * internal_model_scale;
-        }
-
-        if (passenger.getValue("width") != null) {
-            passengerCompartmentWidth = passenger.getValue("width").asDouble() * internal_model_scale;
-        }
-
+        passengerCenter = new Vec3d(0, passenger.getValue("center_y").asDouble() - 0.35, passenger.getValue("center_x").asDouble()).scale(internal_model_scale);
+        passengerCompartmentLength = passenger.getValue("length").asDouble() * internal_model_scale;
+        passengerCompartmentWidth = passenger.getValue("width").asDouble() * internal_model_scale;
         maxPassengers = passenger.getValue("slots").asInteger();
         shouldSit = passenger.getValue("should_sit").asBoolean();
 
@@ -647,81 +635,35 @@ public abstract class EntityRollingStockDefinition {
         }
         return renderComponents.get(name);
     }
-    
-    public boolean hitsNavCollisionMesh(Gauge gauge, Vec3d passengerOffset, Vec3d movement) {
-        if (navMesh.collisionRoot == null) {
-            return false;
-        }
-        // Flip coords
-        passengerOffset = passengerOffset.rotateYaw(-90);
-        movement = movement.rotateYaw(-90);
 
-        passengerOffset = passengerOffset.add(movement);
-
-        IBoundingBox rayBox = IBoundingBox.from(
-                passengerOffset.subtract(0.25f, 0.5f, 0.25f),
-                passengerOffset.add(0.25f, 0.5f, 0.25f)
-        );
-        List<OBJFace> nearby = new ArrayList<>();
-        navMesh.queryBVH(navMesh.collisionRoot, rayBox, nearby, gauge.scale());
-
-        Vec3d rayStart = passengerOffset.add(0, 1, 0);
-        Vec3d rayDir = movement.normalize();
-
-        for (OBJFace tri : nearby) {
-            Double t = MathUtil.intersectRayTriangle(rayStart, rayDir, tri);
-            if (t != null) {
-               return true;
-            }
+    public Vec3d correctPassengerBounds(Gauge gauge, Vec3d pos, boolean shouldSit) {
+        double gs = gauge.scale();
+        Vec3d passengerCenter = this.passengerCenter.scale(gs);
+        pos = pos.subtract(passengerCenter);
+        if (pos.z > this.passengerCompartmentLength * gs) {
+            pos = new Vec3d(pos.x, pos.y, this.passengerCompartmentLength * gs);
         }
 
-        return false;
-    }
-
-    public Vec3d correctPassengerBounds(Gauge gauge, Vec3d passengerOffset, boolean shouldSit) {
-        // Flip coords
-        passengerOffset = passengerOffset.rotateYaw(-90);
-
-        for (float searchRange : new float[]{0.5f, 5f, 10f}) {
-            IBoundingBox rayBox = IBoundingBox.from(
-                    passengerOffset.subtract(searchRange, searchRange, searchRange),
-                    passengerOffset.add(searchRange, searchRange, searchRange)
-            );
-            List<OBJFace> nearby = new ArrayList<>();
-            navMesh.queryBVH(navMesh.root, rayBox, nearby, gauge.scale());
-            if (nearby.isEmpty()) {
-                continue;
-            }
-
-            Vec3d closestPoint = null;
-            double closestDistanceSq = 0;
-            for (OBJFace face : nearby) {
-                Vec3d p0 = face.vertex0.pos;
-                Vec3d p1 = face.vertex1.pos;
-                Vec3d p2 = face.vertex2.pos;
-
-                Vec3d pointOnTri = MathUtil.closestPointOnTriangle(passengerOffset, p0, p1, p2);
-                double distSq = passengerOffset.subtract(pointOnTri).lengthSquared();
-
-                if (closestPoint == null || distSq < closestDistanceSq) {
-                    closestDistanceSq = distSq;
-                    closestPoint = pointOnTri;
-                }
-            }
-
-            // flip coords
-            return closestPoint.rotateYaw(90);
+        if (pos.z < -this.passengerCompartmentLength * gs) {
+            pos = new Vec3d(pos.x, pos.y, -this.passengerCompartmentLength * gs);
         }
 
-        // flip coords
-        return passengerOffset.rotateYaw(90);
+        if (Math.abs(pos.x) > this.passengerCompartmentWidth / 2 * gs) {
+            pos = new Vec3d(Math.copySign(this.passengerCompartmentWidth / 2 * gs, pos.x), pos.y, pos.z);
+        }
+
+        pos = new Vec3d(pos.x, passengerCenter.y - (shouldSit ? 0.75 : 0), pos.z + passengerCenter.z);
+
+        return pos;
     }
 
     public boolean isAtFront(Gauge gauge, Vec3d pos) {
+        pos = pos.subtract(passengerCenter.scale(gauge.scale()));
         return pos.z >= this.passengerCompartmentLength * gauge.scale();
     }
 
     public boolean isAtRear(Gauge gauge, Vec3d pos) {
+        pos = pos.subtract(passengerCenter.scale(gauge.scale()));
         return pos.z <= -this.passengerCompartmentLength * gauge.scale();
     }
 
