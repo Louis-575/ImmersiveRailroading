@@ -304,6 +304,12 @@ public class Config {
 
 		@Comment("Does stock drops itself/components when player is in creative mode?")
 		public static boolean stockDropInCreativeMode = true;
+
+		@Comment("Enable track snapping")
+		public static boolean enableTrackSnapping = false;
+
+		@Comment("Should track snapping also snap angle")
+		public static boolean trackSnapAngle = false;
 	}
 
 	public static boolean isFuelRequired(Gauge gauge) {
