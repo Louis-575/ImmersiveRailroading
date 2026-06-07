@@ -39,10 +39,11 @@ public class BuilderParallel extends BuilderBase {
 
 		for (int i = 0; i < info.settings.parallelCount; i++) {
 			final int trackIndex = i;
-			boolean isDefaultCustom = info.settings.type == TrackItems.CUSTOM //For default custom curve when there is no endpoint
+			boolean hasCustomCurveEndpoint = info.settings.type == TrackItems.CUSTOM || info.settings.type == TrackItems.SWITCH;
+			boolean isDefaultCustom = hasCustomCurveEndpoint // For default custom curve/switch when there is no endpoint
 					&& info.customInfo.placementPosition.equals(info.placementInfo.placementPosition);
 			Vec3d offset = VecUtil.fromYaw(trackIndex * info.settings.parallelGap, info.placementInfo.yaw + 90);
-			Vec3d customOffset = info.settings.type == TrackItems.CUSTOM && !isDefaultCustom
+			Vec3d customOffset = hasCustomCurveEndpoint && !isDefaultCustom
 					? VecUtil.fromYaw(trackIndex * info.settings.parallelGap * -1, info.customInfo.yaw + 90)
 					: offset;
 			Vec3d placement = info.placementInfo.placementPosition.add(offset);
