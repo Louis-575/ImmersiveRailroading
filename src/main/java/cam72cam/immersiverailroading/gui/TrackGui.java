@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.gui.components.ListSelector;
+import cam72cam.immersiverailroading.gui.components.NumberInputer;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
@@ -9,6 +10,7 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.render.rail.RailRender;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.track.BuilderParallel;
 import cam72cam.immersiverailroading.track.BuilderTransferTable;
 import cam72cam.immersiverailroading.track.BuilderTurnTable;
 import cam72cam.immersiverailroading.track.TrackBase;
@@ -39,6 +41,8 @@ public class TrackGui implements IScreen {
 	private TileRailPreview te;
 	private Button typeButton;
 	private TextField lengthInput;
+    //TODO How do we handle dynamic range?
+//	private NumberInputer lengthInput;
 	private Slider degreesSlider;
 	private Slider curvositySlider;
 	private CheckBox isPreviewCB;
@@ -48,6 +52,8 @@ public class TrackGui implements IScreen {
 	private Button posTypeButton;
 	private Button smoothingButton;
 	private Button directionButton;
+	private Slider parallelCountSlider;
+	private Slider parallelGapSlider;
 	private Button bedTypeButton;
 	private Button bedFillButton;
 
@@ -97,32 +103,43 @@ public class TrackGui implements IScreen {
 		int height = 20;
 		int xtop = -GUIHelpers.getScreenWidth() / 2;
 		int ytop = -GUIHelpers.getScreenHeight() / 4;
-
-		this.lengthInput = new TextField(screen, xtop, ytop, width-1, height);
-		this.lengthInput.setText("" + settings.length);
-		this.lengthInput.setValidator(s -> {
-			if (s == null || s.length() == 0) {
-				return true;
-			}
-			int val;
-			try {
-				val = Integer.parseInt(s);
-			} catch (NumberFormatException e) {
-				return false;
-			}
-			int max = 1000;
-			if (settings.type.isTable()) {
-				max = settings.type == TrackItems.TURNTABLE
-					  ? BuilderTurnTable.maxLength(settings.gauge)
-					  : BuilderTransferTable.maxLength(settings.gauge);
-			}
-			if (val > 0 && val <= max) {
-				settings.length = val;
-				return true;
-			}
-			return false;
-		});
-		this.lengthInput.setFocused(true);
+        this.lengthInput = new TextField(screen, xtop, ytop, width-1, height);
+        this.lengthInput.setText("" + settings.length);
+        this.lengthInput.setValidator(s -> {
+            if (s == null || s.length() == 0) {
+                return true;
+            }
+            int val;
+            try {
+                val = Integer.parseInt(s);
+            } catch (NumberFormatException e) {
+                return false;
+            }
+            int max = 1000;
+            if (settings.type.isTable()) {
+                max = settings.type == TrackItems.TURNTABLE
+                      ? BuilderTurnTable.maxLength(settings.gauge)
+                      : BuilderTransferTable.maxLength(settings.gauge);
+            }
+            if (val > 0 && val <= max) {
+                settings.length = val;
+                return true;
+            }
+            return false;
+        });
+        this.lengthInput.setFocused(true);
+//		this.lengthInput = new NumberInputer(screen, xtop, ytop, width, height, "Length:", "", 10, 1000, settings.length,
+//                                             true, true, val -> {
+//            int max = 1000;
+//            if (settings.type.isTable()) {
+//                max = settings.type == TrackItems.TURNTABLE
+//                      ? BuilderTurnTable.maxLength(settings.gauge)
+//                      : BuilderTransferTable.maxLength(settings.gauge);
+//            }
+//            if (val > 0 && val <= max) {
+//                settings.length = val.intValue();
+//            }
+//        });
 		ytop += height;
 
 		gaugeSelector = new ListSelector<Gauge>(screen, width, 100, height, settings.gauge,
@@ -136,7 +153,9 @@ public class TrackGui implements IScreen {
 					int max = settings.type == TrackItems.TURNTABLE
 							  ? BuilderTurnTable.maxLength(settings.gauge)
 							  : BuilderTransferTable.maxLength(settings.gauge);
-					lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
+
+                    lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
+//					lengthInput.setValue(Math.min((int)lengthInput.getValue(), max)); // revalidate
 				}
 			}
 		};
@@ -162,11 +181,14 @@ public class TrackGui implements IScreen {
 				curvositySlider.setVisible(settings.type.hasCurvosity());
 				smoothingButton.setVisible(settings.type.hasSmoothing());
 				directionButton.setVisible(settings.type.hasDirection());
+				parallelCountSlider.setVisible(BuilderParallel.supports(settings.type));
+				parallelGapSlider.setVisible(BuilderParallel.supports(settings.type));
 				if (settings.type.isTable()) {
 					int max = settings.type == TrackItems.TURNTABLE
 							  ? BuilderTurnTable.maxLength(settings.gauge)
 							  : BuilderTransferTable.maxLength(settings.gauge);
-					lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
+                    lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
+//					lengthInput.setValue(Math.min((int) lengthInput.getValue(), max)); // revalidate
 				}
 				transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 				transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
@@ -243,10 +265,32 @@ public class TrackGui implements IScreen {
 		curvositySlider.onSlider();
 		ytop += height;
 
+		this.parallelCountSlider = new Slider(screen, 25+xtop, ytop, "", 1, 10, settings.parallelCount, false) {
+			@Override
+			public void onSlider() {
+				settings.parallelCount = this.getValueInt();
+				parallelCountSlider.setText(GuiText.SELECTOR_PARALLEL_TRACKS.toString(settings.parallelCount));
+			}
+		};
+		parallelCountSlider.onSlider();
+		ytop += height;
+
+		this.parallelGapSlider = new Slider(screen, 25+xtop, ytop, "", -20, 20, settings.parallelGap * 2, false) {
+			@Override
+			public void onSlider() {
+				settings.parallelGap = this.getValueInt() / 2f;
+				parallelGapSlider.setText(GuiText.SELECTOR_PARALLEL_GAP.toString(String.format("%.1f", settings.parallelGap)));
+			}
+		};
+		parallelGapSlider.onSlider();
+		ytop += height;
+
 		directionButton.setVisible(settings.type.hasDirection());
 		degreesSlider.setVisible(settings.type.hasQuarters());
 		curvositySlider.setVisible(settings.type.hasCurvosity());
 		smoothingButton.setVisible(settings.type.hasSmoothing());
+		parallelCountSlider.setVisible(BuilderParallel.supports(settings.type));
+		parallelGapSlider.setVisible(BuilderParallel.supports(settings.type));
 		transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 		transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 
