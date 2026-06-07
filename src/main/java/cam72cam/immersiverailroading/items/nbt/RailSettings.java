@@ -19,6 +19,11 @@ public class RailSettings {
     public final TrackDirection direction;
     public final ItemStack railBed;
     public final ItemStack railBedFill;
+    public final int railBedFillWidth;
+    public final ItemStack embankment;
+    public final int embankmentOffset;
+    public final int embankmentHeight;
+    public final float embankmentGradient;
     public final boolean isPreview;
     public final boolean isGradeCrossing;
     public final String track;
@@ -32,6 +37,10 @@ public class RailSettings {
     }
 
     public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing, int parallelCount, float parallelGap) {
+        this(gauge, track, type, length, degrees, curvosity, posType, smoothing, direction, railBed, railBedFill, 1, ItemStack.EMPTY, 0, 1, 1, isPreview, isGradeCrossing, count, spacing, parallelCount, parallelGap);
+    }
+
+    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, int railBedFillWidth, ItemStack embankment, int embankmentOffset, int embankmentHeight, float embankmentGradient, boolean isPreview, boolean isGradeCrossing, int count, int spacing, int parallelCount, float parallelGap) {
         this.gauge = gauge;
         this.track = track;
         this.type = type;
@@ -42,6 +51,11 @@ public class RailSettings {
         this.direction = direction;
         this.railBed = railBed;
         this.railBedFill = railBedFill;
+        this.railBedFillWidth = railBedFillWidth;
+        this.embankment = embankment;
+        this.embankmentOffset = embankmentOffset;
+        this.embankmentHeight = embankmentHeight;
+        this.embankmentGradient = embankmentGradient;
         this.isPreview = isPreview;
         this.isGradeCrossing = isGradeCrossing;
         this.curvosity = curvosity;
@@ -137,6 +151,16 @@ public class RailSettings {
         public ItemStack railBed;
         @TagField("bedFill")
         public ItemStack railBedFill;
+        @TagField("bedFillWidth")
+        public int railBedFillWidth;
+        @TagField("embankment")
+        public ItemStack embankment;
+        @TagField("embankmentOffset")
+        public int embankmentOffset;
+        @TagField("embankmentHeight")
+        public int embankmentHeight;
+        @TagField("embankmentGradient")
+        public float embankmentGradient;
         @TagField("isPreview")
         public boolean isPreview;
         @TagField("isGradeCrossing")
@@ -165,6 +189,11 @@ public class RailSettings {
             this.direction = settings.direction;
             this.railBed = settings.railBed;
             this.railBedFill = settings.railBedFill;
+            this.railBedFillWidth = settings.railBedFillWidth;
+            this.embankment = settings.embankment;
+            this.embankmentOffset = settings.embankmentOffset;
+            this.embankmentHeight = settings.embankmentHeight;
+            this.embankmentGradient = settings.embankmentGradient;
             this.isPreview = settings.isPreview;
             this.isGradeCrossing = settings.isGradeCrossing;
             this.transfertableEntryCount = settings.transfertableEntryCount;
@@ -185,6 +214,11 @@ public class RailSettings {
             direction = TrackDirection.NONE;
             railBed = ItemStack.EMPTY;
             railBedFill = ItemStack.EMPTY;
+            railBedFillWidth = 1;
+            embankment = ItemStack.EMPTY;
+            embankmentOffset = 0;
+            embankmentHeight = 1;
+            embankmentGradient = 1;
             isPreview = false;
             isGradeCrossing = false;
             curvosity = 1;
@@ -209,6 +243,11 @@ public class RailSettings {
                     direction,
                     railBed,
                     railBedFill,
+                    railBedFillWidth,
+                    embankment,
+                    embankmentOffset,
+                    embankmentHeight,
+                    embankmentGradient,
                     isPreview,
                     isGradeCrossing,
                     transfertableEntryCount,

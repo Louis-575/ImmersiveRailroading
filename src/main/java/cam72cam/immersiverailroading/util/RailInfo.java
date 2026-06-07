@@ -311,6 +311,9 @@ public class RailInfo {
 				if (!settings.railBedFill.isEmpty()) {
 					materials.add(new MaterialManager(false, builder.costFill(), settings.railBedFill::is, settings.railBedFill));
 				}
+				if (!settings.embankment.isEmpty()) {
+					materials.add(new MaterialManager(false, builder.costEmbankment(), settings.embankment::is, settings.embankment));
+				}
 
 				List<TrackDefinition.TrackMaterial> tieParts = def.materials.get(TrackComponent.TIE);
 				List<TrackDefinition.TrackMaterial> railParts = def.materials.get(TrackComponent.RAIL);

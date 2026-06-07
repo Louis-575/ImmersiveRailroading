@@ -3,7 +3,6 @@ package cam72cam.immersiverailroading.track;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackModelPart;
-import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3d;
@@ -99,16 +98,19 @@ public class BuilderTransferTable extends BuilderBase {
     }
 
     public int costFill() {
-        int fillCount = 0;
+        return super.costFill();
+    }
+
+    @Override
+    public List<TrackBase> getTracksForRailBedFill() {
+        List<TrackBase> fillTracks = new ArrayList<>();
         for (TrackBase track : tracks) {
             if (track.rel.y == 1) {
                 continue;
             }
-            if (BlockUtil.canBeReplaced(world, track.getPos().down(), false)) {
-                fillCount += 1;
-            }
+            fillTracks.add(track);
         }
-        return (int)Math.ceil(!this.info.settings.railBedFill.isEmpty() ? fillCount : 0);
+        return fillTracks;
     }
 
     public static int maxLength(Gauge gauge){
