@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.items;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
@@ -9,6 +10,7 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.util.TrackUtil;
 import cam72cam.immersiverailroading.track.BuilderParallel;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.IRFuzzy;
@@ -56,7 +58,9 @@ public class ItemTrackBlueprint extends CustomItem {
 	@Override
     public ClickResult onClickBlock(Player player, World world, Vec3i pos, Player.Hand hand, Facing facing, Vec3d hit) {
 		ItemStack stack = player.getHeldItem(hand);
+		PlacementInfo snapped = TrackUtil.getNeighborNode(player, player.getWorld(), pos, hit, stack);
 		RailSettings stackInfo = RailSettings.from(stack);
+		float yaw;
 
 		if (world.isServer && hand == Player.Hand.SECONDARY) {
 			ItemStack blockinfo = world.getItemStack(pos);
@@ -70,11 +74,19 @@ public class ItemTrackBlueprint extends CustomItem {
 			return ClickResult.ACCEPTED;
 		}
 
-		pos = pos.up();
-		
-		if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-			if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5) {
-				pos = pos.down();
+		boolean useSnapping = snapped != null && Config.ConfigDebug.enableTrackSnapping;
+		if(useSnapping) {
+			pos = new Vec3i(snapped.placementPosition);
+			hit = snapped.placementPosition.subtract(pos);
+			yaw = snapped.yaw;
+		} else {
+			pos = pos.up();
+			yaw = player.getRotationYawHead();
+
+			if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
+				if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5) {
+					pos = pos.down();
+				}
 			}
 		}
 
@@ -85,13 +97,13 @@ public class ItemTrackBlueprint extends CustomItem {
 			world.setBlock(pos, IRBlocks.BLOCK_RAIL_PREVIEW);
 			TileRailPreview te = world.getBlockEntity(pos, TileRailPreview.class);
 			if (te != null) {
-				PlacementInfo placementInfo = new PlacementInfo(stack, player.getYawHead(), hit.subtract(0, hit.y, 0));
+				PlacementInfo placementInfo = new PlacementInfo(stack, yaw, hit.subtract(0, hit.y, 0), useSnapping);
 				te.setup(stack, placementInfo);
 			}
 			return ClickResult.ACCEPTED;
 		}
 
-		PlacementInfo placementInfo = new PlacementInfo(stack, player.getYawHead(), hit.subtract(0, hit.y, 0));
+		PlacementInfo placementInfo = new PlacementInfo(stack, yaw, hit.subtract(0, hit.y, 0), useSnapping);
 		RailInfo info = new RailInfo(stack, placementInfo, null);
 		info.build(player, pos);
 		return ClickResult.ACCEPTED;
