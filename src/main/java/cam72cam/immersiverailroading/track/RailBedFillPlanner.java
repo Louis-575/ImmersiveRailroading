@@ -60,7 +60,7 @@ public class RailBedFillPlanner {
         }
 
         int width = Math.max(0, Math.min(10, settings.railBedFillWidth));
-        int maxDistance = width  * DISTANCE_SCALE;
+        int maxDistance = width * DISTANCE_SCALE;
         PriorityQueue<Node> queue = new PriorityQueue<>(Comparator.comparingInt(node -> node.distance));
         Map<Pair<Integer, Integer>, Integer> bestDistance = new HashMap<>();
         Map<Pair<Integer, Integer>, Integer> bestSourceY = new HashMap<>();
