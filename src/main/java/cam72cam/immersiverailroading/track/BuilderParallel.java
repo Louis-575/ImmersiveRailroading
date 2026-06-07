@@ -23,10 +23,15 @@ public class BuilderParallel extends BuilderBase {
 			case STRAIGHT:
 			case TURN:
 			case SWITCH:
+			case CUSTOM:
 				return true;
 			default:
 				return false;
 		}
+	}
+
+	public static boolean supports(RailInfo info) {
+		return supports(info.settings.type);
 	}
 
 	public BuilderParallel(RailInfo info, World world, Vec3i pos) {
@@ -34,7 +39,12 @@ public class BuilderParallel extends BuilderBase {
 
 		for (int i = 0; i < info.settings.parallelCount; i++) {
 			final int trackIndex = i;
+			boolean isDefaultCustom = info.settings.type == TrackItems.CUSTOM //For default custom curve when there is no endpoint
+					&& info.customInfo.placementPosition.equals(info.placementInfo.placementPosition);
 			Vec3d offset = VecUtil.fromYaw(trackIndex * info.settings.parallelGap, info.placementInfo.yaw + 90);
+			Vec3d customOffset = info.settings.type == TrackItems.CUSTOM && !isDefaultCustom
+					? VecUtil.fromYaw(trackIndex * info.settings.parallelGap * -1, info.customInfo.yaw + 90)
+					: offset;
 			Vec3d placement = info.placementInfo.placementPosition.add(offset);
 			Vec3i childPosOffset = new Vec3i(placement.x, 0, placement.z);
 			Vec3i childPos = pos.add(childPosOffset);
@@ -47,7 +57,7 @@ public class BuilderParallel extends BuilderBase {
 					}
 				});
 				b.placementInfo = offset(b.placementInfo, offset, childPosOffset);
-				b.customInfo = b.customInfo != null ? offset(b.customInfo, offset, childPosOffset) : null;
+				b.customInfo = b.customInfo != null ? offset(b.customInfo, customOffset, childPosOffset) : null;
 			});
 			BuilderBase childBuilder = childInfo.getBuilder(world, childPos);
 			if (i == 0) {

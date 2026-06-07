@@ -265,7 +265,7 @@ public class TrackGui implements IScreen {
 		curvositySlider.onSlider();
 		ytop += height;
 
-		this.parallelCountSlider = new Slider(screen, xtop, ytop, width, height, "", 1, 10, settings.parallelCount, false) {
+		this.parallelCountSlider = new Slider(screen, 25+xtop, ytop, "", 1, 10, settings.parallelCount, false) {
 			@Override
 			public void onSlider() {
 				settings.parallelCount = this.getValueInt();
@@ -275,7 +275,7 @@ public class TrackGui implements IScreen {
 		parallelCountSlider.onSlider();
 		ytop += height;
 
-		this.parallelGapSlider = new Slider(screen, xtop, ytop, width, height, "", -20, 20, settings.parallelGap * 2, false) {
+		this.parallelGapSlider = new Slider(screen, 25+xtop, ytop, "", -20, 20, settings.parallelGap * 2, false) {
 			@Override
 			public void onSlider() {
 				settings.parallelGap = this.getValueInt() / 2f;

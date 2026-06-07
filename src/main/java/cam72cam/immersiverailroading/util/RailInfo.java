@@ -183,7 +183,7 @@ public class RailInfo {
 		return builder;
 	}
 	private BuilderBase constructBuilder(World world, Vec3i pos) {
-		if (settings.parallelCount > 1 && BuilderParallel.supports(settings.type)) {
+		if (settings.parallelCount > 1 && BuilderParallel.supports(this)) {
 			return new BuilderParallel(this, world, pos);
 		}
 		switch (settings.type) {
