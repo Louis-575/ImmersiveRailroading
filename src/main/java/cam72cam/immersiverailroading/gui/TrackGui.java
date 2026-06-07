@@ -363,7 +363,7 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-		bedFillWidthSlider = new Slider(screen, 25+xSecondColumn, ySecondColumn, "", 1, 10, settings.railBedFillWidth, false) {
+		bedFillWidthSlider = new Slider(screen, 25+xSecondColumn, ySecondColumn, "", 0, 10, settings.railBedFillWidth, false) {
 			@Override
 			public void onSlider() {
 				settings.railBedFillWidth = this.getValueInt();
