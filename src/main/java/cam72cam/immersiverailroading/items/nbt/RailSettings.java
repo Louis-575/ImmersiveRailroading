@@ -24,8 +24,14 @@ public class RailSettings {
     public final String track;
     public final int transfertableEntryCount;
     public final int transfertableEntrySpacing;
+    public final int parallelCount;
+    public final float parallelGap;
 
     public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
+        this(gauge, track, type, length, degrees, curvosity, posType, smoothing, direction, railBed, railBedFill, isPreview, isGradeCrossing, count, spacing, 1, 4);
+    }
+
+    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing, int parallelCount, float parallelGap) {
         this.gauge = gauge;
         this.track = track;
         this.type = type;
@@ -41,6 +47,8 @@ public class RailSettings {
         this.curvosity = curvosity;
         this.transfertableEntryCount = count;
         this.transfertableEntrySpacing = spacing;
+        this.parallelCount = parallelCount;
+        this.parallelGap = parallelGap;
     }
 
     public void write(ItemStack stack) {
@@ -140,6 +148,10 @@ public class RailSettings {
         public int transfertableEntryCount;
         @TagField("transfertableEntrySpacing")
         public int transfertableEntrySpacing;
+        @TagField("parallelCount")
+        public int parallelCount;
+        @TagField("parallelGap")
+        public float parallelGap;
 
         private Mutable(RailSettings settings) {
             this.gauge = settings.gauge;
@@ -157,6 +169,8 @@ public class RailSettings {
             this.isGradeCrossing = settings.isGradeCrossing;
             this.transfertableEntryCount = settings.transfertableEntryCount;
             this.transfertableEntrySpacing = settings.transfertableEntrySpacing;
+            this.parallelCount = settings.parallelCount;
+            this.parallelGap = settings.parallelGap;
         }
 
         private Mutable(TagCompound data) throws SerializationException {
@@ -176,6 +190,8 @@ public class RailSettings {
             curvosity = 1;
             transfertableEntryCount = 1;
             transfertableEntrySpacing = 1;
+            parallelCount = 1;
+            parallelGap = 4;
 
             TagSerializer.deserialize(data, this);
         }
@@ -196,7 +212,9 @@ public class RailSettings {
                     isPreview,
                     isGradeCrossing,
                     transfertableEntryCount,
-                    transfertableEntrySpacing
+                    transfertableEntrySpacing,
+                    parallelCount,
+                    parallelGap
             );
         }
     }

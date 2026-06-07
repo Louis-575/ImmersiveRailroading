@@ -70,6 +70,8 @@ public class RailInfo {
 				this.settings.track,
 				this.settings.smoothing,
 				this.settings.isGradeCrossing,
+				this.settings.parallelCount,
+				this.settings.parallelGap,
 				this.switchState,
 				this.switchForced,
 				this.tablePos,
@@ -183,6 +185,9 @@ public class RailInfo {
 	private BuilderBase constructBuilder(World world, Vec3i pos) {
 		switch (settings.type) {
 		case STRAIGHT:
+			if (settings.parallelCount > 1) {
+				return new BuilderParallel(this, world, pos);
+			}
 			return new BuilderStraight(this, world, pos);
 		case CROSSING:
 			return new BuilderCrossing(this, world, pos);

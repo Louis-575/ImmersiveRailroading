@@ -16,6 +16,8 @@ public enum GuiText {
 	SELECTOR_POSITION("selector.position"),
 	SELECTOR_SMOOTHING("selector.smoothing"),
 	SELECTOR_DIRECTION("selector.direction"),
+	SELECTOR_PARALLEL_TRACKS("selector.parallel_tracks"),
+	SELECTOR_PARALLEL_GAP("selector.parallel_gap"),
 	SELECTOR_PLACE_BLUEPRINT("selector.place_blueprint"),
 	SELECTOR_GRADE_CROSSING("selector.grade_crossing"),
 	SELECTOR_GAUGE("selector.gauge"),
@@ -45,6 +47,8 @@ public enum GuiText {
 	TRACK_POSITION("track.position"),
 	TRACK_SMOOTHING("track.smoothing"),
 	TRACK_DIRECTION("track.direction"),
+	TRACK_PARALLEL_TRACKS("track.parallel_tracks"),
+	TRACK_PARALLEL_GAP("track.parallel_gap"),
 	TRACK_PLACE_BLUEPRINT_TRUE("track.place_blueprint_true"),
 	TRACK_PLACE_BLUEPRINT_FALSE("track.place_blueprint_false"),
 	

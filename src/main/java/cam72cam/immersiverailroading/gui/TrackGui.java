@@ -51,6 +51,8 @@ public class TrackGui implements IScreen {
 	private Button posTypeButton;
 	private Button smoothingButton;
 	private Button directionButton;
+	private Slider parallelCountSlider;
+	private Slider parallelGapSlider;
 	private Button bedTypeButton;
 	private Button bedFillButton;
 
@@ -178,6 +180,8 @@ public class TrackGui implements IScreen {
 				curvositySlider.setVisible(settings.type.hasCurvosity());
 				smoothingButton.setVisible(settings.type.hasSmoothing());
 				directionButton.setVisible(settings.type.hasDirection());
+				parallelCountSlider.setVisible(settings.type == TrackItems.STRAIGHT);
+				parallelGapSlider.setVisible(settings.type == TrackItems.STRAIGHT);
 				if (settings.type.isTable()) {
 					int max = settings.type == TrackItems.TURNTABLE
 							  ? BuilderTurnTable.maxLength(settings.gauge)
@@ -216,6 +220,15 @@ public class TrackGui implements IScreen {
 			}
 		};
 		transfertableEntryCountSlider.onSlider();
+
+		this.parallelCountSlider = new Slider(screen, 25+xtop, ytop, "", 1, 10, settings.parallelCount, false) {
+			@Override
+			public void onSlider() {
+				settings.parallelCount = this.getValueInt();
+				parallelCountSlider.setText(GuiText.SELECTOR_PARALLEL_TRACKS.toString(settings.parallelCount));
+			}
+		};
+		parallelCountSlider.onSlider();
 		ytop += height;
 
 		directionButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_DIRECTION.toString(settings.direction)) {
@@ -236,6 +249,15 @@ public class TrackGui implements IScreen {
 			}
 		};
 		transfertableEntrySpacingSlider.onSlider();
+
+		this.parallelGapSlider = new Slider(screen, 25+xtop, ytop, "", -20, 20, settings.parallelGap * 2, false) {
+			@Override
+			public void onSlider() {
+				settings.parallelGap = this.getValueInt() / 2f;
+				parallelGapSlider.setText(GuiText.SELECTOR_PARALLEL_GAP.toString(String.format("%.1f", settings.parallelGap)));
+			}
+		};
+		parallelGapSlider.onSlider();
 		ytop += height;
 
 
@@ -264,6 +286,8 @@ public class TrackGui implements IScreen {
 		degreesSlider.setVisible(settings.type.hasQuarters());
 		curvositySlider.setVisible(settings.type.hasCurvosity());
 		smoothingButton.setVisible(settings.type.hasSmoothing());
+		parallelCountSlider.setVisible(settings.type == TrackItems.STRAIGHT);
+		parallelGapSlider.setVisible(settings.type == TrackItems.STRAIGHT);
 		transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 		transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 
