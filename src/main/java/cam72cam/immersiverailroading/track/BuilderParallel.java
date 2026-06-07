@@ -24,6 +24,7 @@ public class BuilderParallel extends BuilderBase {
 			case TURN:
 			case SWITCH:
 			case CUSTOM:
+			case SLOPE:
 				return true;
 			default:
 				return false;
@@ -94,7 +95,12 @@ public class BuilderParallel extends BuilderBase {
 
 	@Override
 	public void build() {
-		subBuilders.forEach(BuilderBase::build);
+		super.build();
+	}
+
+	@Override
+	protected void buildTracks() {
+		subBuilders.forEach(BuilderBase::buildTracks);
 	}
 
 	@Override
@@ -105,6 +111,11 @@ public class BuilderParallel extends BuilderBase {
 	@Override
 	public List<TrackBase> getTracksForRender() {
 		return subBuilders.stream().map(BuilderBase::getTracksForRender).flatMap(List::stream).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<TrackBase> getTracksForBuild() {
+		return subBuilders.stream().map(BuilderBase::getTracksForBuild).flatMap(List::stream).collect(Collectors.toList());
 	}
 
 	@Override

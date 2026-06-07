@@ -62,6 +62,7 @@ public class ItemTrackBlueprint extends CustomItem {
 			ItemStack blockinfo = world.getItemStack(pos);
 			if (player.isCrouching()) {
 				stackInfo = stackInfo.with(b -> b.railBedFill = blockinfo);
+				stackInfo = stackInfo.with(b -> b.embankment = blockinfo);
 			} else {
 				stackInfo = stackInfo.with(b -> b.railBed = blockinfo);
 			}
@@ -129,6 +130,12 @@ public class ItemTrackBlueprint extends CustomItem {
 		}
 		if (!settings.railBedFill.isEmpty()) {
 			tooltip.add(String.format(indented, GuiText.TRACK_RAIL_BED_FILL.toString(settings.railBedFill.getDisplayName())));
+		}
+		if (!settings.embankment.isEmpty()) {
+			tooltip.add(String.format(indented, GuiText.TRACK_EMBANKMENT.toString(settings.embankment.getDisplayName())));
+			tooltip.add(String.format(indented, GuiText.TRACK_EMBANKMENT_OFFSET.toString(settings.embankmentOffset)));
+			tooltip.add(String.format(indented, GuiText.TRACK_EMBANKMENT_HEIGHT.toString(settings.embankmentHeight)));
+			tooltip.add(String.format(indented, GuiText.TRACK_EMBANKMENT_GRADIENT.toString(String.format("%.1f", settings.embankmentGradient))));
 		}
 
 		tooltip.add(GuiText.TRACK_POSITION.toString(""));

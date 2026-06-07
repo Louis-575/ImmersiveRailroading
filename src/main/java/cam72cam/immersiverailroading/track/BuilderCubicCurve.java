@@ -221,10 +221,15 @@ public class BuilderCubicCurve extends BuilderIterator {
 
 	@Override
 	public void build() {
+		super.build();
+	}
+
+	@Override
+	protected void buildTracks() {
 		if (subBuilders == null) {
-			super.build();
+			super.buildTracks();
 		} else {
-			subBuilders.forEach(BuilderBase::build);
+			subBuilders.forEach(BuilderBase::buildTracks);
 		}
 	}
 
@@ -243,6 +248,15 @@ public class BuilderCubicCurve extends BuilderIterator {
 			return super.getTracksForRender();
 		} else {
 			return subBuilders.subList(0, Math.min(subBuilders.size(), 3)).stream().map(BuilderBase::getTracksForRender).flatMap(List::stream).collect(Collectors.toList());
+		}
+	}
+
+	@Override
+	public List<TrackBase> getTracksForBuild() {
+		if (subBuilders == null) {
+			return super.getTracksForBuild();
+		} else {
+			return subBuilders.stream().map(BuilderBase::getTracksForBuild).flatMap(List::stream).collect(Collectors.toList());
 		}
 	}
 

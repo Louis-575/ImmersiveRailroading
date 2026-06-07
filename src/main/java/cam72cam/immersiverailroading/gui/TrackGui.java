@@ -56,6 +56,10 @@ public class TrackGui implements IScreen {
 	private Slider parallelGapSlider;
 	private Button bedTypeButton;
 	private Button bedFillButton;
+	private Button embankmentButton;
+	private Slider embankmentOffsetSlider;
+	private Slider embankmentHeightSlider;
+	private Slider embankmentGradientSlider;
 
 	private Slider transfertableEntryCountSlider;
 	private Slider transfertableEntrySpacingSlider;
@@ -69,6 +73,7 @@ public class TrackGui implements IScreen {
 	private ListSelector<TrackDefinition>  trackSelector;
 	private ListSelector<ItemStack> railBedSelector;
 	private ListSelector<ItemStack> railBedFillSelector;
+	private ListSelector<ItemStack> embankmentSelector;
 
 	private double zoom = 1;
 
@@ -301,7 +306,7 @@ public class TrackGui implements IScreen {
 		//height = 20;
 		//xtop = GUIHelpers.getScreenWidth() / 2 - width;
 		//ytop = -GUIHelpers.getScreenHeight() / 4;
-		ytop = (int) (GUIHelpers.getScreenHeight() * 0.75 - height * 5);
+		ytop = (int) (GUIHelpers.getScreenHeight() * 0.75 - height * 9);
 
 		trackSelector = new ListSelector<TrackDefinition>(screen, width,  250, height,
 				DefinitionManager.getTrack(settings.track),
@@ -354,6 +359,55 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
+		embankmentSelector = new ListSelector<ItemStack>(screen, width, 250, height, settings.embankment,
+				oreDict.stream().collect(Collectors.toMap(TrackGui::getStackName, g -> g, (u, v) -> u, LinkedHashMap::new))
+		) {
+			@Override
+			public void onClick(ItemStack option) {
+				settings.embankment = option;
+				embankmentButton.setText(GuiText.SELECTOR_EMBANKMENT.toString(getStackName(settings.embankment)));
+				updateEmbankmentControls();
+			}
+		};
+		embankmentButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_EMBANKMENT.toString(getStackName(settings.embankment))) {
+			@Override
+			public void onClick(Player.Hand hand) {
+				showSelector(embankmentSelector);
+			}
+		};
+		ytop += height;
+
+		embankmentOffsetSlider = new Slider(screen, 25+xtop, ytop, "", 0, 10, settings.embankmentOffset, false) {
+			@Override
+			public void onSlider() {
+				settings.embankmentOffset = this.getValueInt();
+				embankmentOffsetSlider.setText(GuiText.SELECTOR_EMBANKMENT_OFFSET.toString(settings.embankmentOffset));
+			}
+		};
+		embankmentOffsetSlider.onSlider();
+		ytop += height;
+
+		embankmentHeightSlider = new Slider(screen, 25+xtop, ytop, "", 1, 40, settings.embankmentHeight, false) {
+			@Override
+			public void onSlider() {
+				settings.embankmentHeight = this.getValueInt();
+				embankmentHeightSlider.setText(GuiText.SELECTOR_EMBANKMENT_HEIGHT.toString(settings.embankmentHeight));
+			}
+		};
+		embankmentHeightSlider.onSlider();
+		ytop += height;
+
+		embankmentGradientSlider = new Slider(screen, 25+xtop, ytop, "", 1, 100, settings.embankmentGradient * 10, false) {
+			@Override
+			public void onSlider() {
+				settings.embankmentGradient = this.getValueInt() / 10f;
+				embankmentGradientSlider.setText(GuiText.SELECTOR_EMBANKMENT_GRADIENT.toString(String.format("%.1f", settings.embankmentGradient)));
+			}
+		};
+		embankmentGradientSlider.onSlider();
+		updateEmbankmentControls();
+		ytop += height;
+
 		posTypeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_POSITION.toString(settings.posType)) {
 			@Override
 			public void onClick(Player.Hand hand) {
@@ -396,8 +450,16 @@ public class TrackGui implements IScreen {
 		trackSelector.setVisible(false);
 		railBedSelector.setVisible(false);
 		railBedFillSelector.setVisible(false);
+		embankmentSelector.setVisible(false);
 
 		selector.setVisible(!isVisible);
+	}
+
+	private void updateEmbankmentControls() {
+		boolean enabled = !settings.embankment.isEmpty();
+		embankmentOffsetSlider.setVisible(enabled);
+		embankmentHeightSlider.setVisible(enabled);
+		embankmentGradientSlider.setVisible(enabled);
 	}
 
 	@Override
@@ -447,7 +509,7 @@ public class TrackGui implements IScreen {
 			return;
 		}
 
-		if (trackSelector.isVisible() || railBedSelector.isVisible() || railBedFillSelector.isVisible()) {
+		if (trackSelector.isVisible() || railBedSelector.isVisible() || railBedFillSelector.isVisible() || embankmentSelector.isVisible()) {
 			ListSelector.ButtonRenderer<ItemStack> icons = (button, x, y, value) -> {
 				Matrix4 zMatrix = new Matrix4();
 				zMatrix.translate(0, 0, 100);
@@ -457,12 +519,14 @@ public class TrackGui implements IScreen {
 
 			railBedSelector.render(icons);
 			railBedFillSelector.render(icons);
+			embankmentSelector.render(icons);
 
 
 			double textScale = 1.5;
 			String str = trackSelector.isVisible() ? GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(settings.track).name) :
 					railBedSelector.isVisible() ? GuiText.SELECTOR_RAIL_BED.toString(getStackName(settings.railBed)) :
-							GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(settings.railBedFill));
+							railBedFillSelector.isVisible() ? GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(settings.railBedFill)) :
+									GuiText.SELECTOR_EMBANKMENT.toString(getStackName(settings.embankment));
 
 			GUIHelpers.drawCenteredString(str, (int) ((450 + (GUIHelpers.getScreenWidth()-450) / 2) / textScale), (int) (10 / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
 

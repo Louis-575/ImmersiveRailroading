@@ -51,6 +51,11 @@ public abstract class BuilderBase {
 	}
 	
 	public void build() {
+		buildTracks();
+		placeEmbankment();
+	}
+
+	protected void buildTracks() {
 		/*
 		Assume we have already tested.
 		There are a few edge cases which break with overlapping split builders
@@ -74,8 +79,23 @@ public abstract class BuilderBase {
 			}
 		}
 	}
+
+	protected void placeEmbankment() {
+		if (info.settings.embankment.isEmpty()) {
+			return;
+		}
+		for (Vec3i pos : new EmbankmentPlanner(world, info.settings, getTracksForBuild()).plan()) { //Embankment planner used build embankment
+			if (BlockUtil.canBeReplaced(world, pos, false)) {
+				world.setBlock(pos, info.settings.embankment);
+			}
+		}
+	}
 	
 	public List<TrackBase> getTracksForRender() {
+		return this.tracks;
+	}
+
+	public List<TrackBase> getTracksForBuild() {
 		return this.tracks;
 	}
 
@@ -112,6 +132,10 @@ public abstract class BuilderBase {
 			}
 		}
 		return (int) Math.ceil(!this.info.settings.railBedFill.isEmpty() ? fillCount : 0);
+	}
+
+	public int costEmbankment() {
+		return new EmbankmentPlanner(world, info.settings, getTracksForBuild()).plan().size();
 	}
 
 	public void setDrops(List<ItemStack> drops) {

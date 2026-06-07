@@ -117,8 +117,13 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 	
 	@Override
 	public void build() {
-		straightBuilder.build();
-		turnBuilder.build();
+		super.build();
+	}
+
+	@Override
+	protected void buildTracks() {
+		straightBuilder.buildTracks();
+		turnBuilder.buildTracks();
 	}
 	
 	@Override
@@ -131,6 +136,14 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 	public List<TrackBase> getTracksForRender() {
 		List<TrackBase> data = straightBuilder.getTracksForRender();
 		data.addAll(turnBuilder.getTracksForRender());
+		return data;
+	}
+
+	@Override
+	public List<TrackBase> getTracksForBuild() {
+		List<TrackBase> data = new ArrayList<>();
+		data.addAll(straightBuilder.getTracksForBuild());
+		data.addAll(turnBuilder.getTracksForBuild());
 		return data;
 	}
 
