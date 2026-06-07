@@ -13,7 +13,7 @@ import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.track.BuilderParallel;
 import cam72cam.immersiverailroading.track.BuilderTransferTable;
 import cam72cam.immersiverailroading.track.BuilderTurnTable;
-import cam72cam.immersiverailroading.track.TrackBase;
+import cam72cam.immersiverailroading.track.RailBedFillPlanner;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
@@ -56,6 +56,7 @@ public class TrackGui implements IScreen {
 	private Slider parallelGapSlider;
 	private Button bedTypeButton;
 	private Button bedFillButton;
+	private Slider bedFillWidthSlider;
 	private Button embankmentButton;
 	private Slider embankmentOffsetSlider;
 	private Slider embankmentHeightSlider;
@@ -306,7 +307,9 @@ public class TrackGui implements IScreen {
 		//height = 20;
 		//xtop = GUIHelpers.getScreenWidth() / 2 - width;
 		//ytop = -GUIHelpers.getScreenHeight() / 4;
-		ytop = (int) (GUIHelpers.getScreenHeight() * 0.75 - height * 9);
+		ytop = (int) (GUIHelpers.getScreenHeight() * 0.75 - height * 5);
+		int xSecondColumn = xtop + width;
+		int ySecondColumn = ytop;
 
 		trackSelector = new ListSelector<TrackDefinition>(screen, width,  250, height,
 				DefinitionManager.getTrack(settings.track),
@@ -349,6 +352,7 @@ public class TrackGui implements IScreen {
 			public void onClick(ItemStack option) {
 				settings.railBedFill = option;
 				bedFillButton.setText(GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(settings.railBedFill)));
+				updateRailBedFillControls();
 			}
 		};
 		bedFillButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(settings.railBedFill))) {
@@ -358,6 +362,17 @@ public class TrackGui implements IScreen {
 			}
 		};
 		ytop += height;
+
+		bedFillWidthSlider = new Slider(screen, 25+xSecondColumn, ySecondColumn, "", 1, 10, settings.railBedFillWidth, false) {
+			@Override
+			public void onSlider() {
+				settings.railBedFillWidth = this.getValueInt();
+				bedFillWidthSlider.setText(GuiText.SELECTOR_RAIL_BED_FILL_WIDTH.toString(settings.railBedFillWidth));
+			}
+		};
+		bedFillWidthSlider.onSlider();
+		updateRailBedFillControls();
+		ySecondColumn += height;
 
 		embankmentSelector = new ListSelector<ItemStack>(screen, width, 250, height, settings.embankment,
 				oreDict.stream().collect(Collectors.toMap(TrackGui::getStackName, g -> g, (u, v) -> u, LinkedHashMap::new))
@@ -369,15 +384,15 @@ public class TrackGui implements IScreen {
 				updateEmbankmentControls();
 			}
 		};
-		embankmentButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_EMBANKMENT.toString(getStackName(settings.embankment))) {
+		embankmentButton = new Button(screen, xSecondColumn, ySecondColumn, width, height, GuiText.SELECTOR_EMBANKMENT.toString(getStackName(settings.embankment))) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				showSelector(embankmentSelector);
 			}
 		};
-		ytop += height;
+		ySecondColumn += height;
 
-		embankmentOffsetSlider = new Slider(screen, 25+xtop, ytop, "", 0, 10, settings.embankmentOffset, false) {
+		embankmentOffsetSlider = new Slider(screen, 25+xSecondColumn, ySecondColumn, "", 0, 10, settings.embankmentOffset, false) {
 			@Override
 			public void onSlider() {
 				settings.embankmentOffset = this.getValueInt();
@@ -385,9 +400,9 @@ public class TrackGui implements IScreen {
 			}
 		};
 		embankmentOffsetSlider.onSlider();
-		ytop += height;
+		ySecondColumn += height;
 
-		embankmentHeightSlider = new Slider(screen, 25+xtop, ytop, "", 1, 40, settings.embankmentHeight, false) {
+		embankmentHeightSlider = new Slider(screen, 25+xSecondColumn, ySecondColumn, "", 1, 40, settings.embankmentHeight, false) {
 			@Override
 			public void onSlider() {
 				settings.embankmentHeight = this.getValueInt();
@@ -395,9 +410,9 @@ public class TrackGui implements IScreen {
 			}
 		};
 		embankmentHeightSlider.onSlider();
-		ytop += height;
+		ySecondColumn += height;
 
-		embankmentGradientSlider = new Slider(screen, 25+xtop, ytop, "", 1, 100, settings.embankmentGradient * 10, false) {
+		embankmentGradientSlider = new Slider(screen, 25+xSecondColumn, ySecondColumn, "", 1, 100, settings.embankmentGradient * 10, false) {
 			@Override
 			public void onSlider() {
 				settings.embankmentGradient = this.getValueInt() / 10f;
@@ -406,7 +421,7 @@ public class TrackGui implements IScreen {
 		};
 		embankmentGradientSlider.onSlider();
 		updateEmbankmentControls();
-		ytop += height;
+		ySecondColumn += height;
 
 		posTypeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_POSITION.toString(settings.posType)) {
 			@Override
@@ -460,6 +475,10 @@ public class TrackGui implements IScreen {
 		embankmentOffsetSlider.setVisible(enabled);
 		embankmentHeightSlider.setVisible(enabled);
 		embankmentGradientSlider.setVisible(enabled);
+	}
+
+	private void updateRailBedFillControls() {
+		bedFillWidthSlider.setVisible(!settings.railBedFill.isEmpty());
 	}
 
 	@Override
@@ -557,10 +576,9 @@ public class TrackGui implements IScreen {
 
 			if (!info.settings.railBedFill.isEmpty()) {
 				StandardModel model = new StandardModel();
-				for (TrackBase base : info.getBuilder(MinecraftClient.getPlayer().getWorld()).getTracksForRender()) {
-					Vec3i basePos = base.getPos();
+				for (Vec3i basePos : new RailBedFillPlanner(MinecraftClient.getPlayer().getWorld(), info.settings, info.getBuilder(MinecraftClient.getPlayer().getWorld()).getTracksForRender()).surface()) {
 					model.addItemBlock(info.settings.railBedFill, new Matrix4()
-							.translate(basePos.x, basePos.y-1, basePos.z)
+							.translate(basePos.x, basePos.y, basePos.z)
 					);
 				}
 				model.render(state);
@@ -622,10 +640,9 @@ public class TrackGui implements IScreen {
 		RailRender.get(info).renderRailBase(state);
 		if (!info.settings.railBedFill.isEmpty()) {
 			StandardModel model = new StandardModel();
-			for (TrackBase base : info.getBuilder(MinecraftClient.getPlayer().getWorld()).getTracksForRender()) {
-				Vec3i basePos = base.getPos();
+			for (Vec3i basePos : new RailBedFillPlanner(MinecraftClient.getPlayer().getWorld(), info.settings, info.getBuilder(MinecraftClient.getPlayer().getWorld()).getTracksForRender()).surface()) {
 				model.addItemBlock(info.settings.railBedFill, new Matrix4()
-						.translate(basePos.x, basePos.y-1, basePos.z)
+						.translate(basePos.x, basePos.y, basePos.z)
 				);
 			}
 			model.render(state);

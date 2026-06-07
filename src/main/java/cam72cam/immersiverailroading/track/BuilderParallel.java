@@ -140,7 +140,7 @@ public class BuilderParallel extends BuilderBase {
 
 	@Override
 	public int costFill() {
-		return subBuilders.stream().mapToInt(BuilderBase::costFill).sum();
+		return super.costFill();
 	}
 
 	@Override

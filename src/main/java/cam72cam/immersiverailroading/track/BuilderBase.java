@@ -52,6 +52,7 @@ public abstract class BuilderBase {
 	
 	public void build() {
 		buildTracks();
+		placeRailBedFill();
 		placeEmbankment();
 	}
 
@@ -80,11 +81,22 @@ public abstract class BuilderBase {
 		}
 	}
 
+	protected void placeRailBedFill() {
+		if (info.settings.railBedFill.isEmpty()) {
+			return;
+		}
+		for (Vec3i pos : new RailBedFillPlanner(world, info.settings, getTracksForRailBedFill()).plan()) {
+			if (BlockUtil.canBeReplaced(world, pos, false)) {
+				world.setBlock(pos, info.settings.railBedFill);
+			}
+		}
+	}
+
 	protected void placeEmbankment() {
 		if (info.settings.embankment.isEmpty()) {
 			return;
 		}
-		for (Vec3i pos : new EmbankmentPlanner(world, info.settings, getTracksForBuild()).plan()) { //Embankment planner used build embankment
+		for (Vec3i pos : new EmbankmentPlanner(world, info.settings, getTracksForBuild()).plan()) {
 			if (BlockUtil.canBeReplaced(world, pos, false)) {
 				world.setBlock(pos, info.settings.embankment);
 			}
@@ -97,6 +109,10 @@ public abstract class BuilderBase {
 
 	public List<TrackBase> getTracksForBuild() {
 		return this.tracks;
+	}
+
+	public List<TrackBase> getTracksForRailBedFill() {
+		return getTracksForBuild();
 	}
 
 	public List<TrackBase> getTracksForFloating() {
@@ -125,13 +141,7 @@ public abstract class BuilderBase {
 	}
 
 	public int costFill() {
-		int fillCount = 0;
-		for (TrackBase track : tracks) {
-			if (BlockUtil.canBeReplaced(world, track.getPos().down(), false)) {
-				fillCount += 1;
-			}
-		}
-		return (int) Math.ceil(!this.info.settings.railBedFill.isEmpty() ? fillCount : 0);
+		return new RailBedFillPlanner(world, info.settings, getTracksForRailBedFill()).plan().size();
 	}
 
 	public int costEmbankment() {

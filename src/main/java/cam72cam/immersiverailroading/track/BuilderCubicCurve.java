@@ -193,11 +193,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 
 	@Override
 	public int costFill() {
-		if (subBuilders == null) {
-			return super.costFill();
-		} else {
-			return subBuilders.stream().mapToInt((BuilderBase::costFill)).sum();
-		}
+		return super.costFill();
 	}
 
 	@Override

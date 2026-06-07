@@ -130,6 +130,7 @@ public class ItemTrackBlueprint extends CustomItem {
 		}
 		if (!settings.railBedFill.isEmpty()) {
 			tooltip.add(String.format(indented, GuiText.TRACK_RAIL_BED_FILL.toString(settings.railBedFill.getDisplayName())));
+			tooltip.add(String.format(indented, GuiText.TRACK_RAIL_BED_FILL_WIDTH.toString(settings.railBedFillWidth)));
 		}
 		if (!settings.embankment.isEmpty()) {
 			tooltip.add(String.format(indented, GuiText.TRACK_EMBANKMENT.toString(settings.embankment.getDisplayName())));

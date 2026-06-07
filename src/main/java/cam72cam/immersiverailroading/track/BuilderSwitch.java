@@ -101,7 +101,7 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 	
 	@Override
 	public int costFill() {
-		return straightBuilder.costFill() + turnBuilder.costFill();
+		return super.costFill();
 	}
 	
 	@Override
