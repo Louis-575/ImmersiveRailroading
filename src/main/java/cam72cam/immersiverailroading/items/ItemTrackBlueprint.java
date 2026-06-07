@@ -5,11 +5,11 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
-import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.track.BuilderParallel;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.immersiverailroading.util.PlacementInfo;
@@ -139,7 +139,7 @@ public class ItemTrackBlueprint extends CustomItem {
 		if (settings.type.hasDirection()) {
 			tooltip.add(String.format(indented, GuiText.TRACK_DIRECTION.toString(settings.direction)));
 		}
-		if (settings.type == TrackItems.STRAIGHT) {
+		if (BuilderParallel.supports(settings.type)) {
 			tooltip.add(String.format(indented, GuiText.TRACK_PARALLEL_TRACKS.toString(settings.parallelCount)));
 			tooltip.add(String.format(indented, GuiText.TRACK_PARALLEL_GAP.toString(String.format("%.2f", settings.parallelGap))));
 		}

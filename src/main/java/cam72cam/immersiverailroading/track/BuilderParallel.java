@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.track;
 
+import cam72cam.immersiverailroading.library.TrackDirection;
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
@@ -16,16 +18,34 @@ import java.util.stream.Collectors;
 public class BuilderParallel extends BuilderBase {
 	private final List<BuilderBase> subBuilders = new ArrayList<>();
 
+	public static boolean supports(TrackItems type) {
+		switch (type) {
+			case STRAIGHT:
+			case TURN:
+			case SWITCH:
+				return true;
+			default:
+				return false;
+		}
+	}
+
 	public BuilderParallel(RailInfo info, World world, Vec3i pos) {
 		super(info, world, pos);
 
 		for (int i = 0; i < info.settings.parallelCount; i++) {
-			Vec3d offset = VecUtil.fromYaw(i * info.settings.parallelGap, info.placementInfo.yaw + 90);
+			final int trackIndex = i;
+			Vec3d offset = VecUtil.fromYaw(trackIndex * info.settings.parallelGap, info.placementInfo.yaw + 90);
 			Vec3d placement = info.placementInfo.placementPosition.add(offset);
 			Vec3i childPosOffset = new Vec3i(placement.x, 0, placement.z);
 			Vec3i childPos = pos.add(childPosOffset);
 			RailInfo childInfo = info.with(b -> {
-				b.settings = b.settings.with(settings -> settings.parallelCount = 1);
+				b.settings = b.settings.with(settings -> {
+					settings.parallelCount = 1;
+					if (settings.type == TrackItems.TURN) {
+						double radiusOffset = trackIndex * info.settings.parallelGap * (info.placementInfo.direction == TrackDirection.RIGHT ? -1 : 1);
+						settings.length = Math.max(2, (int) Math.round(info.settings.length + radiusOffset));
+					}
+				});
 				b.placementInfo = offset(b.placementInfo, offset, childPosOffset);
 				b.customInfo = b.customInfo != null ? offset(b.customInfo, offset, childPosOffset) : null;
 			});
