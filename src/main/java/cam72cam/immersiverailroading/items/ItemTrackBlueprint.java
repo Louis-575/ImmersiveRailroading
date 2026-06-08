@@ -138,6 +138,12 @@ public class ItemTrackBlueprint extends CustomItem {
 			tooltip.add(String.format(indented, GuiText.TRACK_EMBANKMENT_HEIGHT.toString(settings.embankmentHeight)));
 			tooltip.add(String.format(indented, GuiText.TRACK_EMBANKMENT_GRADIENT.toString(String.format("%.1f", settings.embankmentGradient))));
 		}
+		if (settings.cuttingEnabled) {
+			tooltip.add(String.format(indented, GuiText.TRACK_CUTTING.toString()));
+			tooltip.add(String.format(indented, GuiText.TRACK_CUTTING_OFFSET.toString(settings.cuttingOffset)));
+			tooltip.add(String.format(indented, GuiText.TRACK_CUTTING_HEIGHT.toString(settings.cuttingHeight)));
+			tooltip.add(String.format(indented, GuiText.TRACK_CUTTING_GRADIENT.toString(String.format("%.1f", settings.cuttingGradient))));
+		}
 
 		tooltip.add(GuiText.TRACK_POSITION.toString(""));
 		tooltip.add(String.format(indented, settings.posType));

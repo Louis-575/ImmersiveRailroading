@@ -54,6 +54,7 @@ public abstract class BuilderBase {
 		buildTracks();
 		placeRailBedFill();
 		placeEmbankment();
+		placeCutting();
 	}
 
 	protected void buildTracks() {
@@ -99,6 +100,17 @@ public abstract class BuilderBase {
 		for (Vec3i pos : new EmbankmentPlanner(world, info.settings, getTracksForBuild()).plan()) {
 			if (BlockUtil.canBeReplaced(world, pos, false)) {
 				world.setBlock(pos, info.settings.embankment);
+			}
+		}
+	}
+
+	protected void placeCutting() {
+		if (!info.settings.cuttingEnabled) {
+			return;
+		}
+		for (Vec3i pos : new CuttingPlanner(world, info.settings, getTracksForBuild()).plan()) {
+			if (!BlockUtil.isIRRail(world, pos)) {
+				world.setToAir(pos);
 			}
 		}
 	}

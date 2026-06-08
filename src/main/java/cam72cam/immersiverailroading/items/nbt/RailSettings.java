@@ -24,6 +24,10 @@ public class RailSettings {
     public final int embankmentOffset;
     public final int embankmentHeight;
     public final float embankmentGradient;
+    public final boolean cuttingEnabled;
+    public final int cuttingOffset;
+    public final int cuttingHeight;
+    public final float cuttingGradient;
     public final boolean isPreview;
     public final boolean isGradeCrossing;
     public final String track;
@@ -37,10 +41,10 @@ public class RailSettings {
     }
 
     public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing, int parallelCount, float parallelGap) {
-        this(gauge, track, type, length, degrees, curvosity, posType, smoothing, direction, railBed, railBedFill, 1, ItemStack.EMPTY, 0, 1, 1, isPreview, isGradeCrossing, count, spacing, parallelCount, parallelGap);
+        this(gauge, track, type, length, degrees, curvosity, posType, smoothing, direction, railBed, railBedFill, 1, ItemStack.EMPTY, 0, 1, 1, false, 0, 4, 1, isPreview, isGradeCrossing, count, spacing, parallelCount, parallelGap);
     }
 
-    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, int railBedFillWidth, ItemStack embankment, int embankmentOffset, int embankmentHeight, float embankmentGradient, boolean isPreview, boolean isGradeCrossing, int count, int spacing, int parallelCount, float parallelGap) {
+    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, int railBedFillWidth, ItemStack embankment, int embankmentOffset, int embankmentHeight, float embankmentGradient, boolean cuttingEnabled, int cuttingOffset, int cuttingHeight, float cuttingGradient, boolean isPreview, boolean isGradeCrossing, int count, int spacing, int parallelCount, float parallelGap) {
         this.gauge = gauge;
         this.track = track;
         this.type = type;
@@ -56,6 +60,10 @@ public class RailSettings {
         this.embankmentOffset = embankmentOffset;
         this.embankmentHeight = embankmentHeight;
         this.embankmentGradient = embankmentGradient;
+        this.cuttingEnabled = cuttingEnabled;
+        this.cuttingOffset = cuttingOffset;
+        this.cuttingHeight = cuttingHeight;
+        this.cuttingGradient = cuttingGradient;
         this.isPreview = isPreview;
         this.isGradeCrossing = isGradeCrossing;
         this.curvosity = curvosity;
@@ -161,6 +169,14 @@ public class RailSettings {
         public int embankmentHeight;
         @TagField("embankmentGradient")
         public float embankmentGradient;
+        @TagField("cuttingEnabled")
+        public boolean cuttingEnabled;
+        @TagField("cuttingOffset")
+        public int cuttingOffset;
+        @TagField("cuttingHeight")
+        public int cuttingHeight;
+        @TagField("cuttingGradient")
+        public float cuttingGradient;
         @TagField("isPreview")
         public boolean isPreview;
         @TagField("isGradeCrossing")
@@ -194,6 +210,10 @@ public class RailSettings {
             this.embankmentOffset = settings.embankmentOffset;
             this.embankmentHeight = settings.embankmentHeight;
             this.embankmentGradient = settings.embankmentGradient;
+            this.cuttingEnabled = settings.cuttingEnabled;
+            this.cuttingOffset = settings.cuttingOffset;
+            this.cuttingHeight = settings.cuttingHeight;
+            this.cuttingGradient = settings.cuttingGradient;
             this.isPreview = settings.isPreview;
             this.isGradeCrossing = settings.isGradeCrossing;
             this.transfertableEntryCount = settings.transfertableEntryCount;
@@ -219,6 +239,10 @@ public class RailSettings {
             embankmentOffset = 0;
             embankmentHeight = 1;
             embankmentGradient = 1;
+            cuttingEnabled = false;
+            cuttingOffset = 0;
+            cuttingHeight = 4;
+            cuttingGradient = 1;
             isPreview = false;
             isGradeCrossing = false;
             curvosity = 1;
@@ -248,6 +272,10 @@ public class RailSettings {
                     embankmentOffset,
                     embankmentHeight,
                     embankmentGradient,
+                    cuttingEnabled,
+                    cuttingOffset,
+                    cuttingHeight,
+                    cuttingGradient,
                     isPreview,
                     isGradeCrossing,
                     transfertableEntryCount,

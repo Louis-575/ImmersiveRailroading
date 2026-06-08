@@ -56,8 +56,10 @@ public abstract class TrackBase {
 
 	public boolean canPlaceTrack() {
 		Vec3i pos = getPos();
+		boolean canCutBlock = builder.info.settings.cuttingEnabled && !BlockUtil.isIRRail(builder.world, pos);
+		boolean canReplaceBlock = BlockUtil.canBeReplaced(builder.world, pos, flexible || builder.overrideFlexible);
 
-		return isDownSolid(true) && (BlockUtil.canBeReplaced(builder.world, pos, flexible || builder.overrideFlexible) || isOverTileRail());
+		return isDownSolid(true) && (canReplaceBlock || isOverTileRail() || canCutBlock);
 	}
 
 	public TileRailBase placeTrack(boolean actuallyPlace) {

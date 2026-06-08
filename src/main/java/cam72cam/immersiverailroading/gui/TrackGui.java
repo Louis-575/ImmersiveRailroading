@@ -61,6 +61,10 @@ public class TrackGui implements IScreen {
 	private Slider embankmentOffsetSlider;
 	private Slider embankmentHeightSlider;
 	private Slider embankmentGradientSlider;
+	private CheckBox cuttingCB;
+	private Slider cuttingOffsetSlider;
+	private Slider cuttingHeightSlider;
+	private Slider cuttingGradientSlider;
 
 	private Slider transfertableEntryCountSlider;
 	private Slider transfertableEntrySpacingSlider;
@@ -310,6 +314,8 @@ public class TrackGui implements IScreen {
 		ytop = (int) (GUIHelpers.getScreenHeight() * 0.75 - height * 5);
 		int xSecondColumn = xtop + width;
 		int ySecondColumn = ytop;
+		int xThirdColumn = xSecondColumn + width;
+		int yThirdColumn = ytop;
 
 		trackSelector = new ListSelector<TrackDefinition>(screen, width,  250, height,
 				DefinitionManager.getTrack(settings.track),
@@ -423,6 +429,46 @@ public class TrackGui implements IScreen {
 		updateEmbankmentControls();
 		ySecondColumn += height;
 
+		cuttingCB = new CheckBox(screen, xThirdColumn+25, yThirdColumn+2, GuiText.SELECTOR_CUTTING.toString(), settings.cuttingEnabled) {
+			@Override
+			public void onClick(Player.Hand hand) {
+				settings.cuttingEnabled = cuttingCB.isChecked();
+				updateCuttingControls();
+			}
+		};
+		yThirdColumn += height;
+
+		cuttingOffsetSlider = new Slider(screen, 25+xThirdColumn, yThirdColumn, "", 0, 10, settings.cuttingOffset, false) {
+			@Override
+			public void onSlider() {
+				settings.cuttingOffset = this.getValueInt();
+				cuttingOffsetSlider.setText(GuiText.SELECTOR_CUTTING_OFFSET.toString(settings.cuttingOffset));
+			}
+		};
+		cuttingOffsetSlider.onSlider();
+		yThirdColumn += height;
+
+		cuttingHeightSlider = new Slider(screen, 25+xThirdColumn, yThirdColumn, "", 1, 40, settings.cuttingHeight, false) {
+			@Override
+			public void onSlider() {
+				settings.cuttingHeight = this.getValueInt();
+				cuttingHeightSlider.setText(GuiText.SELECTOR_CUTTING_HEIGHT.toString(settings.cuttingHeight));
+			}
+		};
+		cuttingHeightSlider.onSlider();
+		yThirdColumn += height;
+
+		cuttingGradientSlider = new Slider(screen, 25+xThirdColumn, yThirdColumn, "", 1, 100, settings.cuttingGradient * 10, false) {
+			@Override
+			public void onSlider() {
+				settings.cuttingGradient = this.getValueInt() / 10f;
+				cuttingGradientSlider.setText(GuiText.SELECTOR_CUTTING_GRADIENT.toString(String.format("%.1f", settings.cuttingGradient)));
+			}
+		};
+		cuttingGradientSlider.onSlider();
+		updateCuttingControls();
+		yThirdColumn += height;
+
 		posTypeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_POSITION.toString(settings.posType)) {
 			@Override
 			public void onClick(Player.Hand hand) {
@@ -479,6 +525,12 @@ public class TrackGui implements IScreen {
 
 	private void updateRailBedFillControls() {
 		bedFillWidthSlider.setVisible(!settings.railBedFill.isEmpty());
+	}
+
+	private void updateCuttingControls() {
+		cuttingOffsetSlider.setVisible(settings.cuttingEnabled);
+		cuttingHeightSlider.setVisible(settings.cuttingEnabled);
+		cuttingGradientSlider.setVisible(settings.cuttingEnabled);
 	}
 
 	@Override
