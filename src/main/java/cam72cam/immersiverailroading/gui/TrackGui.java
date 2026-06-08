@@ -36,6 +36,8 @@ import static cam72cam.immersiverailroading.gui.ClickListHelper.next;
 import static cam72cam.immersiverailroading.gui.components.GuiUtils.fitString;
 
 public class TrackGui implements IScreen {
+	private static final int BOTTOM_PAGE_COUNT = 3;
+
 	long frame;
 
 	private TileRailPreview te;
@@ -65,6 +67,7 @@ public class TrackGui implements IScreen {
 	private Slider cuttingOffsetSlider;
 	private Slider cuttingHeightSlider;
 	private Slider cuttingGradientSlider;
+	private Button bottomPageButton;
 
 	private Slider transfertableEntryCountSlider;
 	private Slider transfertableEntrySpacingSlider;
@@ -81,6 +84,7 @@ public class TrackGui implements IScreen {
 	private ListSelector<ItemStack> embankmentSelector;
 
 	private double zoom = 1;
+	private int bottomPage;
 
 	public TrackGui() {
 		this(MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY));
@@ -311,11 +315,19 @@ public class TrackGui implements IScreen {
 		//height = 20;
 		//xtop = GUIHelpers.getScreenWidth() / 2 - width;
 		//ytop = -GUIHelpers.getScreenHeight() / 4;
-		ytop = (int) (GUIHelpers.getScreenHeight() * 0.75 - height * 5);
-		int xSecondColumn = xtop + width;
-		int ySecondColumn = ytop;
-		int xThirdColumn = xSecondColumn + width;
-		int yThirdColumn = ytop;
+		ytop = (int) (GUIHelpers.getScreenHeight() * 0.75 - height * 7);
+		int bottomX = xtop;
+		int bottomY = ytop;
+		int pageButtonY = bottomY + height * 6;
+
+		bottomPageButton = new Button(screen, bottomX, pageButtonY, width, height, "") {
+			@Override
+			public void onClick(Player.Hand hand) {
+				bottomPage = (bottomPage + BOTTOM_PAGE_COUNT + (hand == Player.Hand.PRIMARY ? 1 : -1)) % BOTTOM_PAGE_COUNT;
+				hideSelectors();
+				updateBottomPageControls();
+			}
+		};
 
 		trackSelector = new ListSelector<TrackDefinition>(screen, width,  250, height,
 				DefinitionManager.getTrack(settings.track),
@@ -369,7 +381,7 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-		bedFillWidthSlider = new Slider(screen, 25+xSecondColumn, ySecondColumn, "", 0, 10, settings.railBedFillWidth, false) {
+		bedFillWidthSlider = new Slider(screen, 25+bottomX, ytop, "", 0, 10, settings.railBedFillWidth, false) {
 			@Override
 			public void onSlider() {
 				settings.railBedFillWidth = this.getValueInt();
@@ -377,8 +389,7 @@ public class TrackGui implements IScreen {
 			}
 		};
 		bedFillWidthSlider.onSlider();
-		updateRailBedFillControls();
-		ySecondColumn += height;
+		ytop += height;
 
 		embankmentSelector = new ListSelector<ItemStack>(screen, width, 250, height, settings.embankment,
 				oreDict.stream().collect(Collectors.toMap(TrackGui::getStackName, g -> g, (u, v) -> u, LinkedHashMap::new))
@@ -390,15 +401,16 @@ public class TrackGui implements IScreen {
 				updateEmbankmentControls();
 			}
 		};
-		embankmentButton = new Button(screen, xSecondColumn, ySecondColumn, width, height, GuiText.SELECTOR_EMBANKMENT.toString(getStackName(settings.embankment))) {
+		int yEmbankment = bottomY;
+		embankmentButton = new Button(screen, bottomX, yEmbankment, width, height, GuiText.SELECTOR_EMBANKMENT.toString(getStackName(settings.embankment))) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				showSelector(embankmentSelector);
 			}
 		};
-		ySecondColumn += height;
+		yEmbankment += height;
 
-		embankmentOffsetSlider = new Slider(screen, 25+xSecondColumn, ySecondColumn, "", 0, 10, settings.embankmentOffset, false) {
+		embankmentOffsetSlider = new Slider(screen, 25+bottomX, yEmbankment, "", 0, 10, settings.embankmentOffset, false) {
 			@Override
 			public void onSlider() {
 				settings.embankmentOffset = this.getValueInt();
@@ -406,9 +418,9 @@ public class TrackGui implements IScreen {
 			}
 		};
 		embankmentOffsetSlider.onSlider();
-		ySecondColumn += height;
+		yEmbankment += height;
 
-		embankmentHeightSlider = new Slider(screen, 25+xSecondColumn, ySecondColumn, "", 1, 40, settings.embankmentHeight, false) {
+		embankmentHeightSlider = new Slider(screen, 25+bottomX, yEmbankment, "", 1, 40, settings.embankmentHeight, false) {
 			@Override
 			public void onSlider() {
 				settings.embankmentHeight = this.getValueInt();
@@ -416,9 +428,9 @@ public class TrackGui implements IScreen {
 			}
 		};
 		embankmentHeightSlider.onSlider();
-		ySecondColumn += height;
+		yEmbankment += height;
 
-		embankmentGradientSlider = new Slider(screen, 25+xSecondColumn, ySecondColumn, "", 1, 100, settings.embankmentGradient * 10, false) {
+		embankmentGradientSlider = new Slider(screen, 25+bottomX, yEmbankment, "", 1, 100, settings.embankmentGradient * 10, false) {
 			@Override
 			public void onSlider() {
 				settings.embankmentGradient = this.getValueInt() / 10f;
@@ -426,19 +438,19 @@ public class TrackGui implements IScreen {
 			}
 		};
 		embankmentGradientSlider.onSlider();
-		updateEmbankmentControls();
-		ySecondColumn += height;
+		yEmbankment += height;
 
-		cuttingCB = new CheckBox(screen, xThirdColumn+25, yThirdColumn+2, GuiText.SELECTOR_CUTTING.toString(), settings.cuttingEnabled) {
+		int yCutting = bottomY;
+		cuttingCB = new CheckBox(screen, bottomX+2, yCutting+2, GuiText.SELECTOR_CUTTING.toString(), settings.cuttingEnabled) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				settings.cuttingEnabled = cuttingCB.isChecked();
 				updateCuttingControls();
 			}
 		};
-		yThirdColumn += height;
+		yCutting += height;
 
-		cuttingOffsetSlider = new Slider(screen, 25+xThirdColumn, yThirdColumn, "", 0, 10, settings.cuttingOffset, false) {
+		cuttingOffsetSlider = new Slider(screen, 25+bottomX, yCutting, "", 0, 10, settings.cuttingOffset, false) {
 			@Override
 			public void onSlider() {
 				settings.cuttingOffset = this.getValueInt();
@@ -446,9 +458,9 @@ public class TrackGui implements IScreen {
 			}
 		};
 		cuttingOffsetSlider.onSlider();
-		yThirdColumn += height;
+		yCutting += height;
 
-		cuttingHeightSlider = new Slider(screen, 25+xThirdColumn, yThirdColumn, "", 1, 40, settings.cuttingHeight, false) {
+		cuttingHeightSlider = new Slider(screen, 25+bottomX, yCutting, "", 1, 40, settings.cuttingHeight, false) {
 			@Override
 			public void onSlider() {
 				settings.cuttingHeight = this.getValueInt();
@@ -456,9 +468,9 @@ public class TrackGui implements IScreen {
 			}
 		};
 		cuttingHeightSlider.onSlider();
-		yThirdColumn += height;
+		yCutting += height;
 
-		cuttingGradientSlider = new Slider(screen, 25+xThirdColumn, yThirdColumn, "", 1, 100, settings.cuttingGradient * 10, false) {
+		cuttingGradientSlider = new Slider(screen, 25+bottomX, yCutting, "", 1, 100, settings.cuttingGradient * 10, false) {
 			@Override
 			public void onSlider() {
 				settings.cuttingGradient = this.getValueInt() / 10f;
@@ -466,8 +478,7 @@ public class TrackGui implements IScreen {
 			}
 		};
 		cuttingGradientSlider.onSlider();
-		updateCuttingControls();
-		yThirdColumn += height;
+		yCutting += height;
 
 		posTypeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_POSITION.toString(settings.posType)) {
 			@Override
@@ -478,7 +489,7 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-		isPreviewCB = new CheckBox(screen, xtop+2, ytop+2, GuiText.SELECTOR_PLACE_BLUEPRINT.toString(), settings.isPreview) {
+		isPreviewCB = new CheckBox(screen, bottomX+2, ytop+2, GuiText.SELECTOR_PLACE_BLUEPRINT.toString(), settings.isPreview) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				settings.isPreview = isPreviewCB.isChecked();
@@ -486,7 +497,7 @@ public class TrackGui implements IScreen {
 		};
 //		ytop += height;
 
-		isGradeCrossingCB = new CheckBox(screen, xtop+102, ytop+2, GuiText.SELECTOR_GRADE_CROSSING.toString(), settings.isGradeCrossing) {
+		isGradeCrossingCB = new CheckBox(screen, bottomX+102, ytop+2, GuiText.SELECTOR_GRADE_CROSSING.toString(), settings.isGradeCrossing) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				settings.isGradeCrossing = isGradeCrossingCB.isChecked();
@@ -501,36 +512,66 @@ public class TrackGui implements IScreen {
 				zoom = this.getValue();
 			}
 		};
+		updateBottomPageControls();
 	}
 
 	private void showSelector(ListSelector<?> selector) {
 		boolean isVisible = selector.isVisible();
 
+		hideSelectors();
+
+		selector.setVisible(!isVisible);
+	}
+
+	private void hideSelectors() {
 		gaugeSelector.setVisible(false);
 		typeSelector.setVisible(false);
 		trackSelector.setVisible(false);
 		railBedSelector.setVisible(false);
 		railBedFillSelector.setVisible(false);
 		embankmentSelector.setVisible(false);
-
-		selector.setVisible(!isVisible);
 	}
 
 	private void updateEmbankmentControls() {
-		boolean enabled = !settings.embankment.isEmpty();
-		embankmentOffsetSlider.setVisible(enabled);
-		embankmentHeightSlider.setVisible(enabled);
-		embankmentGradientSlider.setVisible(enabled);
+		updateBottomPageControls();
 	}
 
 	private void updateRailBedFillControls() {
-		bedFillWidthSlider.setVisible(!settings.railBedFill.isEmpty());
+		updateBottomPageControls();
 	}
 
 	private void updateCuttingControls() {
-		cuttingOffsetSlider.setVisible(settings.cuttingEnabled);
-		cuttingHeightSlider.setVisible(settings.cuttingEnabled);
-		cuttingGradientSlider.setVisible(settings.cuttingEnabled);
+		updateBottomPageControls();
+	}
+
+	private void updateBottomPageControls() {
+		if (bottomPageButton == null || cuttingGradientSlider == null) {
+			return;
+		}
+
+		boolean trackPage = bottomPage == 0;
+		boolean embankmentPage = bottomPage == 1;
+		boolean cuttingPage = bottomPage == 2;
+
+		bottomPageButton.setText(GuiText.SELECTOR_PAGE.toString(bottomPage + 1, BOTTOM_PAGE_COUNT));
+
+		trackButton.setVisible(trackPage);
+		bedTypeButton.setVisible(trackPage);
+		bedFillButton.setVisible(trackPage);
+		bedFillWidthSlider.setVisible(trackPage && !settings.railBedFill.isEmpty());
+		posTypeButton.setVisible(trackPage);
+		isPreviewCB.setVisible(trackPage);
+		isGradeCrossingCB.setVisible(trackPage);
+
+		embankmentButton.setVisible(embankmentPage);
+		embankmentOffsetSlider.setVisible(embankmentPage && !settings.embankment.isEmpty());
+		embankmentHeightSlider.setVisible(embankmentPage && !settings.embankment.isEmpty());
+		embankmentGradientSlider.setVisible(embankmentPage && !settings.embankment.isEmpty());
+
+		cuttingCB.setVisible(cuttingPage);
+		cuttingOffsetSlider.setVisible(cuttingPage && settings.cuttingEnabled);
+		cuttingHeightSlider.setVisible(cuttingPage && settings.cuttingEnabled);
+		cuttingGradientSlider.setVisible(cuttingPage && settings.cuttingEnabled);
 	}
 
 	@Override
