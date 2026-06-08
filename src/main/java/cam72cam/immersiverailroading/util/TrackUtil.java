@@ -13,7 +13,9 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class TrackUtil {
     public static PlacementInfo getNeighborNode(Player player, World world, Vec3i pos, Vec3d hit, ItemStack stack) {
@@ -31,18 +33,29 @@ public class TrackUtil {
                 for (int z = -hori; z <= hori; z++) {
                     Vec3i offset = pos.add(x, y, z);
                     TileRailBase tile = world.getBlockEntity(offset, TileRailBase.class);
+                    Set<Vec3i> visited = new HashSet<>();
                     while (tile != null){
+                        if (!visited.add(tile.getPos())) {
+                            break;
+                        }
                         if (!(tile instanceof TileRail)) {
                             tile = tile.getParentTile();
+                            continue;
                         }
 
                         TileRail rail = (TileRail) tile;
                         if (rail == null || rail.info == null ||
-                                Math.abs(rail.getTrackGauge() - stackInfo.gauge.value()) > 1.0E-6) continue;
+                                Math.abs(rail.getTrackGauge() - stackInfo.gauge.value()) > 1.0E-6) {
+                            tile = tile.getReplacedTile();
+                            continue;
+                        }
 
                         BuilderBase builder = rail.info.getBuilder(world);
                         List<VecYPR> renderData = builder.getRenderData();
-                        if (renderData.isEmpty()) continue;
+                        if (renderData.isEmpty()) {
+                            tile = tile.getReplacedTile();
+                            continue;
+                        }
 
                         if (renderData.size() > 1) {
                             Vec3d p1 = renderData.get(0).add(rail.info.placementInfo.placementPosition).add(

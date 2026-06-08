@@ -58,7 +58,7 @@ public class ItemTrackBlueprint extends CustomItem {
 	@Override
     public ClickResult onClickBlock(Player player, World world, Vec3i pos, Player.Hand hand, Facing facing, Vec3d hit) {
 		ItemStack stack = player.getHeldItem(hand);
-		PlacementInfo snapped = TrackUtil.getNeighborNode(player, player.getWorld(), pos, hit, stack);
+		PlacementInfo snapped = Config.ConfigDebug.enableTrackSnapping ? TrackUtil.getNeighborNode(player, player.getWorld(), pos, hit, stack) : null;
 		RailSettings stackInfo = RailSettings.from(stack);
 		float yaw;
 
@@ -74,7 +74,7 @@ public class ItemTrackBlueprint extends CustomItem {
 			return ClickResult.ACCEPTED;
 		}
 
-		boolean useSnapping = snapped != null && Config.ConfigDebug.enableTrackSnapping;
+		boolean useSnapping = snapped != null;
 		if(useSnapping) {
 			pos = new Vec3i(snapped.placementPosition);
 			hit = snapped.placementPosition.subtract(pos);
