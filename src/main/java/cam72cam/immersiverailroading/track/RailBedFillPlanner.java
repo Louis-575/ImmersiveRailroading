@@ -34,8 +34,9 @@ public class RailBedFillPlanner {
 
     public List<Vec3i> plan() {
         List<Vec3i> planned = new ArrayList<>();
-        for (Vec3i pos : surface()) {
-            if (BlockUtil.canBeReplaced(world, pos, false)) {
+        Set<Vec3i> surface = surface();
+        for (Vec3i pos : surface) {
+            if (!BlockUtil.isIRRail(world, pos)) {
                 planned.add(pos);
             }
         }

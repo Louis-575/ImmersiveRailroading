@@ -87,7 +87,7 @@ public abstract class BuilderBase {
 			return;
 		}
 		for (Vec3i pos : new RailBedFillPlanner(world, info.settings, getTracksForRailBedFill()).plan()) {
-			if (BlockUtil.canBeReplaced(world, pos, false)) {
+			if (!BlockUtil.isIRRail(world, pos)) {
 				world.setBlock(pos, info.settings.railBedFill);
 			}
 		}
