@@ -41,14 +41,22 @@ public class EmbankmentPlanner {
         Set<Vec3i> railBedSurface = new RailBedFillPlanner(world, settings, tracks).surface();
         Map<Pair<Integer, Integer>, Integer> railBedSurfaceHeights = new HashMap<>();
         for (Vec3i pos : railBedSurface) {
-            railBedSurfaceHeights.put(Pair.of(pos.x, pos.z), pos.y);
-        }
-        for (TrackBase track : tracks) {
-            Vec3i pos = track.getPos().down();
             Pair<Integer, Integer> cell = Pair.of(pos.x, pos.z);
-            Integer existing = footprint.get(cell);
+            Integer existing = railBedSurfaceHeights.get(cell);
             if (existing == null || pos.y > existing) {
-                footprint.put(cell, pos.y);
+                railBedSurfaceHeights.put(cell, pos.y);
+            }
+        }
+        if (!settings.railBedFill.isEmpty()) {
+            footprint.putAll(railBedSurfaceHeights);
+        } else {
+            for (TrackBase track : tracks) {
+                Vec3i pos = track.getPos().down();
+                Pair<Integer, Integer> cell = Pair.of(pos.x, pos.z);
+                Integer existing = footprint.get(cell);
+                if (existing == null || pos.y > existing) {
+                    footprint.put(cell, pos.y);
+                }
             }
         }
 
@@ -60,10 +68,6 @@ public class EmbankmentPlanner {
         int height = Math.max(1, Math.min(40, settings.embankmentHeight));
         float gradient = Math.max(0.1f, settings.embankmentGradient);
         int maxDistance = (int) Math.ceil((offset + (height - 1) / gradient) * DISTANCE_SCALE);
-        if (!settings.railBedFill.isEmpty()) {
-            int railBedFillDistance = (Math.max(1, Math.min(10, settings.railBedFillWidth)) - 1) * DISTANCE_SCALE;
-            maxDistance = Math.max(maxDistance, railBedFillDistance);
-        }
 
         PriorityQueue<Node> queue = new PriorityQueue<>(Comparator.comparingInt(node -> node.distance));
         Map<Pair<Integer, Integer>, Integer> bestDistance = new HashMap<>();
