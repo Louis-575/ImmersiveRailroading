@@ -930,23 +930,23 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	 * @return parent Rail where parent.info.settings.type.equals(TrackItems.SWITCH) is true, if such a parent exists; null otherwise
 	 */
 	public TileRail findSwitchParent(TileRailBase cur) {
-		if (cur == null) {
-			return null;
-		}
-
-		if (cur instanceof TileRail) {
-			TileRail curTR = (TileRail) cur;
-			if (curTR.info.settings.type.equals(TrackItems.SWITCH)) {
-				return curTR;
+		int depth = 0;
+		while (cur != null && depth++ < 32) {
+			if (cur instanceof TileRail) {
+				TileRail curTR = (TileRail) cur;
+				if (curTR.info != null && curTR.info.settings.type.isSwitch()) {
+					return curTR;
+				}
 			}
+
+			TileRail parent = cur.getParentTile();
+			if (parent == null || cur.getPos().equals(parent.getPos())) {
+				return null;
+			}
+			cur = parent;
 		}
 
-		// Prevent infinite recursion
-		if (cur.getPos().equals(cur.getParentTile().getPos())) {
-			return null;
-		}
-
-		return findSwitchParent(cur.getParentTile());
+		return null;
 	}
 
 	/* NEW STUFF */
@@ -1083,6 +1083,10 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				SwitchState state = SwitchUtil.getSwitchState(switchTile);
 				if (state != SwitchState.NONE) {
 					switchTile.setSwitchState(state);
+					TileRail parent = switchTile.getParentTile();
+					if (parent != null && parent != switchTile && parent.info.settings.type.isSwitch()) {
+						parent.setSwitchState(state);
+					}
 				}
 			}
 			if (data == null) {

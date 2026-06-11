@@ -33,6 +33,10 @@ public class RailBaseModel {
 		if (te instanceof TileRail && ((TileRail) te).info != null) {
 			model.addCustom((state, pt) -> {
 				RailInfo info = ((TileRail) te).info;
+				TileRail switchParent = te.findSwitchParent();
+				if (switchParent != null && switchParent != te && switchParent.info.settings.type == TrackItems.RADIAL_SWITCH) {
+					return;
+				}
                 if (info.settings.type == TrackItems.SWITCH) {
                     //TODO render switch and don't render turn
                     info = info.withSettings(b -> b.type = TrackItems.STRAIGHT);

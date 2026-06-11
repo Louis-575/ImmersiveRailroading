@@ -184,6 +184,7 @@ track.immersiverailroading:class.turn=Turn
 track.immersiverailroading:class.turntable=Turn Table
 track.immersiverailroading:class.transfertable=Transfer Table
 track.immersiverailroading:class.switch=Switch
+track.immersiverailroading:class.radial_switch=Radial Switch
 track.immersiverailroading:class.custom=Custom Curve
 
 track.immersiverailroading:position.fixed=Fixed

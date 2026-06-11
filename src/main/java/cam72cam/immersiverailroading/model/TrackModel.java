@@ -214,7 +214,7 @@ public class TrackModel extends OBJModel{
                       .map(groupNames::get).forEach(groups::addAll);
         } else {
             groupNames.keySet().stream()
-                      .filter(part -> part != TrackModelPart.TABLE)
+                      .filter(TrackModelPart::isDefaultRender)
                       .map(groupNames::get).forEach(groups::addAll);
         }
         builder.draw(groups, matrix);

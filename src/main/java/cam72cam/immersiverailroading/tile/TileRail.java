@@ -214,10 +214,17 @@ public class TileRail extends TileRailBase {
 		}
 
 		if (tracks == null) {
-			tracks = (info.settings.type == TrackItems.SWITCH ? info.withSettings(b -> b.type = TrackItems.STRAIGHT) : info).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForFloating();
+			RailInfo floatingInfo = info.settings.type.isSwitch() ? info.withSettings(b -> b.type = TrackItems.STRAIGHT) : info;
+			tracks = floatingInfo.getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForFloating();
+			if (tracks.isEmpty()) {
+				return 0;
+			}
 			// This is just terrible
 			Vec3i offset = getPos().subtract(tracks.get(0).getPos());
-			tracks = (info.settings.type == TrackItems.SWITCH ? info.withSettings(b -> b.type = TrackItems.STRAIGHT) : info).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos().add(offset))).getTracksForFloating();
+			tracks = floatingInfo.getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos().add(offset))).getTracksForFloating();
+			if (tracks.isEmpty()) {
+				return 0;
+			}
 		}
 
 

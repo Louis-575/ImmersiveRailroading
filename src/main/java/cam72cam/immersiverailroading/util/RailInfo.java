@@ -207,6 +207,8 @@ public class RailInfo {
 			return new BuilderTurn(this, world, pos);
 		case SWITCH:
 			return new BuilderSwitch(this, world, pos);
+		case RADIAL_SWITCH:
+			return new BuilderRadialSwitch(this, world, pos);
 		case TURNTABLE:
 			return new BuilderTurnTable(this, world, pos);
 		case TRANSFERTABLE:

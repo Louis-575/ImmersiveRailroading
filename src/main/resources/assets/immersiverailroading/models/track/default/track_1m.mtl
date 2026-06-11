@@ -1,10 +1,9 @@
-# Blender MTL File: 'None'
-# Material Count: 1
+# Blender 5.0.1 MTL File: 'points test.blend'
+# www.blender.org
 
-newmtl Prototype_Texture
-Ns 94.117647
+newmtl Prototype_Texture.012
+Ns 94.117653
 Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000

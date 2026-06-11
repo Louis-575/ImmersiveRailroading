@@ -27,7 +27,7 @@ public class SwitchUtil {
 		if (parent == null) {
 			return SwitchState.NONE;
 		}
-		if (parent.info.settings.type != TrackItems.SWITCH) {
+		if (!parent.info.settings.type.isSwitch()) {
 			return SwitchState.NONE;
 		}
 

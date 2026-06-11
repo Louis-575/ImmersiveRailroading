@@ -5,6 +5,7 @@ import cam72cam.mod.text.TextUtil;
 import java.util.Locale;
 
 public enum TrackItems {
+	// Saved rail settings are ordinal-sensitive, so append new values instead of inserting them.
 	STRAIGHT(0),
 	CROSSING(1),
 	SLOPE(2),
@@ -12,7 +13,8 @@ public enum TrackItems {
 	SWITCH(4),
 	TURNTABLE(5),
 	CUSTOM(7),
-	TRANSFERTABLE(6);
+	TRANSFERTABLE(6),
+	RADIAL_SWITCH(4);
 
 	private final int order;
 
@@ -29,6 +31,7 @@ public enum TrackItems {
 		switch (this) {
 			case TURN:
 			case SWITCH:
+			case RADIAL_SWITCH:
 				return true;
 			default:
 				return false;
@@ -61,6 +64,7 @@ public enum TrackItems {
 		switch (this) {
 			case TURN:
 			case SWITCH:
+			case RADIAL_SWITCH:
 				return true;
 			default:
 				return false;
@@ -75,6 +79,10 @@ public enum TrackItems {
 			default:
 				return false;
 		}
+	}
+
+	public boolean isSwitch() {
+		return this == SWITCH || this == RADIAL_SWITCH;
 	}
 
 	public int getOrder() {

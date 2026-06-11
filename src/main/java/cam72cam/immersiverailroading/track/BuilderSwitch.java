@@ -13,34 +13,23 @@ import java.util.List;
 
 public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 
-	private BuilderIterator turnBuilder;
-	private BuilderStraight straightBuilder;
-	private BuilderStraight realStraightBuilder;
-	private final BuilderStraight straightBuilderReal;
+	protected BuilderIterator turnBuilder;
+	protected BuilderStraight straightBuilder;
+	protected BuilderStraight realStraightBuilder;
+	protected final BuilderStraight straightBuilderReal;
 
 	public BuilderSwitch(RailInfo info, World world, Vec3i pos) {
 		super(info, world, pos);
 		
-		RailInfo turnInfo = info.withSettings(b -> b.type = info.customInfo.placementPosition.equals(info.placementInfo.placementPosition) ? TrackItems.TURN : TrackItems.CUSTOM);
-		RailInfo straightInfo = info;
+		RailInfo turnInfo = getSwitchTurnInfo(info);
+		RailInfo straightInfo = getSwitchStraightInfo(info);
 
 		{
 			turnBuilder = (BuilderIterator) turnInfo.getBuilder(world, pos);
 			straightBuilder = new BuilderStraight(straightInfo, world, pos, true);
 			realStraightBuilder = new BuilderStraight(straightInfo, world, pos, true);
 
-			straightInfo = straightInfo.withSettings(b -> {
-				double maxOverlap = 0;
-
-				straightBuilder.positions.retainAll(turnBuilder.positions);
-
-				for (Pair<Integer, Integer> straight : straightBuilder.positions) {
-					maxOverlap = Math.max(maxOverlap, new Vec3d(straight.getKey(), 0, straight.getValue()).length());
-				}
-
-				maxOverlap *= 1.2;
-				b.length = (int) Math.ceil(maxOverlap) + 3;
-			});
+			straightInfo = getAdjustedSwitchStraightInfo(straightInfo, straightBuilder, turnBuilder);
 		}
 		
 
@@ -59,6 +48,29 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 				straight.setFlexible();
 			}
 		}
+	}
+
+	protected RailInfo getSwitchTurnInfo(RailInfo info) {
+		return info.withSettings(b -> b.type = info.customInfo.placementPosition.equals(info.placementInfo.placementPosition) ? TrackItems.TURN : TrackItems.CUSTOM);
+	}
+
+	protected RailInfo getSwitchStraightInfo(RailInfo info) {
+		return info;
+	}
+
+	protected RailInfo getAdjustedSwitchStraightInfo(RailInfo straightInfo, BuilderStraight straightBuilder, BuilderIterator turnBuilder) {
+		return straightInfo.withSettings(b -> {
+			double maxOverlap = 0;
+
+			straightBuilder.positions.retainAll(turnBuilder.positions);
+
+			for (Pair<Integer, Integer> straight : straightBuilder.positions) {
+				maxOverlap = Math.max(maxOverlap, new Vec3d(straight.getKey(), 0, straight.getValue()).length());
+			}
+
+			maxOverlap *= 1.2;
+			b.length = (int) Math.ceil(maxOverlap) + 3;
+		});
 	}
 
 	@Override
