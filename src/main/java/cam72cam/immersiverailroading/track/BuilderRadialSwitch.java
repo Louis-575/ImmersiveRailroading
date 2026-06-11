@@ -237,72 +237,30 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 	private FrogGeometry calculateFrogGeometry(List<VecYPR> straightPath, List<VecYPR> turnPath, double heelDistance, double fallbackFrogDistance, TrackModelPart straightFrogRail, TrackModelPart turnFrogRail) {
 		double scale = info.settings.gauge.scale();
 		double renderStep = scale * info.getTrackModel().spacing;
-		VecYPR straightStart = pointAtDistance(straightPath, 0);
-		Vec3d straightRailStart = railPoint(straightStart, straightFrogRail, scale);
-		Vec3d straightDirection = normalize(VecUtil.fromYaw(1, straightStart.getYaw()));
+		double boundsTolerance = Math.max(scale, renderStep * 1.5);
 		double straightTotal = totalDistance(straightPath);
 		double turnTotal = totalDistance(turnPath);
+		FrogIntersection intersection = findFrogIntersection(
+				straightPath,
+				turnPath,
+				heelDistance,
+				fallbackFrogDistance,
+				boundsTolerance,
+				straightFrogRail,
+				turnFrogRail,
+				scale
+		);
 
-		double accumulated = 0;
-		FrogGeometry best = null;
-		double bestScore = Double.MAX_VALUE;
-		for (int i = 1; i < turnPath.size(); i++) {
-			VecYPR previous = turnPath.get(i - 1);
-			VecYPR next = turnPath.get(i);
-			double segmentLength = horizontalDistance(previous, next);
-			if (segmentLength <= 0) {
-				continue;
-			}
-
-			double segmentStartDistance = accumulated;
-			double segmentEndDistance = accumulated + segmentLength;
-			accumulated = segmentEndDistance;
-			if (segmentEndDistance < heelDistance) {
-				continue;
-			}
-
-			Vec3d curveRailStart = railPoint(previous, turnFrogRail, scale);
-			Vec3d curveRailEnd = railPoint(next, turnFrogRail, scale);
-			double railSegmentLength = horizontalDistance(curveRailStart, curveRailEnd);
-			if (railSegmentLength <= 0) {
-				continue;
-			}
-			Vec3d curveDirection = normalize(curveRailEnd.subtract(curveRailStart));
-			double[] intersection = lineIntersection(straightRailStart, straightDirection, curveRailStart, curveDirection);
-			if (intersection == null) {
-				continue;
-			}
-
-			double straightDistance = intersection[0];
-			double curveSegmentDistance = intersection[1];
-			double curvedDistance = segmentStartDistance + segmentLength * (curveSegmentDistance / railSegmentLength);
-			if (straightDistance < heelDistance || straightDistance > straightTotal || curveSegmentDistance < 0 || curveSegmentDistance > railSegmentLength || curvedDistance > turnTotal) {
-				continue;
-			}
-
-			double sinTheta = Math.abs(cross(straightDirection, curveDirection));
-			if (sinTheta < 0.05) {
-				continue;
-			}
-
-			double gapHalf = (FLANGE_GAP * scale / sinTheta) / 2;
-			FrogGeometry candidate = offsetFrogGeometry(new FrogGeometry(
-					straightDistance,
-					curvedDistance,
-					Math.max(heelDistance, straightDistance - gapHalf),
-					Math.max(heelDistance, curvedDistance - gapHalf),
-					Math.min(straightTotal, straightDistance + gapHalf),
-					Math.min(turnTotal, curvedDistance + gapHalf)
+		if (intersection != null) {
+			double gapHalf = (FLANGE_GAP * scale / intersection.sinTheta) / 2;
+			return offsetFrogGeometry(new FrogGeometry(
+					intersection.straightDistance,
+					intersection.curvedDistance,
+					Math.max(heelDistance, intersection.straightDistance - gapHalf),
+					Math.max(heelDistance, intersection.curvedDistance - gapHalf),
+					Math.min(straightTotal, intersection.straightDistance + gapHalf),
+					Math.min(turnTotal, intersection.curvedDistance + gapHalf)
 			), heelDistance, straightTotal, turnTotal, FROG_OFFSET_BACK * scale);
-			double score = Math.abs(straightDistance - fallbackFrogDistance) + Math.abs(curvedDistance - fallbackFrogDistance);
-			if (score < bestScore) {
-				best = candidate;
-				bestScore = score;
-			}
-		}
-
-		if (best != null) {
-			return best;
 		}
 
 		double fallbackGapHalf = FLANGE_GAP * scale / 2;
@@ -327,6 +285,83 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 				Math.min(straightTotal, Math.max(heelDistance, frog.straightPointDistance - offset)),
 				Math.min(turnTotal, Math.max(heelDistance, frog.curvedPointDistance - offset))
 		);
+	}
+
+	private FrogIntersection findFrogIntersection(List<VecYPR> straightPath, List<VecYPR> turnPath, double heelDistance, double fallbackFrogDistance, double boundsTolerance, TrackModelPart straightFrogRail, TrackModelPart turnFrogRail, double scale) {
+		double[] straightDistances = cumulativeDistances(straightPath);
+		double[] turnDistances = cumulativeDistances(turnPath);
+		FrogIntersection best = null;
+		double bestScore = Double.MAX_VALUE;
+
+		for (int straightIndex = 1; straightIndex < straightPath.size(); straightIndex++) {
+			if (straightDistances[straightIndex] < heelDistance) {
+				continue;
+			}
+
+			Vec3d straightRailStart = railPoint(straightPath.get(straightIndex - 1), straightFrogRail, scale);
+			Vec3d straightRailEnd = railPoint(straightPath.get(straightIndex), straightFrogRail, scale);
+			double straightRailLength = horizontalDistance(straightRailStart, straightRailEnd);
+			double straightPathLength = straightDistances[straightIndex] - straightDistances[straightIndex - 1];
+			if (straightRailLength <= 0 || straightPathLength <= 0) {
+				continue;
+			}
+			Vec3d straightDirection = normalize(straightRailEnd.subtract(straightRailStart));
+
+			for (int turnIndex = 1; turnIndex < turnPath.size(); turnIndex++) {
+				if (turnDistances[turnIndex] < heelDistance) {
+					continue;
+				}
+
+				Vec3d curveRailStart = railPoint(turnPath.get(turnIndex - 1), turnFrogRail, scale);
+				Vec3d curveRailEnd = railPoint(turnPath.get(turnIndex), turnFrogRail, scale);
+				double curveRailLength = horizontalDistance(curveRailStart, curveRailEnd);
+				double curvePathLength = turnDistances[turnIndex] - turnDistances[turnIndex - 1];
+				if (curveRailLength <= 0 || curvePathLength <= 0) {
+					continue;
+				}
+				Vec3d curveDirection = normalize(curveRailEnd.subtract(curveRailStart));
+				double sinTheta = Math.abs(cross(straightDirection, curveDirection));
+				if (sinTheta < 0.05) {
+					continue;
+				}
+
+				double[] intersection = lineIntersection(straightRailStart, straightDirection, curveRailStart, curveDirection);
+				if (intersection == null) {
+					continue;
+				}
+
+				double straightRailDistance = clamp(intersection[0], 0, straightRailLength);
+				double curveRailDistance = clamp(intersection[1], 0, curveRailLength);
+				Vec3d straightPoint = straightRailStart.add(straightDirection.scale(straightRailDistance));
+				Vec3d curvePoint = curveRailStart.add(curveDirection.scale(curveRailDistance));
+				double missDistance = horizontalDistance(straightPoint, curvePoint);
+				if (missDistance > boundsTolerance) {
+					continue;
+				}
+
+				double straightDistance = straightDistances[straightIndex - 1] + straightPathLength * (straightRailDistance / straightRailLength);
+				double curvedDistance = turnDistances[turnIndex - 1] + curvePathLength * (curveRailDistance / curveRailLength);
+				if (straightDistance < heelDistance || curvedDistance < heelDistance) {
+					continue;
+				}
+
+				double fallbackScore = Math.abs(straightDistance - fallbackFrogDistance) + Math.abs(curvedDistance - fallbackFrogDistance);
+				double score = missDistance * 1000 + fallbackScore;
+				if (score < bestScore) {
+					best = new FrogIntersection(straightDistance, curvedDistance, sinTheta);
+					bestScore = score;
+				}
+			}
+		}
+		return best;
+	}
+
+	private double[] cumulativeDistances(List<VecYPR> path) {
+		double[] distances = new double[path.size()];
+		for (int i = 1; i < path.size(); i++) {
+			distances[i] = distances[i - 1] + horizontalDistance(path.get(i - 1), path.get(i));
+		}
+		return distances;
 	}
 
 	private double findSeparationDistance(List<VecYPR> straightPath, List<VecYPR> turnPath, double target) {
@@ -494,6 +529,22 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 
 	private double cross(Vec3d first, Vec3d second) {
 		return first.x * second.z - first.z * second.x;
+	}
+
+	private double clamp(double value, double min, double max) {
+		return Math.max(min, Math.min(max, value));
+	}
+
+	private static class FrogIntersection {
+		private final double straightDistance;
+		private final double curvedDistance;
+		private final double sinTheta;
+
+		private FrogIntersection(double straightDistance, double curvedDistance, double sinTheta) {
+			this.straightDistance = straightDistance;
+			this.curvedDistance = curvedDistance;
+			this.sinTheta = sinTheta;
+		}
 	}
 
 	private static class RadialSwitchLayout {
