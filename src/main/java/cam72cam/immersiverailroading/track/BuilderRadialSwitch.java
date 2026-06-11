@@ -90,9 +90,11 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 		addSegments(data, layout.turnPath, 0, layout.turnEnd, renderStep, TrackModelPart.RAIL_BASE, TURN_SLEEPER_Y_OFFSET * info.settings.gauge.scale(), false);
 
 		addSegments(data, layout.straightPath, 0, layout.straightEnd, renderStep, layout.straightStockRail);
-		addSegmentsExcept(data, layout.straightPath, 0, layout.straightEnd, renderStep, layout.straightGapStartDistance, layout.straightPointDistance, layout.straightFrogRail);
+		addMovableClosureSegments(data, layout.straightPath, 0, layout.heelDistance, renderStep, layout.straightFrogRail, layout.straightClosureThrow);
+		addSegmentsExcept(data, layout.straightPath, layout.heelDistance, layout.straightEnd, renderStep, layout.straightGapStartDistance, layout.straightPointDistance, layout.straightFrogRail);
 		addSegments(data, layout.turnPath, 0, layout.turnEnd, renderStep, layout.turnStockRail, 0, true);
-		addSegmentsExcept(data, layout.turnPath, 0, layout.turnEnd, renderStep, layout.curvedGapStartDistance, layout.curvedPointDistance, layout.turnFrogRail, true);
+		addMovableClosureSegments(data, layout.turnPath, 0, layout.heelDistance, renderStep, layout.turnFrogRail, layout.curvedClosureThrow);
+		addSegmentsExcept(data, layout.turnPath, layout.heelDistance, layout.turnEnd, renderStep, layout.curvedGapStartDistance, layout.curvedPointDistance, layout.turnFrogRail, true);
 
 		data.addAll(getSwitchPartRenderData(layout));
 		return data;
@@ -148,7 +150,7 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 	private List<VecYPR> getSwitchPartRenderData(RadialSwitchLayout layout) {
 		List<VecYPR> data = new ArrayList<>();
 		data.add(switchPart(pointAtDistance(layout.straightPath, 0), TrackModelPart.TOE_LEFT, TrackModelPart.TOE_RIGHT));
-		data.add(switchPart(applyPointThrow(pointAtDistance(layout.straightPath, layout.stretcherDistance), layout.stretcherDistance, layout.heelDistance), TrackModelPart.STRETCHER_BAR));
+		data.add(switchPart(applyLinearThrow(pointAtDistance(layout.straightPath, layout.stretcherDistance), layout.stretcherDistance, layout.heelDistance, layout.stretcherThrow), TrackModelPart.STRETCHER_BAR));
 
 		VecYPR straightHeel = pointAtDistance(layout.straightPath, layout.heelDistance);
 		VecYPR turnHeel = pointAtDistance(layout.turnPath, layout.heelDistance);
@@ -214,6 +216,38 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 			addRail(data, path, start, Math.min(end, gapStart), part, 0, scaleCurveRails);
 			addRail(data, path, Math.max(start, gapEnd), end, part, 0, scaleCurveRails);
 		}
+	}
+
+	private void addMovableClosureSegments(List<VecYPR> data, List<VecYPR> path, double from, double to, double maxStep, TrackModelPart part, double throwDistance) {
+		double length = to - from;
+		if (length <= 0) {
+			return;
+		}
+
+		int count = Math.max(1, (int) Math.ceil(length / maxStep));
+		for (int i = 0; i < count; i++) {
+			double start = from + length * i / count;
+			double end = from + length * (i + 1) / count;
+			VecYPR span = movableClosureSpan(path, start, end, to, part, throwDistance);
+			if (span != null) {
+				data.add(span);
+			}
+		}
+	}
+
+	private VecYPR movableClosureSpan(List<VecYPR> path, double from, double to, double heelDistance, TrackModelPart part, double throwDistance) {
+		double total = totalDistance(path);
+		from = Math.max(0, Math.min(total, from));
+		to = Math.max(0, Math.min(total, to));
+		if (to <= from) {
+			return null;
+		}
+
+		VecYPR start = applyLinearThrow(pointAtDistance(path, from), from, heelDistance, throwDistance);
+		VecYPR end = applyLinearThrow(pointAtDistance(path, to), to, heelDistance, throwDistance);
+		float yaw = VecUtil.toYaw(end.subtract(start));
+		float length = (float) (horizontalDistance(start, end) / info.getTrackModel().spacing * 1.005);
+		return new VecYPR(start.x, start.y, start.z, yaw, 0, length, part);
 	}
 
 	private VecYPR span(List<VecYPR> path, double from, double to, TrackModelPart part, double yOffset, boolean scaleCurveRails) {
@@ -433,20 +467,14 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 		return delta;
 	}
 
-	private VecYPR applyPointThrow(VecYPR point, double distance, double heelDistance) {
-		if (info.switchState != SwitchState.TURN || heelDistance <= 0 || distance >= heelDistance) {
+	private VecYPR applyLinearThrow(VecYPR point, double distance, double heelDistance, double throwDistance) {
+		if (throwDistance == 0 || heelDistance <= 0 || distance >= heelDistance) {
 			return point;
 		}
 
 		double switchOffset = 1 - (distance / heelDistance);
-		double dist = 0.2 * switchOffset * info.settings.gauge.scale() * info.getTrackModel().spacing;
-		Vec3d offset = VecUtil.fromYaw(dist, point.getYaw() + 90 + info.placementInfo.direction.toYaw());
-		double offsetAngle = Math.toDegrees(0.2 / Math.max(1, heelDistance / info.settings.gauge.scale()));
-		if (info.placementInfo.direction == TrackDirection.RIGHT) {
-			offsetAngle = -offsetAngle;
-		}
-
-		return new VecYPR(point.add(offset), point.getYaw() + (float) offsetAngle, 0);
+		Vec3d offset = VecUtil.fromYaw(throwDistance * switchOffset, point.getYaw() + 90);
+		return new VecYPR(point.add(offset), point.getYaw(), point.getPitch());
 	}
 
 	private VecYPR switchPart(VecYPR point, TrackModelPart... parts) {
@@ -547,7 +575,7 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 		}
 	}
 
-	private static class RadialSwitchLayout {
+	private class RadialSwitchLayout {
 		private final List<VecYPR> straightPath;
 		private final List<VecYPR> turnPath;
 		private final double renderStep;
@@ -569,6 +597,9 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 		private final double curvedIntersectionDistance;
 		private final double straightPointDistance;
 		private final double curvedPointDistance;
+		private final double straightClosureThrow;
+		private final double curvedClosureThrow;
+		private final double stretcherThrow;
 
 		private RadialSwitchLayout(List<VecYPR> straightPath, List<VecYPR> turnPath, double renderStep, double straightEnd, double turnEnd, double heelDistance, double stretcherDistance, TrackModelPart straightFrogRail, TrackModelPart straightStockRail, TrackModelPart turnFrogRail, TrackModelPart turnStockRail, FrogGeometry frog) {
 			this.straightPath = straightPath;
@@ -593,6 +624,13 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 			this.curvedIntersectionDistance = frog.curvedIntersectionDistance;
 			this.straightPointDistance = frog.straightPointDistance;
 			this.curvedPointDistance = frog.curvedPointDistance;
+
+			double throwDirection = info.placementInfo.direction == TrackDirection.RIGHT ? 1 : -1;
+			double throwDistance = FLANGE_GAP * info.settings.gauge.scale() * throwDirection;
+			boolean thrown = info.switchState == SwitchState.TURN;
+			this.straightClosureThrow = thrown ? -throwDistance : 0;
+			this.curvedClosureThrow = thrown ? 0 : throwDistance;
+			this.stretcherThrow = thrown ? -throwDistance : throwDistance;
 		}
 	}
 
