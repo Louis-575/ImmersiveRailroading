@@ -25,6 +25,7 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 	private static final double TOE_BACK_OFFSET = 0.5;
 	private static final double POINT_LENGTH_SCALE = 1.1;
 	private static final double POINT_FROG_OFFSET = 0.5;
+	private static final double POINT_NORMAL_RAIL_CLEARANCE = 0.3;
 	private static final double TURN_SLEEPER_Y_OFFSET = 0.002;
 	private static final float CURVE_RAIL_LENGTH_SCALE = 2.25f;
 
@@ -98,11 +99,11 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 
 		addSegments(data, layout.straightPath, 0, layout.straightEnd, renderStep, layout.straightStockRail);
 		addMovableClosureSegments(data, layout.straightPath, layout.toeEndDistance, layout.heelDistance, renderStep, layout.straightFrogRail, layout.straightClosureThrow);
-		addSegmentsExcept(data, layout.straightPath, layout.heelDistance, layout.straightEnd, renderStep, layout.straightGapStartDistance, layout.straightPointDistance, layout.straightFrogRail);
+		addSegmentsExcept(data, layout.straightPath, layout.heelDistance, layout.straightEnd, renderStep, layout.straightGapStartDistance, layout.straightNormalRailStartDistance, layout.straightFrogRail);
 		addFrogConnector(data, layout.straightPath, layout.straightGapStartDistance, layout.straightWingStartDistance, layout.straightFrogRail);
 		addSegments(data, layout.turnPath, 0, layout.turnEnd, renderStep, layout.turnStockRail, 0, true);
 		addMovableClosureSegments(data, layout.turnPath, layout.toeEndDistance, layout.heelDistance, renderStep, layout.turnFrogRail, layout.curvedClosureThrow);
-		addSegmentsExcept(data, layout.turnPath, layout.heelDistance, layout.turnEnd, renderStep, layout.curvedGapStartDistance, layout.curvedPointDistance, layout.turnFrogRail, true);
+		addSegmentsExcept(data, layout.turnPath, layout.heelDistance, layout.turnEnd, renderStep, layout.curvedGapStartDistance, layout.curvedNormalRailStartDistance, layout.turnFrogRail, true);
 		addFrogConnector(data, layout.turnPath, layout.curvedGapStartDistance, layout.curvedWingStartDistance, layout.turnFrogRail);
 
 		data.addAll(getSwitchPartRenderData(layout));
@@ -167,10 +168,17 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 		double pointOffset = POINT_FROG_OFFSET * info.settings.gauge.scale();
 		data.add(pointPart(pointAtDistance(layout.turnPath, Math.max(layout.curvedGapStartDistance, layout.curvedPointDistance - pointOffset)), TrackModelPart.POINT_LEFT));
 		data.add(pointPart(pointAtDistance(layout.straightPath, Math.max(layout.straightGapStartDistance, layout.straightPointDistance - pointOffset)), TrackModelPart.POINT_RIGHT));
-		data.add(switchPart(pointAtDistance(layout.turnPath, layout.curvedWingStartDistance), TrackModelPart.WING_RAIL_LEFT));
-		data.add(switchPart(pointAtDistance(layout.straightPath, layout.straightWingStartDistance), TrackModelPart.WING_RAIL_RIGHT));
-		data.add(switchPart(pointAtDistance(layout.straightPath, layout.straightCheckDistance), TrackModelPart.CHECK_RAIL_LEFT));
-		data.add(switchPart(pointAtDistance(layout.turnPath, layout.curvedCheckDistance), TrackModelPart.CHECK_RAIL_RIGHT));
+		if (info.placementInfo.direction == TrackDirection.RIGHT) {
+			data.add(switchPart(pointAtDistance(layout.straightPath, layout.straightCheckDistance), TrackModelPart.WING_RAIL_LEFT));
+			data.add(switchPart(pointAtDistance(layout.turnPath, layout.curvedCheckDistance), TrackModelPart.WING_RAIL_RIGHT));
+			data.add(switchPart(pointAtDistance(layout.turnPath, layout.curvedWingStartDistance), TrackModelPart.CHECK_RAIL_LEFT));
+			data.add(switchPart(pointAtDistance(layout.straightPath, layout.straightWingStartDistance), TrackModelPart.CHECK_RAIL_RIGHT));
+		} else {
+			data.add(switchPart(pointAtDistance(layout.turnPath, layout.curvedWingStartDistance), TrackModelPart.WING_RAIL_LEFT));
+			data.add(switchPart(pointAtDistance(layout.straightPath, layout.straightWingStartDistance), TrackModelPart.WING_RAIL_RIGHT));
+			data.add(switchPart(pointAtDistance(layout.straightPath, layout.straightCheckDistance), TrackModelPart.CHECK_RAIL_LEFT));
+			data.add(switchPart(pointAtDistance(layout.turnPath, layout.curvedCheckDistance), TrackModelPart.CHECK_RAIL_RIGHT));
+		}
 		return data;
 	}
 
@@ -570,6 +578,8 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 		private final double curvedIntersectionDistance;
 		private final double straightPointDistance;
 		private final double curvedPointDistance;
+		private final double straightNormalRailStartDistance;
+		private final double curvedNormalRailStartDistance;
 		private final double straightClosureThrow;
 		private final double curvedClosureThrow;
 		private final double stretcherThrow;
@@ -599,6 +609,9 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 			this.curvedIntersectionDistance = frog.curvedIntersectionDistance;
 			this.straightPointDistance = frog.straightPointDistance;
 			this.curvedPointDistance = frog.curvedPointDistance;
+			double pointNormalRailClearance = POINT_NORMAL_RAIL_CLEARANCE * info.settings.gauge.scale();
+			this.straightNormalRailStartDistance = Math.min(straightEnd, frog.straightPointDistance + pointNormalRailClearance);
+			this.curvedNormalRailStartDistance = Math.min(turnEnd, frog.curvedPointDistance + pointNormalRailClearance);
 
 			double throwDirection = info.placementInfo.direction == TrackDirection.RIGHT ? 1 : -1;
 			double throwDistance = FLANGE_GAP * info.settings.gauge.scale() * throwDirection;
