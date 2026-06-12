@@ -18,10 +18,13 @@ import java.util.List;
 public class BuilderRadialSwitch extends BuilderSwitch {
 	private static final double FLANGE_GAP = 0.15;
 	private static final double FROG_PART_OFFSET = 0.5;
+	private static final double FROG_CONNECTOR_OVERLAP = 0.5;
 	private static final double TOE_LENGTH = 1;
 	private static final double TOE_LENGTH_SCALE = 1.1;
 	private static final double TOE_INWARD_OFFSET = 0.15;
 	private static final double TOE_BACK_OFFSET = 0.5;
+	private static final double POINT_LENGTH_SCALE = 1.1;
+	private static final double POINT_FROG_OFFSET = 0.5;
 	private static final double TURN_SLEEPER_Y_OFFSET = 0.002;
 	private static final float CURVE_RAIL_LENGTH_SCALE = 2.25f;
 
@@ -96,9 +99,11 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 		addSegments(data, layout.straightPath, 0, layout.straightEnd, renderStep, layout.straightStockRail);
 		addMovableClosureSegments(data, layout.straightPath, layout.toeEndDistance, layout.heelDistance, renderStep, layout.straightFrogRail, layout.straightClosureThrow);
 		addSegmentsExcept(data, layout.straightPath, layout.heelDistance, layout.straightEnd, renderStep, layout.straightGapStartDistance, layout.straightPointDistance, layout.straightFrogRail);
+		addFrogConnector(data, layout.straightPath, layout.straightGapStartDistance, layout.straightWingStartDistance, layout.straightFrogRail);
 		addSegments(data, layout.turnPath, 0, layout.turnEnd, renderStep, layout.turnStockRail, 0, true);
 		addMovableClosureSegments(data, layout.turnPath, layout.toeEndDistance, layout.heelDistance, renderStep, layout.turnFrogRail, layout.curvedClosureThrow);
 		addSegmentsExcept(data, layout.turnPath, layout.heelDistance, layout.turnEnd, renderStep, layout.curvedGapStartDistance, layout.curvedPointDistance, layout.turnFrogRail, true);
+		addFrogConnector(data, layout.turnPath, layout.curvedGapStartDistance, layout.curvedWingStartDistance, layout.turnFrogRail);
 
 		data.addAll(getSwitchPartRenderData(layout));
 		return data;
@@ -159,8 +164,9 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 		VecYPR turnHeel = pointAtDistance(layout.turnPath, layout.heelDistance);
 		data.add(switchPart(VecUtil.between(straightHeel, turnHeel), turnHeel.getYaw(), 0, TrackModelPart.HEEL_BLOCK));
 
-		data.add(switchPart(pointAtDistance(layout.turnPath, layout.curvedPointDistance), TrackModelPart.POINT_LEFT));
-		data.add(switchPart(pointAtDistance(layout.straightPath, layout.straightPointDistance), TrackModelPart.POINT_RIGHT));
+		double pointOffset = POINT_FROG_OFFSET * info.settings.gauge.scale();
+		data.add(pointPart(pointAtDistance(layout.turnPath, Math.max(layout.curvedGapStartDistance, layout.curvedPointDistance - pointOffset)), TrackModelPart.POINT_LEFT));
+		data.add(pointPart(pointAtDistance(layout.straightPath, Math.max(layout.straightGapStartDistance, layout.straightPointDistance - pointOffset)), TrackModelPart.POINT_RIGHT));
 		data.add(switchPart(pointAtDistance(layout.turnPath, layout.curvedWingStartDistance), TrackModelPart.WING_RAIL_LEFT));
 		data.add(switchPart(pointAtDistance(layout.straightPath, layout.straightWingStartDistance), TrackModelPart.WING_RAIL_RIGHT));
 		data.add(switchPart(pointAtDistance(layout.straightPath, layout.straightCheckDistance), TrackModelPart.CHECK_RAIL_LEFT));
@@ -247,6 +253,28 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 				data.add(span);
 			}
 		}
+	}
+
+	private void addFrogConnector(List<VecYPR> data, List<VecYPR> path, double hiddenFrom, double wingAt, TrackModelPart part) {
+		double total = totalDistance(path);
+		double overlap = FROG_CONNECTOR_OVERLAP * info.settings.gauge.scale();
+		double from = Math.max(0, Math.min(hiddenFrom, wingAt) - overlap);
+		double to = Math.min(total, Math.max(hiddenFrom, wingAt) + overlap);
+		if (wingAt <= hiddenFrom) {
+			to = Math.min(to, hiddenFrom);
+		} else {
+			from = Math.max(from, hiddenFrom);
+		}
+
+		VecYPR start = pointAtDistance(path, from);
+		VecYPR end = pointAtDistance(path, to);
+		double length = horizontalDistance(start, end);
+		if (length <= 0.001) {
+			return;
+		}
+
+		float yaw = VecUtil.toYaw(end.subtract(start));
+		data.add(new VecYPR(start.x, start.y, start.z, yaw, start.getPitch(), (float) (length / info.getTrackModel().spacing * 1.005), part));
 	}
 
 	private VecYPR movableClosureSpan(List<VecYPR> path, double from, double to, double heelDistance, TrackModelPart part, double throwDistance) {
@@ -442,6 +470,11 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 
 	private VecYPR toePart(VecYPR point, TrackModelPart part) {
 		float length = (float) (TOE_LENGTH_SCALE * info.settings.gauge.scale());
+		return new VecYPR(point, point.getYaw() + 180, point.getPitch(), length, part);
+	}
+
+	private VecYPR pointPart(VecYPR point, TrackModelPart part) {
+		float length = (float) (POINT_LENGTH_SCALE * info.settings.gauge.scale());
 		return new VecYPR(point, point.getYaw() + 180, point.getPitch(), length, part);
 	}
 
