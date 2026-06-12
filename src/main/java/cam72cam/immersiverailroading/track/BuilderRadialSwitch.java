@@ -17,7 +17,9 @@ import java.util.List;
 
 public class BuilderRadialSwitch extends BuilderSwitch {
 	private static final double FLANGE_GAP = 0.15;
+	private static final double FROG_PART_OFFSET = 0.5;
 	private static final double TOE_LENGTH = 1;
+	private static final double TOE_LENGTH_SCALE = 1.1;
 	private static final double TOE_INWARD_OFFSET = 0.15;
 	private static final double TOE_BACK_OFFSET = 0.5;
 	private static final double TURN_SLEEPER_Y_OFFSET = 0.002;
@@ -173,8 +175,8 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 		double leftThrow = rightHand ? layout.curvedClosureThrow : layout.straightClosureThrow;
 		double rightThrow = rightHand ? layout.straightClosureThrow : layout.curvedClosureThrow;
 
-		data.add(switchPart(applyToeOffset(applyLinearThrow(pointAtDistance(leftRailPath, 0), 0, layout.heelDistance, leftThrow), true), TrackModelPart.TOE_LEFT));
-		data.add(switchPart(applyToeOffset(applyLinearThrow(pointAtDistance(rightRailPath, 0), 0, layout.heelDistance, rightThrow), false), TrackModelPart.TOE_RIGHT));
+		data.add(toePart(applyToeOffset(applyLinearThrow(pointAtDistance(leftRailPath, 0), 0, layout.heelDistance, leftThrow), true), TrackModelPart.TOE_LEFT));
+		data.add(toePart(applyToeOffset(applyLinearThrow(pointAtDistance(rightRailPath, 0), 0, layout.heelDistance, rightThrow), false), TrackModelPart.TOE_RIGHT));
 	}
 
 	private void addRail(List<VecYPR> data, List<VecYPR> path, double from, double to, TrackModelPart rail) {
@@ -286,14 +288,15 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 		double turnTotal = totalDistance(turnPath);
 		FrogIntersection intersection = calculateAnalyticFrog(straightPath, turnPath, straightFrogRail, turnFrogRail, scale);
 		double gapBack = FLANGE_GAP * scale / Math.max(0.05, intersection.sinTheta);
+		double partOffset = FROG_PART_OFFSET * scale;
 
 		return new FrogGeometry(
 				intersection.straightDistance,
 				intersection.curvedDistance,
 				Math.max(heelDistance, intersection.straightDistance - gapBack),
 				Math.max(heelDistance, intersection.curvedDistance - gapBack),
-				Math.min(straightTotal, Math.max(heelDistance, intersection.straightDistance)),
-				Math.min(turnTotal, Math.max(heelDistance, intersection.curvedDistance))
+				Math.min(straightTotal, Math.max(heelDistance, intersection.straightDistance + partOffset)),
+				Math.min(turnTotal, Math.max(heelDistance, intersection.curvedDistance + partOffset))
 		);
 	}
 
@@ -437,6 +440,11 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 		return switchPart(point, point.getYaw(), point.getPitch(), parts);
 	}
 
+	private VecYPR toePart(VecYPR point, TrackModelPart part) {
+		float length = (float) (TOE_LENGTH_SCALE * info.settings.gauge.scale());
+		return new VecYPR(point, point.getYaw() + 180, point.getPitch(), length, part);
+	}
+
 	private List<VecYPR> getFullPath(BuilderCubicCurve builder, double stepSize) {
 		List<BuilderBase> subBuilders = builder.getSubBuilders();
 		if (subBuilders == null || subBuilders.isEmpty()) {
@@ -547,10 +555,11 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 			this.turnFrogRail = turnFrogRail;
 			this.turnStockRail = turnStockRail;
 			double wingRailLength = renderStep;
+			double frogPartOffset = FROG_PART_OFFSET * info.settings.gauge.scale();
 			this.straightGapStartDistance = frog.straightWingDistance;
 			this.curvedGapStartDistance = frog.curvedWingDistance;
-			this.straightWingStartDistance = Math.max(heelDistance, frog.straightWingDistance - wingRailLength);
-			this.curvedWingStartDistance = Math.max(heelDistance, frog.curvedWingDistance - wingRailLength);
+			this.straightWingStartDistance = Math.min(straightEnd, Math.max(heelDistance, frog.straightWingDistance - wingRailLength + frogPartOffset));
+			this.curvedWingStartDistance = Math.min(turnEnd, Math.max(heelDistance, frog.curvedWingDistance - wingRailLength + frogPartOffset));
 			this.straightCheckDistance = Math.min(straightEnd, straightWingStartDistance);
 			this.curvedCheckDistance = Math.min(turnEnd, curvedWingStartDistance);
 			this.straightIntersectionDistance = frog.straightIntersectionDistance;
