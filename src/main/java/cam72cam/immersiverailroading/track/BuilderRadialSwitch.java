@@ -24,8 +24,8 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 	private static final double TOE_INWARD_OFFSET = 0.15;
 	private static final double TOE_BACK_OFFSET = 0.5;
 	private static final double POINT_LENGTH_SCALE = 1.1;
-	private static final double POINT_FROG_OFFSET = 0.5;
-	private static final double POINT_NORMAL_RAIL_CLEARANCE = 0.3;
+	private static final double POINT_NORMAL_RAIL_CLEARANCE = -0.2;
+	private static final double MIN_FROG_CLIPPED_SPAN = 0.2;
 	private static final double TURN_SLEEPER_Y_OFFSET = 0.002;
 	private static final float CURVE_RAIL_LENGTH_SCALE = 2.25f;
 
@@ -165,9 +165,8 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 		VecYPR turnHeel = pointAtDistance(layout.turnPath, layout.heelDistance);
 		data.add(switchPart(VecUtil.between(straightHeel, turnHeel), turnHeel.getYaw(), 0, TrackModelPart.HEEL_BLOCK));
 
-		double pointOffset = POINT_FROG_OFFSET * info.settings.gauge.scale();
-		data.add(pointPart(pointAtDistance(layout.turnPath, Math.max(layout.curvedGapStartDistance, layout.curvedPointDistance - pointOffset)), TrackModelPart.POINT_LEFT));
-		data.add(pointPart(pointAtDistance(layout.straightPath, Math.max(layout.straightGapStartDistance, layout.straightPointDistance - pointOffset)), TrackModelPart.POINT_RIGHT));
+		data.add(pointPart(pointAtDistance(layout.turnPath, layout.curvedGapStartDistance), TrackModelPart.POINT_LEFT));
+		data.add(pointPart(pointAtDistance(layout.straightPath, layout.straightGapStartDistance), TrackModelPart.POINT_RIGHT));
 		if (info.placementInfo.direction == TrackDirection.RIGHT) {
 			data.add(switchPart(pointAtDistance(layout.straightPath, layout.straightCheckDistance), TrackModelPart.WING_RAIL_LEFT));
 			data.add(switchPart(pointAtDistance(layout.turnPath, layout.curvedCheckDistance), TrackModelPart.WING_RAIL_RIGHT));
@@ -241,9 +240,16 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 		for (int i = 0; i < count; i++) {
 			double start = from + length * i / count;
 			double end = from + length * (i + 1) / count;
-			addRail(data, path, start, Math.min(end, gapStart), part, 0, scaleCurveRails);
-			addRail(data, path, Math.max(start, gapEnd), end, part, 0, scaleCurveRails);
+			addClippedRail(data, path, start, Math.min(end, gapStart), part, scaleCurveRails);
+			addClippedRail(data, path, Math.max(start, gapEnd), end, part, scaleCurveRails);
 		}
+	}
+
+	private void addClippedRail(List<VecYPR> data, List<VecYPR> path, double from, double to, TrackModelPart part, boolean scaleCurveRails) {
+		if (to - from < MIN_FROG_CLIPPED_SPAN * info.settings.gauge.scale()) {
+			return;
+		}
+		addRail(data, path, from, to, part, 0, scaleCurveRails);
 	}
 
 	private void addMovableClosureSegments(List<VecYPR> data, List<VecYPR> path, double from, double to, double maxStep, TrackModelPart part, double throwDistance) {
@@ -482,7 +488,7 @@ public class BuilderRadialSwitch extends BuilderSwitch {
 	}
 
 	private VecYPR pointPart(VecYPR point, TrackModelPart part) {
-		float length = (float) (POINT_LENGTH_SCALE * info.settings.gauge.scale());
+		float length = (float) (-POINT_LENGTH_SCALE * info.settings.gauge.scale());
 		return new VecYPR(point, point.getYaw() + 180, point.getPitch(), length, part);
 	}
 
