@@ -48,7 +48,7 @@ public class LuaContext {
         env.load(new PackageLib());
         env.load(new Bit32Lib());
         env.load(new TableLib());
-        env.load(new JseStringLib());
+        env.load(new StringLib());
         env.load(new JseMathLib());
         env.load(new JseOsLib());
         LoadState.install(env);
