@@ -45,7 +45,7 @@ public abstract class TrackBase {
             // Valid block beneath
             builder.world.isTopSolid(pos) ||
             // BlockType below is replaceable and we will replace it with something
-            countFill && (BlockUtil.canBeReplaced(builder.world, pos, false) && !builder.info.settings.railBedFill.isEmpty()) ||
+            countFill && (BlockUtil.canBeReplaced(builder.world, pos, false) && (!builder.info.settings.railBedFill.isEmpty() || !builder.info.settings.embankment.isEmpty())) ||
             // BlockType below is an IR Rail
             BlockUtil.isIRRail(builder.world, pos);
 	}
@@ -56,8 +56,10 @@ public abstract class TrackBase {
 
 	public boolean canPlaceTrack() {
 		Vec3i pos = getPos();
+		boolean canCutBlock = builder.info.settings.cuttingEnabled && !BlockUtil.isIRRail(builder.world, pos);
+		boolean canReplaceBlock = BlockUtil.canBeReplaced(builder.world, pos, flexible || builder.overrideFlexible);
 
-		return isDownSolid(true) && (BlockUtil.canBeReplaced(builder.world, pos, flexible || builder.overrideFlexible) || isOverTileRail());
+		return isDownSolid(true) && (canReplaceBlock || isOverTileRail() || canCutBlock);
 	}
 
 	public TileRailBase placeTrack(boolean actuallyPlace) {

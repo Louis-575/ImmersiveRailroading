@@ -66,10 +66,22 @@ public class RailInfo {
 				this.settings.degrees,
 				this.settings.curvosity,
 				this.settings.railBed,
+				this.settings.railBedFill,
+				this.settings.railBedFillWidth,
+				this.settings.embankment,
+				this.settings.embankmentOffset,
+				this.settings.embankmentHeight,
+				this.settings.embankmentGradient,
+				this.settings.cuttingEnabled,
+				this.settings.cuttingOffset,
+				this.settings.cuttingHeight,
+				this.settings.cuttingGradient,
 				this.settings.gauge,
 				this.settings.track,
 				this.settings.smoothing,
 				this.settings.isGradeCrossing,
+				this.settings.parallelCount,
+				this.settings.parallelGap,
 				this.switchState,
 				this.switchForced,
 				this.tablePos,
@@ -181,6 +193,9 @@ public class RailInfo {
 		return builder;
 	}
 	private BuilderBase constructBuilder(World world, Vec3i pos) {
+		if (settings.parallelCount > 1 && BuilderParallel.supports(this)) {
+			return new BuilderParallel(this, world, pos);
+		}
 		switch (settings.type) {
 		case STRAIGHT:
 			return new BuilderStraight(this, world, pos);
@@ -305,6 +320,9 @@ public class RailInfo {
 				}
 				if (!settings.railBedFill.isEmpty()) {
 					materials.add(new MaterialManager(false, builder.costFill(), settings.railBedFill::is, settings.railBedFill));
+				}
+				if (!settings.embankment.isEmpty()) {
+					materials.add(new MaterialManager(false, builder.costEmbankment(), settings.embankment::is, settings.embankment));
 				}
 
 				List<TrackDefinition.TrackMaterial> tieParts = def.materials.get(TrackComponent.TIE);

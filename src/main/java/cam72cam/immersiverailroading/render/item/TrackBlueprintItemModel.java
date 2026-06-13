@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.render.item;
 
+import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.util.TrackUtil;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.render.rail.RailRender;
@@ -55,18 +57,33 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 
 	private static ExpireableMap<String, RailInfo> infoCache = new ExpireableMap<>();
 	public static void renderMouseover(Player player, ItemStack stack, Vec3i pos, Vec3d vec, RenderState state, float partialTicks) {
-		Vec3d hit = vec.subtract(pos);
 		World world = player.getWorld();
+		Vec3d cameraPos = GlobalRender.getCameraPos(partialTicks);
 
-		pos = pos.up();
+		PlacementInfo closeEnd = TrackUtil.getNeighborNode(player, world, pos, vec.subtract(pos), stack);
+		boolean useSnapping = closeEnd != null && Config.ConfigDebug.enableTrackSnapping;
 
-		if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-			if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5) {
-				pos = pos.down();
+		Vec3d hit;
+		float yaw;
+
+		if (!useSnapping) {
+			hit = vec.subtract(pos);
+			pos = pos.up();
+
+			if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
+				if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5) {
+					pos = pos.down();
+				}
 			}
+
+			yaw = player.getRotationYawHead();
+		} else {
+			pos = new Vec3i(closeEnd.placementPosition);
+			hit = closeEnd.placementPosition.subtract(pos);
+			yaw = closeEnd.yaw;
 		}
 
-		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, player.getRotationYawHead(), hit.subtract(0, hit.y, 0)), null);
+		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, yaw, hit.subtract(0, hit.y, 0), useSnapping), null);
 		String key = info.uniqueID + info.placementInfo.placementPosition;
 		RailInfo cached = infoCache.get(key);
 		if (cached != null) {
@@ -77,8 +94,6 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 
 		state.blend(new BlendMode(BlendMode.GL_CONSTANT_ALPHA, BlendMode.GL_ONE).constantColor(1, 1, 1, 0.5f)).lightmap(1, 1);
 
-
-		Vec3d cameraPos = GlobalRender.getCameraPos(partialTicks);
 		Vec3d offPos = info.placementInfo.placementPosition.add(pos).subtract(cameraPos);
 		state.translate(offPos.x, offPos.y, offPos.z);
 

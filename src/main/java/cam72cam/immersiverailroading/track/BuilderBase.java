@@ -50,6 +50,13 @@ public abstract class BuilderBase {
 	}
 	
 	public void build() {
+		buildTracks();
+		placeRailBedFill();
+		placeEmbankment();
+		placeCutting();
+	}
+
+	protected void buildTracks() {
 		/*
 		Assume we have already tested.
 		There are a few edge cases which break with overlapping split builders
@@ -73,9 +80,50 @@ public abstract class BuilderBase {
 			}
 		}
 	}
+
+	protected void placeRailBedFill() {
+		if (info.settings.railBedFill.isEmpty()) {
+			return;
+		}
+		for (Vec3i pos : new RailBedFillPlanner(world, info.settings, getTracksForRailBedFill()).plan()) {
+			if (!BlockUtil.isIRRail(world, pos)) {
+				world.setBlock(pos, info.settings.railBedFill);
+			}
+		}
+	}
+
+	protected void placeEmbankment() {
+		if (info.settings.embankment.isEmpty()) {
+			return;
+		}
+		for (Vec3i pos : new EmbankmentPlanner(world, info.settings, getTracksForBuild()).plan()) {
+			if (BlockUtil.canBeReplaced(world, pos, false)) {
+				world.setBlock(pos, info.settings.embankment);
+			}
+		}
+	}
+
+	protected void placeCutting() {
+		if (!info.settings.cuttingEnabled) {
+			return;
+		}
+		for (Vec3i pos : new CuttingPlanner(world, info.settings, getTracksForBuild()).plan()) {
+			if (!BlockUtil.isIRRail(world, pos)) {
+				world.setToAir(pos);
+			}
+		}
+	}
 	
 	public List<TrackBase> getTracksForRender() {
 		return this.tracks;
+	}
+
+	public List<TrackBase> getTracksForBuild() {
+		return this.tracks;
+	}
+
+	public List<TrackBase> getTracksForRailBedFill() {
+		return getTracksForBuild();
 	}
 
 	public List<TrackBase> getTracksForFloating() {
@@ -104,13 +152,11 @@ public abstract class BuilderBase {
 	}
 
 	public int costFill() {
-		int fillCount = 0;
-		for (TrackBase track : tracks) {
-			if (BlockUtil.canBeReplaced(world, track.getPos().down(), false)) {
-				fillCount += 1;
-			}
-		}
-		return (int) Math.ceil(!this.info.settings.railBedFill.isEmpty() ? fillCount : 0);
+		return new RailBedFillPlanner(world, info.settings, getTracksForRailBedFill()).plan().size();
+	}
+
+	public int costEmbankment() {
+		return new EmbankmentPlanner(world, info.settings, getTracksForBuild()).plan().size();
 	}
 
 	public void setDrops(List<ItemStack> drops) {

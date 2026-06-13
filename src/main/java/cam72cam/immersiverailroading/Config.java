@@ -127,7 +127,7 @@ public class Config {
         @Comment("Power Multiplier: Higher numbers increase the locomotive power, lower numbers decrease the power")
         @Range(min = 0, max = 10)
         public static double powerMultiplier = 1.0;
-		
+
 		@Comment( "How heavy is a single block in Kg" )
 		@Range(min = 0, max = 100)
 		public static int blockWeight = 10;
@@ -238,7 +238,7 @@ public class Config {
 
 		@Comment("Round to nearest bucket")
 		public static boolean RoundStockTankToNearestBucket = true;
-		
+
         @Comment("Sand Efficiency")
         @Range(min = 1, max = 10)
         public static int SandEfficiency = 1;
@@ -316,7 +316,7 @@ public class Config {
 		@Comment("Number of physics steps to cache for future movement / send in packets.  DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING")
 		@Range(min = 10, max = 60)
 		public static int physicsFutureTicks = 10;
-		
+
 	    @Comment( "Print extra info" )
 	    public static boolean debugLogging = false;
 
@@ -325,9 +325,15 @@ public class Config {
 
 		@Comment("Does stock drops itself/components when player is in creative mode?")
 		public static boolean stockDropInCreativeMode = true;
-		}
-	
-    public static boolean isFuelRequired(Gauge gauge) {
-        return !(!ConfigBalance.FuelRequired || (!ConfigBalance.ModelFuelRequired && gauge.isModel()));
+
+		@Comment("Enable track snapping")
+		public static boolean enableTrackSnapping = false;
+
+		@Comment("Should track snapping also snap angle")
+		public static boolean trackSnapAngle = false;
+	}
+
+	public static boolean isFuelRequired(Gauge gauge) {
+		return !(!ConfigBalance.FuelRequired || (!ConfigBalance.ModelFuelRequired && gauge.isModel()));
 	}
 }

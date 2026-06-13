@@ -19,13 +19,32 @@ public class RailSettings {
     public final TrackDirection direction;
     public final ItemStack railBed;
     public final ItemStack railBedFill;
+    public final int railBedFillWidth;
+    public final ItemStack embankment;
+    public final int embankmentOffset;
+    public final int embankmentHeight;
+    public final float embankmentGradient;
+    public final boolean cuttingEnabled;
+    public final int cuttingOffset;
+    public final int cuttingHeight;
+    public final float cuttingGradient;
     public final boolean isPreview;
     public final boolean isGradeCrossing;
     public final String track;
     public final int transfertableEntryCount;
     public final int transfertableEntrySpacing;
+    public final int parallelCount;
+    public final float parallelGap;
 
     public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
+        this(gauge, track, type, length, degrees, curvosity, posType, smoothing, direction, railBed, railBedFill, isPreview, isGradeCrossing, count, spacing, 1, 4);
+    }
+
+    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing, int parallelCount, float parallelGap) {
+        this(gauge, track, type, length, degrees, curvosity, posType, smoothing, direction, railBed, railBedFill, 1, ItemStack.EMPTY, 0, 1, 1, false, 0, 4, 1, isPreview, isGradeCrossing, count, spacing, parallelCount, parallelGap);
+    }
+
+    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, int railBedFillWidth, ItemStack embankment, int embankmentOffset, int embankmentHeight, float embankmentGradient, boolean cuttingEnabled, int cuttingOffset, int cuttingHeight, float cuttingGradient, boolean isPreview, boolean isGradeCrossing, int count, int spacing, int parallelCount, float parallelGap) {
         this.gauge = gauge;
         this.track = track;
         this.type = type;
@@ -36,11 +55,22 @@ public class RailSettings {
         this.direction = direction;
         this.railBed = railBed;
         this.railBedFill = railBedFill;
+        this.railBedFillWidth = railBedFillWidth;
+        this.embankment = embankment;
+        this.embankmentOffset = embankmentOffset;
+        this.embankmentHeight = embankmentHeight;
+        this.embankmentGradient = embankmentGradient;
+        this.cuttingEnabled = cuttingEnabled;
+        this.cuttingOffset = cuttingOffset;
+        this.cuttingHeight = cuttingHeight;
+        this.cuttingGradient = cuttingGradient;
         this.isPreview = isPreview;
         this.isGradeCrossing = isGradeCrossing;
         this.curvosity = curvosity;
         this.transfertableEntryCount = count;
         this.transfertableEntrySpacing = spacing;
+        this.parallelCount = parallelCount;
+        this.parallelGap = parallelGap;
     }
 
     public void write(ItemStack stack) {
@@ -129,6 +159,24 @@ public class RailSettings {
         public ItemStack railBed;
         @TagField("bedFill")
         public ItemStack railBedFill;
+        @TagField("bedFillWidth")
+        public int railBedFillWidth;
+        @TagField("embankment")
+        public ItemStack embankment;
+        @TagField("embankmentOffset")
+        public int embankmentOffset;
+        @TagField("embankmentHeight")
+        public int embankmentHeight;
+        @TagField("embankmentGradient")
+        public float embankmentGradient;
+        @TagField("cuttingEnabled")
+        public boolean cuttingEnabled;
+        @TagField("cuttingOffset")
+        public int cuttingOffset;
+        @TagField("cuttingHeight")
+        public int cuttingHeight;
+        @TagField("cuttingGradient")
+        public float cuttingGradient;
         @TagField("isPreview")
         public boolean isPreview;
         @TagField("isGradeCrossing")
@@ -140,6 +188,10 @@ public class RailSettings {
         public int transfertableEntryCount;
         @TagField("transfertableEntrySpacing")
         public int transfertableEntrySpacing;
+        @TagField("parallelCount")
+        public int parallelCount;
+        @TagField("parallelGap")
+        public float parallelGap;
 
         private Mutable(RailSettings settings) {
             this.gauge = settings.gauge;
@@ -153,10 +205,21 @@ public class RailSettings {
             this.direction = settings.direction;
             this.railBed = settings.railBed;
             this.railBedFill = settings.railBedFill;
+            this.railBedFillWidth = settings.railBedFillWidth;
+            this.embankment = settings.embankment;
+            this.embankmentOffset = settings.embankmentOffset;
+            this.embankmentHeight = settings.embankmentHeight;
+            this.embankmentGradient = settings.embankmentGradient;
+            this.cuttingEnabled = settings.cuttingEnabled;
+            this.cuttingOffset = settings.cuttingOffset;
+            this.cuttingHeight = settings.cuttingHeight;
+            this.cuttingGradient = settings.cuttingGradient;
             this.isPreview = settings.isPreview;
             this.isGradeCrossing = settings.isGradeCrossing;
             this.transfertableEntryCount = settings.transfertableEntryCount;
             this.transfertableEntrySpacing = settings.transfertableEntrySpacing;
+            this.parallelCount = settings.parallelCount;
+            this.parallelGap = settings.parallelGap;
         }
 
         private Mutable(TagCompound data) throws SerializationException {
@@ -171,11 +234,22 @@ public class RailSettings {
             direction = TrackDirection.NONE;
             railBed = ItemStack.EMPTY;
             railBedFill = ItemStack.EMPTY;
+            railBedFillWidth = 1;
+            embankment = ItemStack.EMPTY;
+            embankmentOffset = 0;
+            embankmentHeight = 1;
+            embankmentGradient = 1;
+            cuttingEnabled = false;
+            cuttingOffset = 0;
+            cuttingHeight = 4;
+            cuttingGradient = 1;
             isPreview = false;
             isGradeCrossing = false;
             curvosity = 1;
             transfertableEntryCount = 1;
             transfertableEntrySpacing = 1;
+            parallelCount = 1;
+            parallelGap = 4;
 
             TagSerializer.deserialize(data, this);
         }
@@ -193,10 +267,21 @@ public class RailSettings {
                     direction,
                     railBed,
                     railBedFill,
+                    railBedFillWidth,
+                    embankment,
+                    embankmentOffset,
+                    embankmentHeight,
+                    embankmentGradient,
+                    cuttingEnabled,
+                    cuttingOffset,
+                    cuttingHeight,
+                    cuttingGradient,
                     isPreview,
                     isGradeCrossing,
                     transfertableEntryCount,
-                    transfertableEntrySpacing
+                    transfertableEntrySpacing,
+                    parallelCount,
+                    parallelGap
             );
         }
     }

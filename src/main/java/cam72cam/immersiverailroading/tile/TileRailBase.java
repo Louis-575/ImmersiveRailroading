@@ -244,7 +244,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		return this.augmentFilterID != null;
 	}
 
-	public void setAugmentProperties(@Nonnull Augment.Properties properties) {
+	public void setAugmentProperties(Augment.Properties properties) {
 		this.positive = properties.positiveFilter;
 		this.negative = properties.negativeFilter;
 		this.actuatorFilter = properties.doorActuatorFilter;
@@ -308,7 +308,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 
 	private final SingleCache<Vec3i, Vec3i> parentCache = new SingleCache<>(parent -> parent.add(getPos()));
-	
+
 	public Vec3i getParent() {
 		if (parent == null) {
 			if (ticksExisted > 5 && getWorld().isServer) {
@@ -321,7 +321,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		// Assume if pos changes (piston? WE?) the TE is re-initialized
 		return parentCache.get(parent);
 	}
-	
+
 	public void setParent(Vec3i pos) {
 		this.parent = pos.subtract(this.getPos());
 	}
@@ -684,7 +684,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 		ticksExisted += 1;
 		Vec3i pos = getPos();
-		
+
 		if (ConfigDebug.snowAccumulateRate > 0 && ((int) (Math.random() * ConfigDebug.snowAccumulateRate * 10) == 0)) {
 			if (world.isSnowing(pos) && world.canSeeSky(pos.up())) {
 				this.handleSnowTick();
@@ -1154,7 +1154,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			}
 			return true;
 		}
-		
+
 
 		// TODO
         if (this.augment != null
